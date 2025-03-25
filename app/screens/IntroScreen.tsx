@@ -1,11 +1,12 @@
 import React, { useRef, useState } from "react"
-import { View, FlatList, Dimensions, StyleSheet, TouchableOpacity, Animated } from "react-native"
+import { View, FlatList, Dimensions, TouchableOpacity, Animated } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import type { AppStackParamList } from "@/navigators/AppNavigator"
 import { Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { ChevronRight } from "lucide-react-native"
+import type { ThemedStyle } from "@/theme"
 
 const { width, height } = Dimensions.get("window")
 
@@ -31,7 +32,7 @@ export function IntroScreen() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
-  const { theme } = useAppTheme()
+  const { themed, theme } = useAppTheme()
   const scrollX = useRef(new Animated.Value(0)).current
 
   const goToMainTabs = () => {
@@ -59,28 +60,26 @@ export function IntroScreen() {
     const isLastSlide = index === slides.length - 1
 
     return (
-      <View style={styles.slide}>
-        <View style={styles.topSection}>
-          <View style={styles.imagePlaceholder} />
+      <View style={themed($slide)}>
+        <View style={themed($topSection)}>
+          <View style={themed($imagePlaceholder)} />
         </View>
 
-        <View style={styles.bottomSection}>
-          <Text preset="heading" style={styles.heading}>
+        <View style={themed($bottomSection)}>
+          <Text preset="heading" style={themed($heading)}>
             {item.heading}
           </Text>
-          <Text preset="default" style={styles.description}>
+          <Text preset="default" style={themed($description)}>
             {item.description}
           </Text>
 
-          <View style={styles.indicatorContainer}>
+          <View style={themed($indicatorContainer)}>
             {slides.map((_, i) => (
               <View
                 key={i}
                 style={[
-                  styles.dot,
-                  i === currentIndex
-                    ? [styles.activeDot, { backgroundColor: theme.colors.tint }]
-                    : styles.inactiveDot,
+                  themed($dot),
+                  i === currentIndex ? themed($activeDot) : themed($inactiveDot),
                 ]}
               />
             ))}
@@ -88,10 +87,10 @@ export function IntroScreen() {
 
           {isLastSlide && (
             <TouchableOpacity
-              style={[styles.getStartedButton, { backgroundColor: theme.colors.tint }]}
+              style={themed($getStartedButton)}
               onPress={goToMainTabs}
             >
-              <Text style={styles.getStartedText}>Get Started</Text>
+              <Text style={themed($getStartedText)}>Get Started</Text>
               <ChevronRight color="white" size={20} />
             </TouchableOpacity>
           )}
@@ -101,7 +100,7 @@ export function IntroScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={themed($container)}>
       <Animated.FlatList
         ref={flatListRef}
         data={slides}
@@ -116,14 +115,14 @@ export function IntroScreen() {
       />
 
       {currentIndex < slides.length - 1 && (
-        <TouchableOpacity style={styles.skipButton} onPress={goToMainTabs}>
-          <Text style={[styles.skipText, { color: theme.colors.tint }]}>Skip</Text>
+        <TouchableOpacity style={themed($skipButton)} onPress={goToMainTabs}>
+          <Text style={themed($skipText)}>Skip</Text>
         </TouchableOpacity>
       )}
 
       {currentIndex < slides.length - 1 && (
         <TouchableOpacity
-          style={[styles.nextButton, { backgroundColor: theme.colors.tint }]}
+          style={themed($nextButton)}
           onPress={goToNextSlide}
         >
           <ChevronRight color="white" size={20} />
@@ -133,98 +132,117 @@ export function IntroScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  slide: {
-    width: width,
-    height: height,
-    flex: 1,
-  },
-  topSection: {
-    height: height * 0.6,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bottomSection: {
-    height: height * 0.4,
-    paddingHorizontal: 30,
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  imagePlaceholder: {
-    width: 200,
-    height: 200,
-    backgroundColor: "gray",
-    borderRadius: 12,
-  },
-  heading: {
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  description: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 40,
-    lineHeight: 24,
-  },
-  indicatorContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 30,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 5,
-  },
-  activeDot: {
-    backgroundColor: "#3498db",
-  },
-  inactiveDot: {
-    backgroundColor: "#ccc",
-  },
-  skipButton: {
-    position: "absolute",
-    left: 20,
-    bottom: 40,
-    padding: 10,
-    zIndex: 999,
-  },
-  skipText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  nextButton: {
-    position: "absolute",
-    right: 20,
-    bottom: 40,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#3498db",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 999,
-  },
-  getStartedButton: {
-    flexDirection: "row",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 30,
-    backgroundColor: "#3498db",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  getStartedText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 8,
-  },
+// -----------------------
+// Themed style definitions
+// -----------------------
+
+const $container: ThemedStyle<Animated.AnimatedProps<any>> = ({ colors }) => ({
+  flex: 1,
+  backgroundColor: colors.background,
+})
+
+const $slide: ThemedStyle<any> = () => ({
+  width: width,
+  height: height,
+  flex: 1,
+})
+
+const $topSection: ThemedStyle<any> = () => ({
+  height: height * 0.6,
+  justifyContent: "center",
+  alignItems: "center",
+})
+
+const $bottomSection: ThemedStyle<any> = () => ({
+  height: height * 0.4,
+  paddingHorizontal: 30,
+  justifyContent: "flex-start",
+  alignItems: "center",
+})
+
+const $imagePlaceholder: ThemedStyle<any> = () => ({
+  width: 200,
+  height: 200,
+  backgroundColor: "gray",
+  borderRadius: 12,
+})
+
+const $heading: ThemedStyle<any> = () => ({
+  fontSize: 28,
+  fontWeight: "bold",
+  textAlign: "center",
+  marginBottom: 20,
+})
+
+const $description: ThemedStyle<any> = () => ({
+  fontSize: 16,
+  textAlign: "center",
+  marginBottom: 40,
+  lineHeight: 24,
+})
+
+const $indicatorContainer: ThemedStyle<any> = () => ({
+  flexDirection: "row",
+  justifyContent: "center",
+  marginBottom: 30,
+})
+
+const $dot: ThemedStyle<any> = () => ({
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  marginHorizontal: 5,
+})
+
+const $activeDot: ThemedStyle<any> = ({ colors }) => ({
+  backgroundColor: colors.tint,
+})
+
+const $inactiveDot: ThemedStyle<any> = () => ({
+  backgroundColor: "#ccc",
+})
+
+const $skipButton: ThemedStyle<any> = () => ({
+  position: "absolute",
+  left: 20,
+  bottom: 40,
+  padding: 10,
+  zIndex: 999,
+})
+
+const $skipText: ThemedStyle<any> = ({ colors }) => ({
+  fontSize: 16,
+  fontWeight: "bold",
+  color: colors.tint,
+})
+
+const $nextButton: ThemedStyle<any> = ({ colors }) => ({
+  position: "absolute",
+  right: 20,
+  bottom: 40,
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: colors.tint,
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 999,
+})
+
+const $getStartedButton: ThemedStyle<any> = ({ colors }) => ({
+  flexDirection: "row",
+  paddingHorizontal: 24,
+  paddingVertical: 14,
+  borderRadius: 30,
+  backgroundColor: colors.tint,
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 20,
+})
+
+const $getStartedText: ThemedStyle<any> = () => ({
+  color: "white",
+  fontSize: 16,
+  fontWeight: "bold",
+  marginRight: 8,
 })

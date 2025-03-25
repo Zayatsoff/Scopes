@@ -25,17 +25,15 @@ export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStack
 const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
-  const {
-    theme: { colors },
-  } = useAppTheme()
+  const { theme } = useAppTheme()
 
   return (
     <Stack.Navigator
       initialRouteName="Splash"
       screenOptions={{
         headerShown: false,
-        navigationBarColor: colors.background,
-        contentStyle: { backgroundColor: colors.background },
+        navigationBarColor: theme.colors.background,
+        contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Stack.Screen name="Splash" component={Screens.SplashScreen} />

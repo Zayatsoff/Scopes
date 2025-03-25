@@ -1,11 +1,12 @@
 import React, { useEffect } from "react"
-import { View, ActivityIndicator, StyleSheet, Image, Animated } from "react-native"
+import { View, ActivityIndicator, Animated, Image } from "react-native"
 import * as ExpoSplashScreen from "expo-splash-screen"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import type { AppStackParamList } from "@/navigators/AppNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import * as storage from "@/utils/storage"
+import type { ThemedStyle } from "@/theme"
 
 // Prevent the native splash screen from auto-hiding
 ExpoSplashScreen.preventAutoHideAsync()
@@ -15,7 +16,7 @@ const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
 export function SplashScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
-  const { theme } = useAppTheme()
+  const { themed, theme } = useAppTheme()
   const fadeAnim = React.useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -49,31 +50,40 @@ export function SplashScreen() {
   }, [navigation, fadeAnim])
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Animated.View style={{ opacity: fadeAnim }}>
+    <View style={themed($container)}>
+      <Animated.View style={[{ opacity: fadeAnim }, themed($logoContainer)]}>
         <Image
           source={require("../../assets/images/logo.png")}
-          style={styles.logo}
+          style={themed($logo)}
           resizeMode="contain"
         />
       </Animated.View>
-      <ActivityIndicator size="large" color={theme.colors.tint} style={styles.spinner} />
+      <ActivityIndicator size="large" color={theme.colors.tint} style={themed($spinner)} />
     </View>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 40,
-  },
-  spinner: {
-    marginTop: 20,
-  },
+// -----------------------
+// Themed style definitions
+// -----------------------
+
+const $container: ThemedStyle<any> = ({ colors }) => ({
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: colors.background,
+})
+
+const $logoContainer: ThemedStyle<any> = () => ({
+  alignItems: "center",
+})
+
+const $logo: ThemedStyle<any> = () => ({
+  width: 150,
+  height: 150,
+  marginBottom: 40,
+})
+
+const $spinner: ThemedStyle<any> = ({ spacing }) => ({
+  marginTop: spacing.lg,
 })

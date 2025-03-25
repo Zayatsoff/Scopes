@@ -6,8 +6,9 @@ import { NewsScreen } from "@/screens/NewsScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Home, Megaphone, Newspaper, Settings } from "lucide-react-native"
-import { Platform, View, StyleSheet } from "react-native"
+import { Platform, View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import type { ThemedStyle } from "@/theme"
 
 export type MainTabParamList = {
   Home: undefined
@@ -19,7 +20,7 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
 export function MainTabs() {
-  const { theme } = useAppTheme()
+  const { theme, themed } = useAppTheme()
   const insets = useSafeAreaInsets()
 
   return (
@@ -52,7 +53,7 @@ export function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconContainer}>
+            <View style={themed($iconContainer)}>
               <Home color={color} size={size} />
             </View>
           ),
@@ -63,7 +64,7 @@ export function MainTabs() {
         component={AlertsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconContainer}>
+            <View style={themed($iconContainer)}>
               <Megaphone color={color} size={size} />
             </View>
           ),
@@ -74,7 +75,7 @@ export function MainTabs() {
         component={NewsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconContainer}>
+            <View style={themed($iconContainer)}>
               <Newspaper color={color} size={size} />
             </View>
           ),
@@ -85,7 +86,7 @@ export function MainTabs() {
         component={SettingsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconContainer}>
+            <View style={themed($iconContainer)}>
               <Settings color={color} size={size} />
             </View>
           ),
@@ -95,11 +96,13 @@ export function MainTabs() {
   )
 }
 
-const styles = StyleSheet.create({
-  iconContainer: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+// -----------------------
+// Themed style definitions
+// -----------------------
+
+const $iconContainer: ThemedStyle<any> = () => ({
+  width: 24,
+  height: 24,
+  alignItems: "center",
+  justifyContent: "center",
 })

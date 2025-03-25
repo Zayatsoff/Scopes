@@ -5,27 +5,35 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
 import { useHeader } from "@/utils/useHeader"
+import { useAppTheme } from "@/utils/useAppTheme"
+import type { ThemedStyle } from "@/theme"
 
 interface NewsScreenProps extends BottomTabScreenProps<MainTabParamList, "News"> {}
 
 export const NewsScreen: FC<NewsScreenProps> = observer(function NewsScreen() {
+  const { themed } = useAppTheme()
+  
   useHeader({
     title: "News",
     titleMode: "center",
   })
 
   return (
-    <Screen style={$root} preset="scroll" safeAreaEdges={["bottom"]}>
-      <Text text="News Screen Content" style={$content} />
+    <Screen style={themed($root)} preset="scroll" safeAreaEdges={["bottom"]}>
+      <Text text="News Screen Content" style={themed($content)} />
     </Screen>
   )
 })
 
-const $root: ViewStyle = {
-  flex: 1,
-}
+// -----------------------
+// Themed style definitions
+// -----------------------
 
-const $content: ViewStyle = {
-  padding: 20,
+const $root: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+})
+
+const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  padding: spacing.lg,
   alignItems: "center",
-}
+})
