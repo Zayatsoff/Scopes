@@ -47,6 +47,10 @@ export const colors = {
    */
   transparent: "rgba(0, 0, 0, 0)",
   /**
+   * The default light header.
+   */
+  header: palette.neutral700,
+  /**
    * The default text color in many components.
    */
   text: palette.neutral800,
