@@ -1,0 +1,70 @@
+{
+  "name": "GovApp",
+  "displayName": "GovApp",
+  "expo": {
+    "name": "GovApp",
+    "slug": "GovApp",
+    "scheme": "govapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/app-icon-all.png",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "newArchEnabled": false,
+    "jsEngine": "hermes",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "icon": "./assets/images/app-icon-android-legacy.png",
+      "package": "com.liorrozin.GovApp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+        "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+      },
+      "allowBackup": false,
+      "splash": {
+        "backgroundColor": "#fff"
+      }
+    },
+    "ios": {
+      "icon": "./assets/images/app-icon-ios.png",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.liorrozin.GovApp",
+      "splash": {
+        "backgroundColor": "#fff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/app-icon-web-favicon.png",
+      "bundler": "metro",
+      "splash": {
+        "backgroundColor": "#fff"
+      }
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/app-icon-android-adaptive-foreground.png",
+          "imageWidth": 300,
+          "resizeMode": "contain",
+          "backgroundColor": "#191015"
+        }
+      ]
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "splash": {
+      "backgroundColor": "#fff"
+    }
+  },
+  "ignite": {
+    "version": "10.1.9"
+  }
+}
