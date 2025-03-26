@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { View, FlatList, Dimensions, TouchableOpacity, Animated } from "react-native"
+import { View, FlatList, Dimensions, TouchableOpacity } from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import type { AppStackParamList } from "@/navigators/AppNavigator"
@@ -7,6 +7,15 @@ import { Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { ChevronRight } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
+import Animated, { 
+  useAnimatedStyle, 
+  interpolate, 
+  useSharedValue, 
+  withTiming,
+  Extrapolation,
+  useAnimatedScrollHandler,
+  runOnJS
+} from 'react-native-reanimated'
 
 const { width, height } = Dimensions.get("window")
 
@@ -33,7 +42,10 @@ export function IntroScreen() {
   const flatListRef = useRef<FlatList>(null)
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const { themed, theme } = useAppTheme()
-  const scrollX = useRef(new Animated.Value(0)).current
+  
+  const scrollX = useSharedValue(0)
+  const dotScale = useSharedValue(1)
+  const dotOpacity = useSharedValue(1)
 
   const goToMainTabs = () => {
     navigation.replace("MainTabs")
@@ -47,8 +59,22 @@ export function IntroScreen() {
     }
   }
 
-  const handleScroll = Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-    useNativeDriver: false,
+  const handleScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x
+      
+      const slideIndex = Math.round(event.contentOffset.x / width)
+      if (slideIndex !== currentIndex) {
+        runOnJS(setCurrentIndex)(slideIndex)
+        
+        dotScale.value = withTiming(1.2, { duration: 100 }, () => {
+          dotScale.value = withTiming(1, { duration: 100 })
+        })
+        dotOpacity.value = withTiming(0.7, { duration: 50 }, () => {
+          dotOpacity.value = withTiming(1, { duration: 100 })
+        })
+      }
+    },
   })
 
   const handleMomentumScrollEnd = (e: { nativeEvent: { contentOffset: { x: number } } }) => {
@@ -72,18 +98,6 @@ export function IntroScreen() {
           <Text preset="default" style={themed($description)}>
             {item.description}
           </Text>
-
-          <View style={themed($indicatorContainer)}>
-            {slides.map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  themed($dot),
-                  i === currentIndex ? themed($activeDot) : themed($inactiveDot),
-                ]}
-              />
-            ))}
-          </View>
 
           {isLastSlide && (
             <TouchableOpacity
@@ -112,8 +126,46 @@ export function IntroScreen() {
         onMomentumScrollEnd={handleMomentumScrollEnd}
         keyExtractor={(item) => item.key}
         bounces={false}
+        scrollEventThrottle={16}
       />
 
+      <View style={themed($fixedIndicatorContainer)}>
+        {slides.map((_, i) => {
+          const animatedDotStyle = useAnimatedStyle(() => {
+            const isActive = i === currentIndex
+            
+            return {
+              backgroundColor: isActive ? theme.colors.tint : '#ccc',
+              transform: [{ 
+                scale: isActive 
+                  ? dotScale.value 
+                  : interpolate(
+                      scrollX.value,
+                      [(i - 1) * width, i * width, (i + 1) * width],
+                      [0.8, 1, 0.8],
+                      Extrapolation.CLAMP
+                    )
+              }],
+              opacity: isActive 
+                ? dotOpacity.value
+                : interpolate(
+                    scrollX.value,
+                    [(i - 1) * width, i * width, (i + 1) * width],
+                    [0.5, 1, 0.5],
+                    Extrapolation.CLAMP
+                  )
+            }
+          })
+
+          return (
+            <Animated.View
+              key={i}
+              style={[themed($dot), animatedDotStyle]}
+            />
+          )
+        })}
+      </View>
+      
       {currentIndex < slides.length - 1 && (
         <TouchableOpacity style={themed($skipButton)} onPress={goToMainTabs}>
           <Text style={themed($skipText)}>Skip</Text>
@@ -136,7 +188,7 @@ export function IntroScreen() {
 // Themed style definitions
 // -----------------------
 
-const $container: ThemedStyle<Animated.AnimatedProps<any>> = ({ colors }) => ({
+const $container: ThemedStyle<any> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
 })
@@ -245,4 +297,15 @@ const $getStartedText: ThemedStyle<any> = () => ({
   fontSize: 16,
   fontWeight: "bold",
   marginRight: 8,
+})
+
+const $fixedIndicatorContainer: ThemedStyle<any> = () => ({
+  position: 'absolute',
+  bottom: height * 0.22,
+  left: 0,
+  right: 0,
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 100,
 })

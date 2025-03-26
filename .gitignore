@@ -90,6 +90,3 @@ web-build/
 
 # Yarn
 .yarn/*
-
-# Misc
-docs/
