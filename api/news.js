@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const firestore = admin.firestore();
     const source = req.query.source;
     
-    let query = firestore.collection('news').orderBy('date', 'desc').limit(50);
+    let query = firestore.collection('news').orderBy('date', 'desc').limit(100);
     
     // Add source filter if provided
     if (source) {

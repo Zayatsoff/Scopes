@@ -45,5 +45,5 @@ export const formatDate = (date: string, dateFormat?: string, options?: Options)
     ...options,
     locale: dateFnsLocale,
   }
-  return format(parseISO(date), dateFormat ?? "MMM dd, yyyy", dateOptions)
+  return format(parseISO(date), dateFormat ?? "MMM dd, yyyy 'at' h:mm a", dateOptions)
 }

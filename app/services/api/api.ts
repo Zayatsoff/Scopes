@@ -41,7 +41,7 @@ export class Api {
     })
     
     // Initialize news API
-    this.news = new NewsApi(this)
+    this.news = new NewsApi(this.apisauce)
   }
 }
 

@@ -1,26 +1,40 @@
-import { Api } from "./api"
-import { ApiResponse } from "apisauce"
-import type { NewsItem } from "./api.types"
+import { ApisauceInstance } from "apisauce"
+import type { NewsItem } from "../../models/News"
 
 export class NewsApi {
-  private api: Api
+  private apisauce: ApisauceInstance
 
-  constructor(api: Api) {
-    this.api = api
+  constructor(apisauce: ApisauceInstance) {
+    this.apisauce = apisauce
   }
 
   /**
    * Get latest news items
    */
-  async getNews(): Promise<ApiResponse<{ news: NewsItem[] }>> {
-    // Assuming you have an API endpoint to fetch news from Firestore
-    return this.api.apisauce.get("/api/news")
+  async getNews() {
+    try {
+      console.log("Fetching news from:", this.apisauce.getBaseURL() + "/api/getNews")
+      const response = await this.apisauce.get<{ news: NewsItem[] }>("/api/getNews")
+      console.log("News API Response:", response)
+      return response
+    } catch (error) {
+      console.error("News API Error:", error)
+      throw error
+    }
   }
 
   /**
    * Get news filtered by source
    */
-  async getNewsBySource(source: string): Promise<ApiResponse<{ news: NewsItem[] }>> {
-    return this.api.apisauce.get("/api/news", { source })
+  async getNewsBySource(source: string) {
+    try {
+      console.log("Fetching news from source:", source)
+      const response = await this.apisauce.get<{ news: NewsItem[] }>("/api/getNews", { source })
+      console.log("News API Response:", response)
+      return response
+    } catch (error) {
+      console.error("News API Error:", error)
+      throw error
+    }
   }
 } 

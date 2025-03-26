@@ -7,7 +7,7 @@ import { Screen, Text } from "@/components"
 import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
-import { ChevronDown, ChevronRight } from "lucide-react-native"
+import { ChevronDown } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import Animated, { 
   useSharedValue, 
@@ -17,6 +17,8 @@ import Animated, {
 } from "react-native-reanimated"
 import { useStores } from "@/models"
 import { NewsCard } from "@/components/NewsCard"
+import { Linking } from "react-native"
+import { NewsItem } from "@/models/News"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -68,8 +70,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     }
   }, [api, newsStore])
 
-  const navigateToNewsScreen = () => {
-    navigation.navigate("News")
+  const handleNewsPress = (link: string) => {
+    Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
 
   return (
@@ -78,12 +80,12 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       <View style={themed($imageSection)}>
         <Image
           source={require("../../assets/images/ottawa_cover.jpg")}
-          style={[{ width: screenWidth, height: screenWidth }, themed($image)]}
+          style={[{ width: screenWidth, height: screenWidth * 0.8 }, themed($image)]}
           resizeMode="cover"
         />
         <LinearGradient
           colors={["transparent", theme.colors.background]}
-          style={[{ width: screenWidth, height: 220 }, themed($gradient)]}
+          style={[{ width: screenWidth, height: 180 }, themed($gradient)]}
         >
           <View style={themed($headerOverlay)}>
             <View style={themed($headerTextContainer)}>
@@ -102,73 +104,64 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         </LinearGradient>
       </View>
 
-      {/* Latest News Section */}
-      <View style={themed($section)}>
-        <View style={themed($sectionHeader)}>
-          <Text style={themed($sectionTitle)}>Latest News</Text>
-          <Pressable 
-            onPress={navigateToNewsScreen}
-            style={themed($seeAllButton)}
-            android_ripple={{ color: theme.colors.palette.neutral400 }}
-          >
-            <Text style={themed($seeAllText)}>See All</Text>
-            <ChevronRight size={16} color={theme.colors.primary} />
-          </Pressable>
-        </View>
-        
-        {newsStore.isLoading && newsStore.items.length === 0 ? (
-          <Text style={themed($loadingText)}>Loading latest news...</Text>
-        ) : newsStore.error ? (
-          <Text style={themed($errorText)}>Unable to load news</Text>
-        ) : newsStore.latestItems.length === 0 ? (
-          <Text style={themed($emptyText)}>No news available</Text>
-        ) : (
-          <View style={themed($newsContainer)}>
-            {newsStore.latestItems.map(item => (
-              <NewsCard key={item.id} item={item} compact />
-            ))}
-          </View>
-        )}
-      </View>
-
-      {/* 2x2 Grid of unavailable containers */}
+      {/* 2x2 Grid of containers */}
       <View style={themed($gridSection)}>
         <View style={themed($gridRow)}>
-          <View style={[themed($gridItem), { backgroundColor: theme.colors.tintInactive }]}>
-            <Text style={themed($itemText)}>Unavailable</Text>
-          </View>
-          <View style={[themed($gridItem), { backgroundColor: theme.colors.tintInactive }]}>
-            <Text style={themed($itemText)}>Unavailable</Text>
-          </View>
+          {newsStore.latestItems.slice(0, 2).map((item: NewsItem) => (
+            <Pressable
+              key={item.id}
+              style={themed($gridItem)}
+              onPress={() => handleNewsPress(item.link)}
+            >
+              <View style={themed($gridItemContent)}>
+                <NewsCard item={item} compact />
+              </View>
+            </Pressable>
+          ))}
         </View>
         <View style={themed($gridRow)}>
-          <View style={[themed($gridItem), { backgroundColor: theme.colors.tintInactive }]}>
-            <Text style={themed($itemText)}>Unavailable</Text>
-          </View>
-          <View style={[themed($gridItem), { backgroundColor: theme.colors.tintInactive }]}>
-            <Text style={themed($itemText)}>Unavailable</Text>
-          </View>
+          {newsStore.latestItems.slice(2, 4).map((item: NewsItem) => (
+            <Pressable
+              key={item.id}
+              style={themed($gridItem)}
+              onPress={() => handleNewsPress(item.link)}
+            >
+              <View style={themed($gridItemContent)}>
+                <NewsCard item={item} compact />
+              </View>
+            </Pressable>
+          ))}
         </View>
       </View>
 
-      {/* Vertical list (4 items; only 2 are visible initially) */}
-      <View style={themed($listSection)}>
-        <View style={[themed($listItem), { backgroundColor: "#ccc" }]}>
-          <Text style={themed($itemText)}>Unavailable</Text>
-        </View>
-        <View style={[themed($listItem), { backgroundColor: "#ccc" }]}>
-          <Text style={themed($itemText)}>Unavailable</Text>
-        </View>
-        <View style={[themed($listItem), { backgroundColor: "#ccc" }]}>
-          <Text style={themed($itemText)}>Unavailable</Text>
-        </View>
-        <View style={[themed($listItem), { backgroundColor: "#ccc" }]}>
-          <Text style={themed($itemText)}>Unavailable</Text>
-        </View>
+      {/* 1x4 Grid of news items */}
+      <View style={themed($newsSection)}>
+        {newsStore.latestItems.slice(4, 8).map((item: NewsItem) => (
+          <NewsCard
+            key={item.id}
+            item={item}
+            compact
+            onPress={() => handleNewsPress(item.link)}
+          />
+        ))}
       </View>
+
+      {/* Additional news items */}
+      <View style={[themed($newsSection), { marginTop: theme.spacing.md }]}>
+        <Text style={themed($sectionTitle)}>More News</Text>
+        {newsStore.latestItems.slice(8, 16).map((item: NewsItem) => (
+          <NewsCard
+            key={item.id}
+            item={item}
+            compact
+            onPress={() => handleNewsPress(item.link)}
+          />
+        ))}
+      </View>
+
     </Screen>
   )
-}
+})
 
 // -----------------------
 // Themed style definitions
@@ -180,10 +173,11 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 
 const $imageSection: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
+  marginBottom: 16,
 })
 
-// Change the type here to ImageStyle for compatibility with <Image />
 const $image: ThemedStyle<ImageStyle> = () => ({})
+
 
 const $gradient: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
@@ -213,70 +207,41 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginRight: spacing.sm,
 })
 
-const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginVertical: spacing.md,
-  paddingHorizontal: spacing.md,
-})
-
-const $sectionHeader: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: 10,
-})
-
-const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 20,
-  fontWeight: "bold",
-  color: colors.text,
-})
-
-const $seeAllButton: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "center",
-})
-
-const $seeAllText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 14,
-  color: colors.primary,
-  marginRight: 4,
-})
-
 const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: spacing.md,
-  paddingHorizontal: spacing.lg,
+  paddingHorizontal: spacing.sm,
+  marginBottom: spacing.sm,
 })
 
 const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
-  marginBottom: spacing.md,
+  marginBottom: 14,
 })
 
-const $gridItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  width: "48%",
-  aspectRatio: 1,
-  borderRadius: 8,
+const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  width: "49.5%",
+  borderRadius: 12,
+  overflow: "hidden",
+  backgroundColor: colors.background,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 3,
+})
+
+const $gridItemContent: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
   justifyContent: "center",
-  alignItems: "center",
 })
 
-const $listSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.lg,
-  marginBottom: spacing.xl,
-})
-
-const $listItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  height: 150,
-  borderRadius: 8,
-  justifyContent: "center",
-  alignItems: "center",
-  marginBottom: spacing.md,
-})
-
-const $itemText: ThemedStyle<TextStyle> = () => ({
-  color: "#000",
-  fontWeight: "bold",
+const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.sm,
+  flexDirection: "column",
+  gap: spacing.xs,
 })
 
 const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
@@ -290,26 +255,11 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 18,
 })
 
-const $newsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  gap: spacing.xs,
-})
-
-const $loadingText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.textDim,
-  marginVertical: spacing.lg,
-  textAlign: "center",
-})
-
-const $errorText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.error,
-  marginVertical: spacing.lg,
-  textAlign: "center",
-})
-
-const $emptyText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.textDim,
-  marginVertical: spacing.lg,
-  textAlign: "center",
+const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, typography, spacing }) => ({
+  color: colors.text,
+  fontFamily: typography.primary.semiBold,
+  fontSize: 18,
+  marginBottom: spacing.xs,
 })
 
 export default HomeScreen

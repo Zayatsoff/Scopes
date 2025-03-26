@@ -1,6 +1,6 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { NewsStoreModel } from "./News"
-import { Api } from "@/services/api/api"
+import { Api, api } from "@/services/api/api"
 
 /**
  * A RootStore model.
@@ -10,7 +10,7 @@ export const RootStoreModel = types.model("RootStore").props({
 })
 .views((self) => ({
   get api() {
-    return new Api() // Create a new API instance when needed
+    return api
   }
 }))
 

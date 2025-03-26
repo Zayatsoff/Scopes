@@ -1,161 +1,115 @@
-import { FC, useCallback, useEffect, ReactElement } from "react"
-import { observer } from "mobx-react-lite"
-import { ViewStyle, TextStyle, ActivityIndicator, View, Pressable } from "react-native"
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
-import type { MainTabParamList } from "@/navigators/MainTabs"
-import { Screen, Text } from "@/components"
-import { useHeader } from "@/utils/useHeader"
-import { useAppTheme } from "@/utils/useAppTheme"
-import type { ThemedStyle } from "@/theme"
-import { useStores } from "@/models"
+import React, { useEffect } from "react"
+import { ViewStyle, TextStyle } from "react-native"
+import { Screen } from "@/components/Screen"
 import { NewsCard } from "@/components/NewsCard"
-import { RefreshControl } from "react-native-gesture-handler"
+import { useStores } from "@/models"
+import { observer } from "mobx-react-lite"
 import { FlashList } from "@shopify/flash-list"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { ArrowDownUp } from "lucide-react-native"
+import { useAppTheme } from "@/utils/useAppTheme"
+import { ThemedStyle } from "@/theme"
+import { Button } from "@/components/Button"
+import { Linking } from "react-native"
+import { View } from "react-native"
+import { Text } from "@/components/Text"
+import { spacing } from "@/theme"
 import { NewsItem } from "@/models/News"
 
-interface NewsScreenProps extends BottomTabScreenProps<MainTabParamList, "News"> {}
-
-export const NewsScreen: FC<NewsScreenProps> = observer(function NewsScreen() {
-  const { themed, theme } = useAppTheme()
+export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
-  const { sortNewestFirst } = newsStore
-  const insets = useSafeAreaInsets()
+  const { themed } = useAppTheme()
   
-  useHeader({
-    title: "News",
-    titleMode: "center",
-    rightIcon: undefined,
-    onRightPress: newsStore.toggleSortOrder,
-  })
-
-  const fetchData = useCallback(async () => {
-    await newsStore.fetchNews(api)
-  }, [newsStore, api])
-
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
-  const renderItem = useCallback(({ item }: { item: NewsItem }): ReactElement => {
-    return <NewsCard item={item} />
+    // Fetch news when component mounts
+    newsStore.fetchNews(api)
   }, [])
-
+  
+  const handleNewsPress = (link: string) => {
+    Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
+  }
+  
+  const renderItem = ({ item }: { item: NewsItem }) => (
+    <NewsCard
+      item={item}
+      onPress={() => handleNewsPress(item.link)}
+    />
+  )
+  
+  const ListHeaderComponent = () => (
+    <View style={themed($header)}>
+      <Text
+        text="Local News"
+        preset="heading"
+        style={themed($title)}
+      />
+      <Button
+        text={newsStore.sortNewestFirst ? "Newest First" : "Oldest First"}
+        onPress={newsStore.toggleSortOrder}
+        style={themed($sortButton)}
+      />
+    </View>
+  )
+  
+  const ListEmptyComponent = () => (
+    <View style={themed($emptyContainer)}>
+      <Text
+        text={newsStore.isLoading ? "Loading..." : newsStore.error || "No news available"}
+        style={themed($emptyText)}
+      />
+    </View>
+  )
+  
   return (
     <Screen
-      style={themed($root)}
       preset="fixed"
-      safeAreaEdges={["bottom"]}
-      contentContainerStyle={{ paddingBottom: insets.bottom }}
+      contentContainerStyle={themed($screenContainer)}
+      safeAreaEdges={["top"]}
     >
-      {newsStore.isLoading && newsStore.items.length === 0 ? (
-        <View style={themed($loadingContainer)}>
-          <ActivityIndicator size="large" color={theme.colors.tint} />
-        </View>
-      ) : newsStore.error ? (
-        <View style={themed($errorContainer)}>
-          <Text style={themed($errorText)}>
-            Error loading news: {newsStore.error}
-          </Text>
-          <Pressable
-            style={themed($retryButton)}
-            onPress={fetchData}
-            android_ripple={{ color: theme.colors.palette.neutral400 }}
-          >
-            <Text style={themed($retryText)}>Retry</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <>
-          <View style={themed($sortContainer)}>
-            <Pressable
-              style={themed($sortButton)} 
-              onPress={newsStore.toggleSortOrder}
-              android_ripple={{ color: theme.colors.palette.neutral400 }}
-            >
-              <Text style={themed($sortText)}>
-                Sort: {sortNewestFirst ? "Newest first" : "Oldest first"}
-              </Text>
-              <ArrowDownUp size={16} color={theme.colors.text} />
-            </Pressable>
-          </View>
-          
-          <FlashList
-            data={newsStore.sortedItems}
-            renderItem={renderItem}
-            estimatedItemSize={150}
-            contentContainerStyle={themed($listContent)}
-            keyExtractor={item => item.id}
-            refreshControl={
-              <RefreshControl
-                refreshing={newsStore.isLoading}
-                onRefresh={fetchData}
-                colors={[theme.colors.tint]}
-                tintColor={theme.colors.tint}
-              />
-            }
-          />
-        </>
-      )}
+      <FlashList
+        data={newsStore.sortedItems}
+        renderItem={renderItem}
+        estimatedItemSize={150}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={themed($listContainer)}
+      />
     </Screen>
   )
 })
 
-// -----------------------
-// Themed style definitions
-// -----------------------
-
-const $root: ThemedStyle<ViewStyle> = () => ({
+// Styles
+const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }: { colors: any }) => ({
   flex: 1,
+  backgroundColor: colors.background,
 })
 
-const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.md,
-})
-
-const $loadingContainer: ThemedStyle<ViewStyle> = () => ({
-  flex: 1,
-  justifyContent: "center",
-  alignItems: "center",
-})
-
-const $errorContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  justifyContent: "center",
-  alignItems: "center",
-  padding: spacing.lg,
-})
-
-const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.error,
-  textAlign: "center",
-  marginBottom: 20,
-})
-
-const $retryButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.tint,
-  paddingVertical: spacing.sm,
+const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
   paddingHorizontal: spacing.md,
-  borderRadius: spacing.sm,
 })
 
-const $retryText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral100,
-  fontWeight: "bold",
-})
-
-const $sortContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.md,
-  paddingVertical: spacing.xs,
-})
-
-const $sortButton: ThemedStyle<ViewStyle> = () => ({
+const $header: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
   flexDirection: "row",
+  justifyContent: "space-between",
   alignItems: "center",
+  paddingVertical: spacing.md,
 })
 
-const $sortText: ThemedStyle<TextStyle> = ({ colors }) => ({
+const $title: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
   color: colors.text,
-  marginRight: 8,
+})
+
+const $sortButton: ThemedStyle<ViewStyle> = ({ colors }: { colors: any }) => ({
+  backgroundColor: colors.primary,
+  minHeight: 36,
+})
+
+const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  padding: spacing.xl,
+})
+
+const $emptyText: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
+  color: colors.text,
+  textAlign: "center",
 })

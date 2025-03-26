@@ -1,127 +1,121 @@
 import React from "react"
-import { Pressable, View, ViewStyle, TextStyle, Linking } from "react-native"
+import { Pressable, View, ViewStyle, TextStyle } from "react-native"
 import { Text } from "./Text"
+import { colors, spacing, type ThemedStyle } from "@/theme"
+import { NewsItem } from "@/models/News"
+import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
-import type { ThemedStyle } from "@/theme"
-import type { NewsItem } from "@/models/News"
-import { ExternalLink } from "lucide-react-native"
 
-interface NewsCardProps {
+export interface NewsCardProps {
   item: NewsItem
+  onPress?: () => void
   compact?: boolean
 }
 
-export function NewsCard({ item, compact = false }: NewsCardProps) {
-  const { themed, theme } = useAppTheme()
-  
-  const handlePress = () => {
-    Linking.openURL(item.link).catch((err) => console.error("Couldn't open URL: ", err))
-  }
+export const NewsCard = observer(function NewsCard({ item, onPress, compact }: NewsCardProps) {
+  const { themed } = useAppTheme()
   
   return (
-    <Pressable 
-      style={themed(compact ? $compactCard : $card)} 
-      onPress={handlePress}
-      android_ripple={{ color: theme.colors.palette.neutral400 }}
+    <Pressable
+      style={[themed($container), compact && themed($compactContainer)]}
+      onPress={onPress}
     >
-      <View style={themed($cardContent)}>
-        <View style={themed($headerRow)}>
-          <Text style={themed($source)}>{item.sourceDisplay}</Text>
-          <Text style={themed($date)}>{item.formattedDate}</Text>
-        </View>
-        
-        <Text style={themed(compact ? $compactTitle : $title)} numberOfLines={compact ? 2 : 3}>
-          {item.title}
-        </Text>
-        
-        {!compact && (
-          <Text style={themed($description)} numberOfLines={3}>
-            {item.description}
-          </Text>
-        )}
-        
-        <View style={themed($footer)}>
-          {item.authors && (
-            <Text style={themed($author)} numberOfLines={1}>
-              {item.authors}
-            </Text>
-          )}
-          <ExternalLink size={16} color={theme.colors.text} />
-        </View>
+      <View style={themed($header)}>
+        <Text
+          text={item.sourceDisplay}
+          style={themed($source)}
+        />
+        <Text
+          text={item.formattedDate}
+          style={themed($date)}
+          numberOfLines={1}
+        />
       </View>
+      
+      <Text
+        text={item.title}
+        style={[themed($title), compact && themed($compactTitle)]}
+        numberOfLines={compact ? 2 : 3}
+      />
+      
+      {!compact && (
+        <Text
+          text={item.description}
+          style={themed($description)}
+          numberOfLines={3}
+        />
+      )}
+      
+      {item.authors && !compact && (
+        <Text
+          text={item.authors}
+          style={themed($author)}
+          numberOfLines={1}
+        />
+      )}
     </Pressable>
   )
-}
+})
 
-// ------------------------
-// Styled components
-// ------------------------
-
-const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.card,
+// Styles
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
   borderRadius: spacing.sm,
+  padding: spacing.sm,
   marginVertical: spacing.xs,
-  shadowColor: colors.shadowColor,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 2,
+  borderWidth: 1,
+  borderColor: colors.border,
 })
 
-const $compactCard: ThemedStyle<ViewStyle> = (theme) => ({
-  ...$card(theme),
-  marginVertical: theme.spacing.xxs,
+const $compactContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  padding: spacing.xs,
+  marginVertical: spacing.xxs,
 })
 
-const $cardContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.md,
-})
-
-const $headerRow: ThemedStyle<ViewStyle> = () => ({
+const $header: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
   marginBottom: 4,
+  flexWrap: "nowrap",
 })
 
 const $source: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 12,
+  color: colors.tint,
   fontWeight: "bold",
-  color: colors.primary,
 })
 
 const $date: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 12,
-  color: colors.textDim,
+  color: colors.text,
+  opacity: 0.7,
+  flexShrink: 1,
+  marginLeft: 4,
 })
 
-const $title: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  fontSize: 18,
+const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontSize: 16,
   fontWeight: "bold",
   color: colors.text,
-  marginBottom: spacing.xs,
+  marginBottom: 8,
 })
 
-const $compactTitle: ThemedStyle<TextStyle> = (theme) => ({
-  ...$title(theme),
-  fontSize: 16,
-  marginBottom: theme.spacing.xxs,
-})
-
-const $description: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $compactTitle: ThemedStyle<TextStyle> = () => ({
   fontSize: 14,
-  color: colors.textDim,
-  marginBottom: spacing.xs,
+  marginBottom: 0,
 })
 
-const $footer: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
+const $description: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontSize: 14,
+  color: colors.text,
+  opacity: 0.8,
+  marginBottom: 8,
 })
 
 const $author: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 12,
-  color: colors.textDim,
-  flex: 1,
+  color: colors.text,
+  opacity: 0.7,
+  fontStyle: "italic",
 }) 

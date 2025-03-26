@@ -2,11 +2,15 @@ export interface ConfigBaseProps {
   persistNavigation: "always" | "dev" | "prod" | "never"
   catchErrors: "always" | "dev" | "prod" | "never"
   exitRoutes: string[]
+  API_URL: string
 }
 
 export type PersistNavigationConfig = ConfigBaseProps["persistNavigation"]
 
 const BaseConfig: ConfigBaseProps = {
+  // This is the production API URL. You may want to override this in config.dev.ts for development
+  API_URL: process.env.VERCEL_URL || "https://local-government-app-backend.vercel.app",
+
   // This feature is particularly useful in development mode, but
   // can be used in production as well if you prefer.
   persistNavigation: "dev",
