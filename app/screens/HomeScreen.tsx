@@ -1,14 +1,51 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle } from "react-native"
 import { Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
 import { ChevronDown } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring,
+  withDelay
+} from "react-native-reanimated"
 
 export const HomeScreen = () => {
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
+  
+  // Animation values
+  const opacityValue = useSharedValue(0)
+  const translateYValue = useSharedValue(10)
+  
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    
+    if (hour >= 5 && hour < 12) {
+      return "Good morning"
+    } else if (hour >= 12 && hour < 18) {
+      return "Good afternoon"
+    } else {
+      return "Good evening"
+    }
+  }
+  
+  // Greeting animation styles
+  const greetingAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacityValue.value,
+      transform: [{ translateY: translateYValue.value }]
+    }
+  })
+  
+  // Start animation when component mounts
+  useEffect(() => {
+    opacityValue.value = withDelay(500, withSpring(1, { damping: 20 }))
+    translateYValue.value = withDelay(500, withSpring(0, { damping: 20 }))
+  }, [])
 
   return (
     <Screen preset="scroll" style={themed($container)} safeAreaEdges={["bottom"]}>
@@ -21,13 +58,21 @@ export const HomeScreen = () => {
         />
         <LinearGradient
           colors={["transparent", theme.colors.background]}
-          style={[{ width: screenWidth, height: 200 }, themed($gradient)]}
+          style={[{ width: screenWidth, height: 220 }, themed($gradient)]}
         >
           <View style={themed($headerOverlay)}>
-            <Text preset="heading" style={themed($headerText)}>
-              Ottawa
-            </Text>
-            <ChevronDown size={24} color={theme.colors.tint} />
+            <View style={themed($headerTextContainer)}>
+              <Text preset="heading" style={themed($headerText)}>
+                Ottawa
+              </Text>
+              <ChevronDown size={24} color={theme.colors.tint} />
+            </View>
+            {/* Time-based greeting inside header overlay */}
+            <Animated.View style={[themed($greetingContainer), greetingAnimatedStyle]}>
+              <Text preset="subheading" style={themed($greetingText)}>
+                {getGreeting()}
+              </Text>
+            </Animated.View>
           </View>
         </LinearGradient>
       </View>
@@ -96,9 +141,17 @@ const $gradient: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $headerOverlay: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "flex-end",
+  paddingBottom: 10,
+})
+
+const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "flex-start",
+  marginBottom: 4,
 })
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
@@ -141,6 +194,17 @@ const $listItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $itemText: ThemedStyle<TextStyle> = () => ({
   color: "#000",
   fontWeight: "bold",
+})
+
+const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
+  alignItems: 'flex-start',
+  marginTop: 0,
+})
+
+const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  color: colors.tint,
+  fontFamily: typography.primary.semiBold,
+  fontSize: 18,
 })
 
 export default HomeScreen
