@@ -1,9 +1,13 @@
-import React, { useEffect } from "react"
-import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle } from "react-native"
+import { FC, useEffect } from "react"
+import { observer } from "mobx-react-lite"
+import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle, Pressable } from "react-native"
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
+import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
+import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
-import { ChevronDown } from "lucide-react-native"
+import { ChevronDown, ChevronRight } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import Animated, { 
   useSharedValue, 
@@ -11,15 +15,25 @@ import Animated, {
   withSpring,
   withDelay
 } from "react-native-reanimated"
+import { useStores } from "@/models"
+import { NewsCard } from "@/components/NewsCard"
 
-export const HomeScreen = () => {
+interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
+
+export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
   const { themed, theme } = useAppTheme()
+  const { newsStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
   
   // Animation values
   const opacityValue = useSharedValue(0)
   const translateYValue = useSharedValue(10)
   
+  useHeader({
+    title: "Home",
+    titleMode: "center",
+  })
+
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -46,6 +60,17 @@ export const HomeScreen = () => {
     opacityValue.value = withDelay(500, withSpring(1, { damping: 20 }))
     translateYValue.value = withDelay(500, withSpring(0, { damping: 20 }))
   }, [])
+
+  useEffect(() => {
+    // Fetch news when component mounts if we don't have any yet
+    if (newsStore.items.length === 0) {
+      newsStore.fetchNews(api)
+    }
+  }, [api, newsStore])
+
+  const navigateToNewsScreen = () => {
+    navigation.navigate("News")
+  }
 
   return (
     <Screen preset="scroll" style={themed($container)} safeAreaEdges={["bottom"]}>
@@ -75,6 +100,35 @@ export const HomeScreen = () => {
             </Animated.View>
           </View>
         </LinearGradient>
+      </View>
+
+      {/* Latest News Section */}
+      <View style={themed($section)}>
+        <View style={themed($sectionHeader)}>
+          <Text style={themed($sectionTitle)}>Latest News</Text>
+          <Pressable 
+            onPress={navigateToNewsScreen}
+            style={themed($seeAllButton)}
+            android_ripple={{ color: theme.colors.palette.neutral400 }}
+          >
+            <Text style={themed($seeAllText)}>See All</Text>
+            <ChevronRight size={16} color={theme.colors.primary} />
+          </Pressable>
+        </View>
+        
+        {newsStore.isLoading && newsStore.items.length === 0 ? (
+          <Text style={themed($loadingText)}>Loading latest news...</Text>
+        ) : newsStore.error ? (
+          <Text style={themed($errorText)}>Unable to load news</Text>
+        ) : newsStore.latestItems.length === 0 ? (
+          <Text style={themed($emptyText)}>No news available</Text>
+        ) : (
+          <View style={themed($newsContainer)}>
+            {newsStore.latestItems.map(item => (
+              <NewsCard key={item.id} item={item} compact />
+            ))}
+          </View>
+        )}
       </View>
 
       {/* 2x2 Grid of unavailable containers */}
@@ -159,6 +213,35 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginRight: spacing.sm,
 })
 
+const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginVertical: spacing.md,
+  paddingHorizontal: spacing.md,
+})
+
+const $sectionHeader: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 10,
+})
+
+const $sectionTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontSize: 20,
+  fontWeight: "bold",
+  color: colors.text,
+})
+
+const $seeAllButton: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
+})
+
+const $seeAllText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  fontSize: 14,
+  color: colors.primary,
+  marginRight: 4,
+})
+
 const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.md,
   paddingHorizontal: spacing.lg,
@@ -205,6 +288,28 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.tint,
   fontFamily: typography.primary.semiBold,
   fontSize: 18,
+})
+
+const $newsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.xs,
+})
+
+const $loadingText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.textDim,
+  marginVertical: spacing.lg,
+  textAlign: "center",
+})
+
+const $errorText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.error,
+  marginVertical: spacing.lg,
+  textAlign: "center",
+})
+
+const $emptyText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  color: colors.textDim,
+  marginVertical: spacing.lg,
+  textAlign: "center",
 })
 
 export default HomeScreen

@@ -8,6 +8,7 @@
 import { ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import type { ApiConfig } from "./api.types"
+import { NewsApi } from "./news-api"
 
 /**
  * Configuring the apisauce instance.
@@ -24,6 +25,7 @@ export const DEFAULT_API_CONFIG: ApiConfig = {
 export class Api {
   apisauce: ApisauceInstance
   config: ApiConfig
+  news: NewsApi
 
   /**
    * Set up our API instance. Keep this lightweight!
@@ -37,6 +39,9 @@ export class Api {
         Accept: "application/json",
       },
     })
+    
+    // Initialize news API
+    this.news = new NewsApi(this)
   }
 }
 
