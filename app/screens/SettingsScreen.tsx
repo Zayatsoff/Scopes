@@ -4,7 +4,6 @@ import { StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { ListItem, Screen, Text, Switch } from "@/components"
-import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { 
   Bell, 
@@ -24,11 +23,16 @@ import {
 } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import { StyleProp } from "react-native"
+import { SectionHeader } from "@/components/SectionHeader"
+import { useTabHeader } from "@/components/TabHeader"
 
 interface SettingsScreenProps extends BottomTabScreenProps<MainTabParamList, "Settings"> {}
 
 export const SettingsScreen: FC<SettingsScreenProps> = observer(function SettingsScreen() {
   const { themed, theme } = useAppTheme()
+  
+  // Set up the tab header
+  useTabHeader({ title: "Settings" });
   
   // State for toggle settings
   const [notificationSettings, setNotificationSettings] = useState({
@@ -49,13 +53,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
     saveHistory: true,
     autoLocation: true,
     sendAnalytics: false,
-  })
-
-  useHeader({
-    title: "Settings",
-    titleMode: "center",
-    backgroundColor: theme.colors.palette.primary500,
-    titleStyle: { color: theme.colors.palette.neutral100 }
   })
 
   const toggleNotificationSetting = (key: keyof typeof notificationSettings) => {
@@ -112,7 +109,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   return (
     <Screen style={themed($root)} preset="scroll" safeAreaEdges={["bottom"]}>
       {/* Notification Settings */}
-      <Text preset="heading" text="Notifications" style={themed($sectionTitle)} />
+      <SectionHeader title="Notifications" />
       <View style={themed($section)}>
         <ListItem 
           text="Police Alerts"
@@ -160,7 +157,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       </View>
 
       {/* Display Settings */}
-      <Text preset="heading" text="Display" style={themed($sectionTitle)} />
+      <SectionHeader title="Display" />
       <View style={themed($section)}>
         <ListItem 
           text="Dark Mode"
@@ -208,7 +205,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       </View>
 
       {/* Home Layout Settings */}
-      <Text preset="heading" text="Home Layout" style={themed($sectionTitle)} />
+      <SectionHeader title="Home Layout" />
       <View style={themed($section)}>
         <ListItem 
           text="Customize Home Layout"
@@ -221,7 +218,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       </View>
 
       {/* Other Settings */}
-      <Text preset="heading" text="General" style={themed($sectionTitle)} />
+      <SectionHeader title="General" />
       <View style={themed($section)}>
         <ListItem 
           text="Auto-detect Location"
@@ -258,7 +255,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       </View>
 
       {/* About & Help */}
-      <Text preset="heading" text="About & Help" style={themed($sectionTitle)} />
+      <SectionHeader title="About & Help" />
       <View style={themed($section)}>
         <ListItem 
           text="Tutorial"
@@ -309,16 +306,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
 
 const $root: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
-  backgroundColor: colors.palette.neutral200,
-})
-
-const $sectionTitle: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
-  paddingHorizontal: spacing.md,
-  paddingTop: spacing.lg,
-  paddingBottom: spacing.xs,
-  color: colors.palette.primary600,
-  fontSize: 18,
-  fontWeight: "600",
+  backgroundColor: colors.background,
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({

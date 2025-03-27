@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { ViewStyle, TextStyle } from "react-native"
+import { ViewStyle, TextStyle, View } from "react-native"
 import { Screen } from "@/components/Screen"
 import { NewsCard } from "@/components/NewsCard"
 import { useStores } from "@/models"
@@ -9,14 +9,30 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { ThemedStyle } from "@/theme"
 import { Button } from "@/components/Button"
 import { Linking } from "react-native"
-import { View } from "react-native"
 import { Text } from "@/components/Text"
-import { spacing } from "@/theme"
 import { NewsItem } from "@/models/News"
+import { SectionHeader } from "@/components/SectionHeader"
+import { useTabHeader } from "@/components/TabHeader"
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
+  
+  // Set up the tab header with the same style as Settings
+  useTabHeader({ title: "Local News" });
+  
+  // Create a custom section header with sort button
+  const NewsFeedHeader = () => (
+    <View style={themed($sectionHeaderContainer)}>
+      <SectionHeader title="News Feed" />
+      <Button
+        text={newsStore.sortNewestFirst ? "Newest First" : "Oldest First"}
+        onPress={newsStore.toggleSortOrder}
+        style={themed($sortButton)}
+        textStyle={themed($sortButtonText)}
+      />
+    </View>
+  );
   
   useEffect(() => {
     // Fetch news when component mounts
@@ -34,21 +50,6 @@ export const NewsScreen = observer(function NewsScreen() {
     />
   )
   
-  const ListHeaderComponent = () => (
-    <View style={themed($header)}>
-      <Text
-        text="Local News"
-        preset="heading"
-        style={themed($title)}
-      />
-      <Button
-        text={newsStore.sortNewestFirst ? "Newest First" : "Oldest First"}
-        onPress={newsStore.toggleSortOrder}
-        style={themed($sortButton)}
-      />
-    </View>
-  )
-  
   const ListEmptyComponent = () => (
     <View style={themed($emptyContainer)}>
       <Text
@@ -62,13 +63,14 @@ export const NewsScreen = observer(function NewsScreen() {
     <Screen
       preset="fixed"
       contentContainerStyle={themed($screenContainer)}
-      safeAreaEdges={["top"]}
+      safeAreaEdges={["bottom"]}
     >
+      <NewsFeedHeader />
+      
       <FlashList
         data={newsStore.sortedItems}
         renderItem={renderItem}
         estimatedItemSize={150}
-        ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={themed($listContainer)}
       />
@@ -83,28 +85,12 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }: { colors: any }) =
 })
 
 const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
-  paddingHorizontal: spacing.md,
-})
-
-const $header: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingVertical: spacing.md,
-})
-
-const $title: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
-  color: colors.text,
-})
-
-const $sortButton: ThemedStyle<ViewStyle> = ({ colors }: { colors: any }) => ({
-  backgroundColor: colors.primary,
-  minHeight: 36,
+  paddingHorizontal: spacing.md, 
 })
 
 const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
   flex: 1,
-  justifyContent: "center",
+  // justifyContent: "center",
   alignItems: "center",
   padding: spacing.xl,
 })
@@ -112,4 +98,23 @@ const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) 
 const $emptyText: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
   color: colors.text,
   textAlign: "center",
+})
+
+// New styles for the section header with sort button
+const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingRight: spacing.md,
+})
+
+const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+  backgroundColor: "transparent",
+  minHeight: 32,
+  paddingHorizontal: spacing.xs,
+})
+
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
+  color: colors.palette.primary600,
+  fontSize: 14,
 })

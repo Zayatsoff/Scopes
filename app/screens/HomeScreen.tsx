@@ -19,6 +19,7 @@ import { useStores } from "@/models"
 import { NewsCard } from "@/components/NewsCard"
 import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
+import { SectionHeader } from "@/components/SectionHeader"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -162,7 +163,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
       {/* Additional news items */}
       <View style={[themed($newsSection), { marginTop: theme.spacing.md }]}>
-        <Text style={themed($sectionTitle)}>More News</Text>
+        <SectionHeader title="More News" />
         {newsStore.latestItems.slice(8, 16).map((item: NewsItem) => (
           <NewsCard
             key={item.id}
@@ -271,13 +272,6 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.tint,
   fontFamily: typography.primary.semiBold,
   fontSize: 18,
-})
-
-const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, typography, spacing }) => ({
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  fontSize: 18,
-  marginBottom: spacing.xs,
 })
 
 // Add new styles for grid news items
