@@ -53,12 +53,12 @@ export const NewsStoreModel = types
     },
     
     get latestItems() {
-      // Use the same sorting logic directly instead of referencing sortedItems
+      // Always return newest first for home screen
       return [...self.items]
         .sort((a, b) => {
           const dateA = new Date(a.date).getTime()
           const dateB = new Date(b.date).getTime()
-          return self.sortNewestFirst ? dateB - dateA : dateA - dateB
+          return dateB - dateA // Always sort newest first, regardless of sortNewestFirst setting
         })
         .slice(0, 20) // Get latest 20 items for home screen
     }

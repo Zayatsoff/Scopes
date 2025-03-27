@@ -114,7 +114,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               onPress={() => handleNewsPress(item.link)}
             >
               <View style={themed($gridItemContent)}>
-                <NewsCard item={item} compact />
+                <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
+                <Text 
+                  style={themed($gridNewsTitle)} 
+                  numberOfLines={2}
+                >
+                  {item.title}
+                </Text>
+                <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
               </View>
             </Pressable>
           ))}
@@ -127,7 +134,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               onPress={() => handleNewsPress(item.link)}
             >
               <View style={themed($gridItemContent)}>
-                <NewsCard item={item} compact />
+                <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
+                <Text 
+                  style={themed($gridNewsTitle)} 
+                  numberOfLines={2}
+                >
+                  {item.title}
+                </Text>
+                <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
               </View>
             </Pressable>
           ))}
@@ -215,14 +229,17 @@ const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
-  marginBottom: 14,
+  marginBottom: spacing.sm,
 })
 
 const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
-  width: "49.5%",
+  width: "48%",
+  minHeight: 120,
   borderRadius: 12,
   overflow: "hidden",
   backgroundColor: colors.background,
+  borderWidth: 1,
+  borderColor: colors.border,
   shadowColor: "#000",
   shadowOffset: {
     width: 0,
@@ -233,9 +250,10 @@ const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   elevation: 3,
 })
 
-const $gridItemContent: ThemedStyle<ViewStyle> = () => ({
+const $gridItemContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  justifyContent: "center",
+  padding: spacing.sm,
+  justifyContent: "flex-start",
 })
 
 const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -260,6 +278,29 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, typography, spacing }) 
   fontFamily: typography.primary.semiBold,
   fontSize: 18,
   marginBottom: spacing.xs,
+})
+
+// Add new styles for grid news items
+const $gridNewsSource: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 12,
+  fontFamily: typography.primary.medium,
+  color: colors.tint,
+  marginBottom: 4,
+})
+
+const $gridNewsTitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 14,
+  fontFamily: typography.primary.semiBold,
+  color: colors.text,
+  marginBottom: 8,
+  lineHeight: 18,
+})
+
+const $gridNewsDate: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 12,
+  fontFamily: typography.primary.normal,
+  color: colors.textDim,
+  marginTop: 'auto',
 })
 
 export default HomeScreen
