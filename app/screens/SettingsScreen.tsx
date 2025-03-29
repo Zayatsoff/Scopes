@@ -29,7 +29,7 @@ import { useTabHeader } from "@/components/TabHeader"
 interface SettingsScreenProps extends BottomTabScreenProps<MainTabParamList, "Settings"> {}
 
 export const SettingsScreen: FC<SettingsScreenProps> = observer(function SettingsScreen() {
-  const { themed, theme } = useAppTheme()
+  const { themed, theme, themeContext, setThemeContextOverride } = useAppTheme()
   
   // Set up the tab header
   useTabHeader({ title: "Settings" });
@@ -43,7 +43,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   })
 
   const [displaySettings, setDisplaySettings] = useState({
-    darkMode: false,
     largeText: false,
     showWeather: true,
     compactNewsView: false,
@@ -166,8 +165,8 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           bottomSeparator
           containerStyle={themed($listItemContainer)}
           RightComponent={renderSwitch(
-            displaySettings.darkMode,
-            () => toggleDisplaySetting("darkMode")
+            themeContext === "dark",
+            () => setThemeContextOverride(themeContext === "dark" ? "light" : "dark")
           )}
         />
         <ListItem 
@@ -179,17 +178,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           RightComponent={renderSwitch(
             displaySettings.largeText,
             () => toggleDisplaySetting("largeText")
-          )}
-        />
-        <ListItem 
-          text="Show Weather on Home"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(CloudSun, sectionColors.display)}
-          bottomSeparator
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            displaySettings.showWeather,
-            () => toggleDisplaySetting("showWeather")
           )}
         />
         <ListItem 
@@ -262,7 +250,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Book, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          bottomSeparator
           onPress={() => {}}
           containerStyle={themed($listItemContainer)}
         />
@@ -271,7 +258,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(ShieldCheck, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          bottomSeparator
           onPress={() => {}}
           containerStyle={themed($listItemContainer)}
         />
@@ -280,12 +266,11 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(FileText, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          bottomSeparator
           onPress={() => {}}
           containerStyle={themed($listItemContainer)}
         />
         <ListItem 
-          text="About This App"
+          text="About"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Info, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
@@ -293,16 +278,9 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           containerStyle={themed($listItemContainer)}
         />
       </View>
-      
-      {/* Add some padding at the bottom */}
-      <View style={themed($bottomPadding)} />
     </Screen>
   )
 })
-
-// -----------------------
-// Themed style definitions
-// -----------------------
 
 const $root: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
@@ -310,52 +288,28 @@ const $root: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 12,
-  marginHorizontal: spacing.md,
-  marginBottom: spacing.sm,
-  overflow: 'hidden',
-  shadowColor: colors.palette.neutral800,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 3,
-  elevation: 3,
+  backgroundColor: colors.background,
+  marginBottom: spacing.lg,
 })
 
 const $listItemContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.sm,
   paddingHorizontal: spacing.md,
-  height: 60,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
+  paddingVertical: spacing.sm,
 })
 
 const $iconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  width: 42,
-  height: 42,
-  alignItems: 'center',
-  justifyContent: 'center',
   marginRight: spacing.sm,
-  alignSelf: 'center',
+  justifyContent: "center",
 })
 
 const $listItemText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-  fontSize: 16,
-  flex: 1,
-  fontWeight: '400',
-  textAlignVertical: 'center',
 })
 
 const $switchContainer: ThemedStyle<ViewStyle> = () => ({
-  width: 48,
-  height: 42,
-  alignItems: 'center',
-  justifyContent: 'center',
-  alignSelf: 'center',
+  justifyContent: "center",
 })
 
 const $bottomPadding: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  height: spacing.xxl,
+  paddingBottom: spacing.xl,
 })
