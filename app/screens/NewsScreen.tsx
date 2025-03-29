@@ -1,39 +1,122 @@
-import { FC } from "react"
+import React, { useEffect } from "react"
+import { ViewStyle, TextStyle, View } from "react-native"
+import { Screen } from "@/components/Screen"
+import { NewsCard } from "@/components/NewsCard"
+import { useStores } from "@/models"
 import { observer } from "mobx-react-lite"
-import { ViewStyle } from "react-native"
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
-import type { MainTabParamList } from "@/navigators/MainTabs"
-import { Screen, Text } from "@/components"
-import { useHeader } from "@/utils/useHeader"
+import { FlashList } from "@shopify/flash-list"
 import { useAppTheme } from "@/utils/useAppTheme"
-import type { ThemedStyle } from "@/theme"
+import { ThemedStyle } from "@/theme"
+import { Button } from "@/components/Button"
+import { Linking } from "react-native"
+import { Text } from "@/components/Text"
+import { NewsItem } from "@/models/News"
+import { SectionHeader } from "@/components/SectionHeader"
+import { useTabHeader } from "@/components/TabHeader"
 
-interface NewsScreenProps extends BottomTabScreenProps<MainTabParamList, "News"> {}
-
-export const NewsScreen: FC<NewsScreenProps> = observer(function NewsScreen() {
-  const { themed } = useAppTheme()
+export const NewsScreen = observer(function NewsScreen() {
+  const { newsStore, api } = useStores()
+  const { themed, theme, themeContext } = useAppTheme()
   
-  useHeader({
-    title: "News",
-    titleMode: "center",
-  })
-
+  // Set up the tab header with the same style as Settings
+  useTabHeader({ 
+    title: "Local News",
+    titleMode: "center"
+  });
+  
+  // Create a custom section header with sort button
+  const NewsFeedHeader = () => (
+    <View style={themed($sectionHeaderContainer)}>
+      <SectionHeader title="News Feed" />
+      <Button
+        text={newsStore.sortNewestFirst ? "Newest First" : "Oldest First"}
+        onPress={newsStore.toggleSortOrder}
+        style={themed($sortButton)}
+        textStyle={themed($sortButtonText)}
+      />
+    </View>
+  );
+  
+  useEffect(() => {
+    // Fetch news when component mounts
+    newsStore.fetchNews(api)
+  }, [])
+  
+  const handleNewsPress = (link: string) => {
+    Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
+  }
+  
+  const renderItem = ({ item }: { item: NewsItem }) => (
+    <NewsCard
+      item={item}
+      onPress={() => handleNewsPress(item.link)}
+    />
+  )
+  
+  const ListEmptyComponent = () => (
+    <View style={themed($emptyContainer)}>
+      <Text
+        text={newsStore.isLoading ? "Loading..." : newsStore.error || "No news available"}
+        style={themed($emptyText)}
+      />
+    </View>
+  )
+  
   return (
-    <Screen style={themed($root)} preset="scroll" safeAreaEdges={["bottom"]}>
-      <Text text="News Screen Content" style={themed($content)} />
+    <Screen
+      preset="fixed"
+      contentContainerStyle={themed($screenContainer)}
+      safeAreaEdges={["bottom"]}
+    >
+      <NewsFeedHeader />
+      
+      <FlashList
+        data={newsStore.sortedItems}
+        renderItem={renderItem}
+        estimatedItemSize={150}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={themed($listContainer)}
+      />
     </Screen>
   )
 })
 
-// -----------------------
-// Themed style definitions
-// -----------------------
-
-const $root: ThemedStyle<ViewStyle> = () => ({
+// Styles
+const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
+  backgroundColor: colors.background,
 })
 
-const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.lg,
+const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md, 
+})
+
+const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flex: 1,
   alignItems: "center",
+  padding: spacing.xl,
+})
+
+const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  textAlign: "center",
+})
+
+// New styles for the section header with sort button
+const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingRight: spacing.md,
+})
+
+const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  backgroundColor: "transparent",
+  minHeight: 32,
+  paddingHorizontal: spacing.xs,
+})
+
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.primary600,
+  fontSize: 14,
 })

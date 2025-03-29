@@ -49,7 +49,7 @@ export const colors = {
   /**
    * The default light header.
    */
-  header: palette.neutral700,
+  header: palette.neutral800,
   /**
    * The default text color in many components.
    */

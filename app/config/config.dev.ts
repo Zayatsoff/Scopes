@@ -6,5 +6,7 @@
  * https://reactnative.dev/docs/security#storing-sensitive-info
  */
 export default {
-  API_URL: "https://api.rss2json.com/v1/",
+  // This should point to your Vercel app URL
+  // e.g., "https://your-project-name.vercel.app"
+  API_URL: "https://local-government-app-backend.vercel.app",
 }

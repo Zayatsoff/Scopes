@@ -6,5 +6,5 @@
  * https://reactnative.dev/docs/security#storing-sensitive-info
  */
 export default {
-  API_URL: "CHANGEME",
+  API_URL: "https://local-government-app-backend.vercel.app", // Update with your actual Vercel URL for production
 }
