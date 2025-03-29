@@ -16,10 +16,13 @@ import { useTabHeader } from "@/components/TabHeader"
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
-  const { themed, theme } = useAppTheme()
+  const { themed, theme, themeContext } = useAppTheme()
   
   // Set up the tab header with the same style as Settings
-  useTabHeader({ title: "Local News" });
+  useTabHeader({ 
+    title: "Local News",
+    titleMode: "center"
+  });
   
   // Create a custom section header with sort button
   const NewsFeedHeader = () => (
@@ -79,42 +82,41 @@ export const NewsScreen = observer(function NewsScreen() {
 })
 
 // Styles
-const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }: { colors: any }) => ({
+const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
 })
 
-const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md, 
 })
 
-const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  // justifyContent: "center",
   alignItems: "center",
   padding: spacing.xl,
 })
 
-const $emptyText: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
+const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   textAlign: "center",
 })
 
 // New styles for the section header with sort button
-const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
   paddingRight: spacing.md,
 })
 
-const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }: { spacing: any }) => ({
+const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   backgroundColor: "transparent",
   minHeight: 32,
   paddingHorizontal: spacing.xs,
 })
 
-const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }: { colors: any }) => ({
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.primary600,
   fontSize: 14,
 })
