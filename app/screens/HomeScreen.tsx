@@ -22,6 +22,7 @@ import { NewsCard } from "@/components/NewsCard"
 import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
+import { Siren, Cloudy, TowerControl, BusFront } from "lucide-react-native"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -182,38 +183,44 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       {/* 2x2 Grid of containers */}
       <View style={themed($gridSection)}>
         <View style={themed($gridRow)}>
-          {newsStore.latestItems.slice(0, 2).map((item: NewsItem) => (
-            <Pressable
-              key={item.id}
-              style={themed($gridItem)}
-              onPress={() => handleNewsPress(item.link)}
-            >
-              <View style={themed($gridItemContent)}>
-                <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
-                <Text style={themed($gridNewsTitle)} numberOfLines={2}>
-                  {item.title}
-                </Text>
-                <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
+          <View style={themed($gridItem)}>
+            <View style={themed($gridItemContent)}>
+              <View style={themed($iconTextRow)}>
+                <Siren size={24} color={theme.colors.police} />
+                <Text style={[themed($iconText), { color: theme.colors.police }]}>Police</Text>
               </View>
-            </Pressable>
-          ))}
+              <Text style={themed($gridItemWords)}>urgent response required</Text>
+            </View>
+          </View>
+          <View style={themed($gridItem)}>
+            <View style={themed($gridItemContent)}>
+              <View style={themed($iconTextRow)}>
+                <Cloudy size={24} color={theme.colors.weather} />
+                <Text style={[themed($iconText), { color: theme.colors.weather }]}>Weather</Text>
+              </View>
+              <Text style={themed($gridItemWords)}>sunny partly cloudy</Text>
+            </View>
+          </View>
         </View>
         <View style={themed($gridRow)}>
-          {newsStore.latestItems.slice(2, 4).map((item: NewsItem) => (
-            <Pressable
-              key={item.id}
-              style={themed($gridItem)}
-              onPress={() => handleNewsPress(item.link)}
-            >
-              <View style={themed($gridItemContent)}>
-                <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
-                <Text style={themed($gridNewsTitle)} numberOfLines={2}>
-                  {item.title}
-                </Text>
-                <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
+          <View style={themed($gridItem)}>
+            <View style={themed($gridItemContent)}>
+              <View style={themed($iconTextRow)}>
+                <TowerControl size={24} color={theme.colors.green} />
+                <Text style={[themed($iconText), { color: theme.colors.green }]}>Hydro</Text>
               </View>
-            </Pressable>
-          ))}
+              <Text style={themed($gridItemWords)}>power outage restored</Text>
+            </View>
+          </View>
+          <View style={themed($gridItem)}>
+            <View style={themed($gridItemContent)}>
+              <View style={themed($iconTextRow)}>
+                <BusFront size={24} color={theme.colors.mustard} />
+                <Text style={[themed($iconText), { color: theme.colors.mustard }]}>Traffic</Text>
+              </View>
+              <Text style={themed($gridItemWords)}>construction expect delays</Text>
+            </View>
+          </View>
         </View>
       </View>
 
@@ -286,38 +293,28 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
 })
 
 const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.sm,
-
+  padding: spacing.md,
+  paddingVertical: spacing.xs,
 })
 
 const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  justifyContent: "space-between",
   marginBottom: spacing.sm,
 })
 
 const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
-  width: "48%",
-  minHeight: 120,
-  borderRadius: 12,
-  overflow: "hidden",
+  flex: 1,
+  marginHorizontal: spacing.xs / 2,
   backgroundColor: colors.containerBackground,
-  borderWidth: 1,
-  borderColor: colors.border,
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 2,
-  },
-  shadowOpacity: 0.1,
-  shadowRadius: 3,
-  elevation: 3,
+  borderRadius: 3,
+  height: 100,
+  overflow: "hidden",
 })
 
 const $gridItemContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
   padding: spacing.sm,
-  justifyContent: "flex-start",
+  justifyContent: "space-between",
 })
 
 const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -337,27 +334,23 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 18,
 })
 
-// Add new styles for grid news items
-const $gridNewsSource: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 12,
-  fontFamily: typography.primary.medium,
-  color: colors.tint,
-  marginBottom: 4,
-})
-
-const $gridNewsTitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 14,
-  fontFamily: typography.primary.semiBold,
-  color: colors.text,
+const $iconTextRow: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
   marginBottom: 8,
-  lineHeight: 18,
 })
 
-const $gridNewsDate: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 12,
-  fontFamily: typography.primary.normal,
-  color: colors.textDim,
-  marginTop: "auto",
+const $iconText: ThemedStyle<TextStyle> = ({ typography }) => ({
+  ...typography.secondary,
+  marginLeft: 8,
+  fontWeight: "600",
+  fontSize: 16,
+})
+
+const $gridItemWords: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  ...typography.secondary,
+  color: colors.text,
+  fontSize: 14,
 })
 
 const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({

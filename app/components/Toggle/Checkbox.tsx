@@ -118,4 +118,4 @@ const $checkboxDetail: ImageStyle = {
   resizeMode: "contain",
 }
 
-const $inputOuter: StyleProp<ViewStyle> = [$inputOuterBase, { borderRadius: 4 }]
+const $inputOuter: StyleProp<ViewStyle> = [$inputOuterBase, { borderRadius: 3 }]

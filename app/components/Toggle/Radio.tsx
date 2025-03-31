@@ -98,7 +98,7 @@ function RadioInput(props: RadioInputProps) {
 const $radioDetail: ViewStyle = {
   width: 12,
   height: 12,
-  borderRadius: 6,
+  borderRadius: 3,
 }
 
-const $inputOuter: StyleProp<ViewStyle> = [$inputOuterBase, { borderRadius: 12 }]
+const $inputOuter: StyleProp<ViewStyle> = [$inputOuterBase, { borderRadius: 3 }]

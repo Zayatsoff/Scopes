@@ -72,7 +72,7 @@ const $errorSection: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 2,
   backgroundColor: colors.separator,
   marginVertical: spacing.md,
-  borderRadius: 6,
+  borderRadius: 3,
 })
 
 const $errorSectionContentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

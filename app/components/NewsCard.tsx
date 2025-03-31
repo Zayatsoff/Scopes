@@ -40,7 +40,7 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
 // Styles
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.containerBackground,
-  borderRadius: spacing.sm,
+  borderRadius: 3,
   padding: spacing.sm,
   marginVertical: spacing.xs,
   borderWidth: 1,
