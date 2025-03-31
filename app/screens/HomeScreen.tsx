@@ -294,17 +294,17 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
 
 const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   padding: spacing.md,
-  paddingVertical: spacing.xs,
+  paddingVertical: spacing.md,
 })
 
 const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   marginBottom: spacing.sm,
+  gap: spacing.md,
 })
 
 const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   flex: 1,
-  marginHorizontal: spacing.xs / 2,
   backgroundColor: colors.containerBackground,
   borderRadius: 3,
   height: 100,
@@ -318,7 +318,7 @@ const $gridItemContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.sm,
+  paddingHorizontal: spacing.md,
   flexDirection: "column",
   gap: spacing.xs,
 })

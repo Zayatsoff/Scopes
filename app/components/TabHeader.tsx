@@ -20,7 +20,7 @@ export function useTabHeader({
   RightActionComponent,
   backgroundColor,
   titleColor
-}: UseTabHeaderProps) {
+}: UseTabHeaderProps, deps: any[] = []) {
   const { theme } = useAppTheme()
   
   useHeader({
@@ -33,5 +33,5 @@ export function useTabHeader({
       fontWeight: "600"
     },
     RightActionComponent
-  })
+  }, deps)
 } 

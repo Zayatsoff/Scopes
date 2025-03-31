@@ -22,7 +22,7 @@ export const NewsScreen = observer(function NewsScreen() {
   useTabHeader({ 
     title: "Local News",
     titleMode: "center"
-  });
+  }, [themeContext]);
   
   // Create a custom section header with sort button
   const NewsFeedHeader = () => (
@@ -66,7 +66,7 @@ export const NewsScreen = observer(function NewsScreen() {
     <Screen
       preset="fixed"
       contentContainerStyle={themed($screenContainer)}
-      safeAreaEdges={["bottom"]}
+      safeAreaEdges={[]}
     >
       <NewsFeedHeader />
       
@@ -107,7 +107,7 @@ const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingRight: spacing.md,
+  paddingHorizontal: spacing.md,
 })
 
 const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({

@@ -5,6 +5,7 @@ import { colors, spacing, type ThemedStyle } from "@/theme"
 import { NewsItem } from "@/models/News"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
+import { SourceFavicon } from "./SourceFavicon"
 
 export interface NewsCardProps {
   item: NewsItem
@@ -18,7 +19,10 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
   return (
     <Pressable style={[themed($container), compact && themed($compactContainer)]} onPress={onPress}>
       <View style={themed($header)}>
-        <Text text={item.sourceDisplay} style={themed($source)} />
+        <View style={themed($sourceContainer)}>
+          <SourceFavicon source={item.source} size={16} />
+          <Text text={item.sourceDisplay} style={themed($source)} />
+        </View>
         <Text text={item.formattedDate} style={themed($date)} numberOfLines={1} />
       </View>
 
@@ -58,6 +62,12 @@ const $header: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   marginBottom: 4,
   flexWrap: "nowrap",
+})
+
+const $sourceContainer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
 })
 
 const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({

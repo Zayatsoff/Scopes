@@ -32,7 +32,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   const { themed, theme, themeContext, setThemeContextOverride } = useAppTheme()
   
   // Set up the tab header
-  useTabHeader({ title: "Settings" });
+  useTabHeader({ title: "Settings" }, [themeContext]);
   
   // State for toggle settings
   const [notificationSettings, setNotificationSettings] = useState({
@@ -106,7 +106,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   }
 
   return (
-    <Screen style={themed($root)} preset="scroll" safeAreaEdges={["bottom"]}>
+    <Screen style={themed($root)} preset="scroll" safeAreaEdges={[]}>
       {/* Notification Settings */}
       <SectionHeader title="Notifications" />
       <View style={themed($section)}>
@@ -282,9 +282,11 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   )
 })
 
-const $root: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $root: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 1,
   backgroundColor: colors.background,
+  paddingHorizontal: spacing.md, 
+
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -293,7 +295,7 @@ const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 })
 
 const $listItemContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.md,
+
   paddingVertical: spacing.sm,
 })
 

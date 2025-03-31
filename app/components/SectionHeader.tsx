@@ -26,7 +26,7 @@ export function SectionHeader({ title, color }: SectionHeaderProps) {
 
 // Styles
 const $sectionTitle: ThemedStyle<TextStyle> = ({ spacing, colors, typography }) => ({
-  paddingHorizontal: spacing.md,
+  // paddingHorizontal: spacing.md,
   color: colors.text,
   fontSize: typography.sizes.md,
   fontWeight: "600",

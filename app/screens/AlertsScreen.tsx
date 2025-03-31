@@ -15,13 +15,13 @@ import { CloudSun, Siren, Zap, BusFront } from "lucide-react-native"
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
 export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScreen() {
-  const { theme, themed } = useAppTheme()
+  const { theme, themed, themeContext } = useAppTheme()
 
   // Set up the tab header with customized styling
   useTabHeader({
     title: "Alerts",
     titleMode: "center",
-  })
+  }, [themeContext])
 
   // Define category tabs
   const categoryTabs: CategoryTab[] = [
