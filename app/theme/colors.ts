@@ -31,12 +31,21 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
+  police: "#7396FF",
+  hydro: "#FFE241",
+  traffic: "#FF713D",
+  alert: "#F6484B",
+
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
 } as const
 
 export const colors = {
   palette,
+  police: palette.police,
+  hydro: palette.hydro,
+  traffic: palette.traffic,
+  alert: palette.alert,
   /**
    * A helper for making something see-thru.
    */

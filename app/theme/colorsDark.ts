@@ -31,15 +31,24 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
+  police: "#7396FF",
+  hydro: "#FFE241",
+  traffic: "#FF713D",
+  alert: "#F6484B",
+
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
 } as const
 
 export const colors = {
   palette,
+  police: palette.police,
+  hydro: palette.hydro,
+  traffic: palette.traffic,
+  alert: palette.alert,
   transparent: "rgba(0, 0, 0, 0)",
   cityName: palette.neutral900,
-  text: palette.neutral800,
+  text: palette.neutral900,
   textDim: palette.neutral600,
   background: palette.neutral300,
   containerBackground: palette.neutral400,

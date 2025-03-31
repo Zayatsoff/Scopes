@@ -1,3 +1,4 @@
+import React from "react"
 import { TOptions } from "i18next"
 import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native"
 import { isRTL, translate, TxKeyPath } from "@/i18n"
@@ -55,7 +56,7 @@ export interface TextProps extends RNTextProps {
  */
 export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
 
   const i18nText = tx && translate(tx, txOptions)
   const content = i18nText || text || children
@@ -69,8 +70,14 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
     $styleOverride,
   ]
 
+  // Apply Instrument Sans font family to all text
+  const fontFamilyStyle = { fontFamily: theme.typography.customFontFamily }
+  const finalStyle = Array.isArray($styles) 
+    ? [fontFamilyStyle, ...$styles] 
+    : [fontFamilyStyle, $styles]
+
   return (
-    <RNText {...rest} style={$styles} ref={ref}>
+    <RNText {...rest} style={finalStyle} ref={ref}>
       {content}
     </RNText>
   )

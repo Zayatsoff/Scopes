@@ -27,6 +27,15 @@ const fonts = {
     semiBold: "spaceGroteskSemiBold",
     bold: "spaceGroteskBold",
   },
+  instrumentSans: {
+    // Web-safe Instrument Sans font
+    light: "400",
+    normal: "400", 
+    medium: "500",
+    semiBold: "600",
+    bold: "700",
+    italic: "italic",
+  },
   helveticaNeue: {
     // iOS only font.
     thin: "HelveticaNeue-Thin",
@@ -59,7 +68,7 @@ export const typography = {
   /**
    * The primary font. Used in most places.
    */
-  primary: fonts.spaceGrotesk,
+  primary: fonts.instrumentSans,
   /**
    * An alternate font used for perhaps titles and stuff.
    */
@@ -68,4 +77,8 @@ export const typography = {
    * Lets get fancy with a monospace font!
    */
   code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
+  /**
+   * Custom font family to use throughout the app
+   */
+  customFontFamily: "Instrument Sans, sans-serif",
 }

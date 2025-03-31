@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react"
+import { FC, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle, Pressable } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
@@ -7,13 +7,15 @@ import { Screen, Text } from "@/components"
 import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
-import { ChevronDown } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withDelay,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolate,
 } from "react-native-reanimated"
 import { useStores } from "@/models"
 import { NewsCard } from "@/components/NewsCard"
@@ -27,15 +29,20 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const { themed, theme } = useAppTheme()
   const { newsStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
+  
+  // Set up image dimensions
+  const IMAGE_HEIGHT = screenWidth * 0.8
+  const MIN_IMAGE_HEIGHT = 150
 
   // Animation values
   const opacityValue = useSharedValue(0)
   const translateYValue = useSharedValue(10)
+  const scrollY = useSharedValue(0)
 
-  useHeader({
-    title: "Home",
-    titleMode: "center",
-  })
+  // Hide the header for this screen only
+  useEffect(() => {
+    navigation.setOptions({ headerShown: false })
+  }, [navigation])
 
   // Get greeting based on time of day
   const getGreeting = () => {
@@ -50,11 +57,64 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     }
   }
 
+  // Scroll handler for animations
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y
+    },
+  })
+
   // Greeting animation styles
   const greetingAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacityValue.value,
       transform: [{ translateY: translateYValue.value }],
+    }
+  })
+
+  // Header image animation style
+  const imageAnimatedStyle = useAnimatedStyle(() => {
+    const height = interpolate(
+      scrollY.value,
+      [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
+      [IMAGE_HEIGHT, MIN_IMAGE_HEIGHT],
+      Extrapolate.CLAMP
+    )
+
+    const translateY = interpolate(
+      scrollY.value,
+      [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
+      [0, -(IMAGE_HEIGHT - MIN_IMAGE_HEIGHT) / 2],
+      Extrapolate.CLAMP
+    )
+
+    const scale = interpolate(
+      scrollY.value,
+      [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
+      [1, 1.1],
+      Extrapolate.CLAMP
+    )
+
+    return {
+      height,
+      transform: [
+        { translateY },
+        { scale },
+      ],
+    }
+  })
+
+  // Header container animation style
+  const headerContainerStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [0, 100],
+      [1, 0.85],
+      Extrapolate.CLAMP
+    )
+
+    return {
+      opacity,
     }
   })
 
@@ -76,12 +136,25 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   }
 
   return (
-    <Screen preset="scroll" style={themed($container)} safeAreaEdges={["bottom"]}>
+    <Screen
+      preset="scroll"
+      style={themed($container)}
+      safeAreaEdges={[]}
+      ScrollViewProps={{
+        onScroll: scrollHandler,
+        scrollEventThrottle: 16,
+        showsVerticalScrollIndicator: false,
+      }}
+    >
       {/* Top image with gradient overlay */}
-      <View style={themed($imageSection)}>
-        <Image
+      <Animated.View style={[themed($imageSection), headerContainerStyle]}>
+        <Animated.Image
           source={require("../../assets/images/ottawa_cover.jpg")}
-          style={[{ width: screenWidth, height: screenWidth * 0.8 }, themed($image)]}
+          style={[
+            { width: screenWidth, height: IMAGE_HEIGHT },
+            themed($image),
+            imageAnimatedStyle,
+          ]}
           resizeMode="cover"
         />
         <LinearGradient
@@ -90,10 +163,11 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         >
           <View style={themed($headerOverlay)}>
             <View style={themed($headerTextContainer)}>
-              <Text preset="heading" style={themed($headerText)}>
-                Ottawa
-              </Text>
-              <ChevronDown size={24} color={theme.colors.tint} />
+              <View style={themed($cityTextWrapper)}>
+                <Text preset="heading" style={themed($headerText)}>
+                  Ottawa
+                </Text>
+              </View>
             </View>
             {/* Time-based greeting inside header overlay */}
             <Animated.View style={[themed($greetingContainer), greetingAnimatedStyle]}>
@@ -103,7 +177,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
             </Animated.View>
           </View>
         </LinearGradient>
-      </View>
+      </Animated.View>
 
       {/* 2x2 Grid of containers */}
       <View style={themed($gridSection)}>
@@ -145,6 +219,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
       {/* 1x4 Grid of news items */}
       <View style={themed($newsSection)}>
+      <SectionHeader title="Local News" />
         {newsStore.latestItems.slice(4, 8).map((item: NewsItem) => (
           <NewsCard key={item.id} item={item} compact onPress={() => handleNewsPress(item.link)} />
         ))}
@@ -172,6 +247,7 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 const $imageSection: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
   marginBottom: 16,
+  overflow: 'hidden',
 })
 
 const $image: ThemedStyle<ImageStyle> = () => ({})
@@ -199,14 +275,19 @@ const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
   marginBottom: 4,
 })
 
-const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
   color: colors.cityName,
   marginRight: spacing.sm,
+  fontFamily: typography.customFontFamily,
+  fontWeight: "700",
+  fontSize: 36,
+  includeFontPadding: false,
+  textAlignVertical: 'center',
 })
 
 const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.sm,
-  marginBottom: spacing.sm,
+
 })
 
 const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -277,6 +358,11 @@ const $gridNewsDate: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontFamily: typography.primary.normal,
   color: colors.textDim,
   marginTop: "auto",
+})
+
+const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
+  height: 36,
+  justifyContent: 'center',
 })
 
 export default HomeScreen

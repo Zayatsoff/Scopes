@@ -33,7 +33,7 @@ import Config from "./config"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { loadDateFnsLocale } from "./utils/formatDate"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { StyleSheet } from "react-native"
+import { StyleSheet, Platform } from "react-native"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE_V2"
 
@@ -53,6 +53,26 @@ const config = {
       },
     },
   },
+}
+
+// Load Google Fonts for web
+if (Platform.OS === "web") {
+  // Add Google Fonts link to the document head
+  const link1 = document.createElement("link")
+  link1.rel = "preconnect"
+  link1.href = "https://fonts.googleapis.com"
+  document.head.appendChild(link1)
+
+  const link2 = document.createElement("link")
+  link2.rel = "preconnect"
+  link2.href = "https://fonts.gstatic.com"
+  link2.crossOrigin = "anonymous"
+  document.head.appendChild(link2)
+
+  const fontLink = document.createElement("link")
+  fontLink.rel = "stylesheet"
+  fontLink.href = "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
+  document.head.appendChild(fontLink)
 }
 
 /**

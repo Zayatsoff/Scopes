@@ -30,8 +30,8 @@ export function MainTabs() {
         tabBarActiveTintColor: theme.colors.navForeground,
         tabBarInactiveTintColor: theme.colors.navForeground || "#999",
         tabBarStyle: {
-          borderTopColor: theme.colors.separator,
-          backgroundColor: theme.colors.background,
+          borderTopColor: theme.colors.containerBackground,
+          backgroundColor: theme.colors.containerBackground,
           elevation: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -2 },
