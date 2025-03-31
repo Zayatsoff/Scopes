@@ -1,5 +1,5 @@
-import React, { useEffect } from "react"
-import { ViewStyle, TextStyle, View } from "react-native"
+import React, { useEffect, useState } from "react"
+import { ViewStyle, TextStyle, View, RefreshControl } from "react-native"
 import { Screen } from "@/components/Screen"
 import { NewsCard } from "@/components/NewsCard"
 import { useStores } from "@/models"
@@ -13,10 +13,14 @@ import { Text } from "@/components/Text"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
+import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
   const { themed, theme, themeContext } = useAppTheme()
+  const [refreshing, setRefreshing] = useState(false)
+  const { progress, onScroll } = usePullToRefreshProgress()
   
   // Set up the tab header with the same style as Settings
   useTabHeader({ 
@@ -53,6 +57,12 @@ export const NewsScreen = observer(function NewsScreen() {
     />
   )
   
+  const onRefresh = async () => {
+    setRefreshing(true)
+    await newsStore.refreshNews(api)
+    setRefreshing(false)
+  }
+  
   const ListEmptyComponent = () => (
     <View style={themed($emptyContainer)}>
       <Text
@@ -60,6 +70,19 @@ export const NewsScreen = observer(function NewsScreen() {
         style={themed($emptyText)}
       />
     </View>
+  )
+  
+  // Custom RefreshControl with our rotating icon
+  const renderRefreshControl = () => (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={theme.colors.transparent}
+      colors={[theme.colors.transparent]}
+      progressBackgroundColor={theme.colors.transparent}
+      progressViewOffset={20}
+      // We make the default loading indicator invisible and show our custom one
+    />
   )
   
   return (
@@ -70,12 +93,17 @@ export const NewsScreen = observer(function NewsScreen() {
     >
       <NewsFeedHeader />
       
+      <PullToRefreshIndicator visible={refreshing} progress={progress} />
+      
       <FlashList
         data={newsStore.sortedItems}
         renderItem={renderItem}
         estimatedItemSize={150}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={themed($listContainer)}
+        refreshControl={renderRefreshControl()}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       />
     </Screen>
   )
@@ -88,17 +116,19 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.md, 
+  paddingHorizontal: spacing.sm,
+  paddingBottom: spacing.lg,
 })
 
 const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
+  justifyContent: "center",
   alignItems: "center",
-  padding: spacing.xl,
+  padding: spacing.lg,
 })
 
 const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
+  color: colors.textDim,
   textAlign: "center",
 })
 
@@ -107,16 +137,18 @@ const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingHorizontal: spacing.md,
+  paddingHorizontal: spacing.sm,
+  marginTop: spacing.sm,
+  marginBottom: spacing.xs,
 })
 
-const $sortButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  backgroundColor: "transparent",
-  minHeight: 32,
-  paddingHorizontal: spacing.xs,
+const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.transparent,
+  paddingHorizontal: 0,
 })
 
-const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.primary600,
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   fontSize: 14,
+  color: colors.tint,
+  marginRight: spacing.xs,
 })

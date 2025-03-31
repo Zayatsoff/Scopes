@@ -1,6 +1,6 @@
-import { FC, useState } from "react"
+import { FC, useState, useEffect } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, TextStyle } from "react-native"
+import { ViewStyle, View, TextStyle, RefreshControl } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
@@ -11,17 +11,30 @@ import { FlashList } from "@shopify/flash-list"
 import { useTabHeader } from "@/components/TabHeader"
 import type { ThemedStyle } from "@/theme"
 import { CloudSun, Siren, Zap, BusFront } from "lucide-react-native"
+import { LoadingIcon } from "@/components/LoadingIcon"
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
+import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
 export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScreen() {
   const { theme, themed, themeContext } = useAppTheme()
+  const [refreshing, setRefreshing] = useState(false)
+  const [activeTab, setActiveTab] = useState("weather")
+  const [alerts, setAlerts] = useState<AlertItem[]>([])
+  const { progress, onScroll } = usePullToRefreshProgress()
 
   // Set up the tab header with customized styling
   useTabHeader({
     title: "Alerts",
     titleMode: "center",
   }, [themeContext])
+
+  // Load initial alerts
+  useEffect(() => {
+    // Generate mock alerts for initial tab
+    setAlerts(generateMockAlerts(activeTab))
+  }, [])
 
   // Define category tabs
   const categoryTabs: CategoryTab[] = [
@@ -31,26 +44,42 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     { id: "traffic", label: "Road & Traffic", color: theme.colors.traffic },
   ]
 
-  // Mock alerts data
-  const [activeTab, setActiveTab] = useState("weather")
-  
   // Generate mock alerts for demonstration
   const generateMockAlerts = (category: string): AlertItem[] => {
-    return Array(4).fill(null).map((_, index) => ({
-      id: `${category}-${index}`,
-      source: "Ottawa Police Service",
-      message: "Missing 40-year-old woman to locate. Police are concerned for her well-being.",
-      timestamp: "Friday, March 28, 2025 12:52 PM",
-      category
+    // Sources by category
+    const sources = {
+      weather: "Environment Canada",
+      police: "Ottawa Police Service",
+      hydro: "Hydro Ottawa",
+      traffic: "City of Ottawa Traffic"
+    }
+    
+    // Generate mock alerts based on the category
+    return Array.from({ length: 10 }, (_, i) => ({
+      id: `${category}-${i}`,
+      source: sources[category as keyof typeof sources],
+      message: `This is a mock ${category} alert #${i+1} for testing.`,
+      timestamp: new Date(Date.now() - i * 3600000).toLocaleString(),
+      category,
     }))
   }
-
-  // Filter alerts based on active category
-  const alerts = generateMockAlerts(activeTab)
 
   // Handle tab change
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
+    setAlerts(generateMockAlerts(tabId))
+  }
+  
+  // Handle refresh
+  const onRefresh = async () => {
+    setRefreshing(true)
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Update alerts
+    setAlerts(generateMockAlerts(activeTab))
+    setRefreshing(false)
   }
 
   // Get the icon and title for the current category
@@ -82,6 +111,18 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const getCategoryTitle = () => {
     return categoryTabs.find(tab => tab.id === activeTab)?.label || ""
   }
+  
+  // Custom RefreshControl 
+  const renderRefreshControl = () => (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={theme.colors.transparent}
+      colors={[theme.colors.transparent]}
+      progressBackgroundColor={theme.colors.transparent}
+      progressViewOffset={20}
+    />
+  )
 
   return (
     <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]}>
@@ -101,11 +142,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         />
       </View>
       
+      <PullToRefreshIndicator visible={refreshing} color={getCategoryColor()} progress={progress} />
+      
       <FlashList
         data={alerts}
         renderItem={({ item }) => <AlertCard item={item} />}
         estimatedItemSize={100}
         contentContainerStyle={themed($listContent)}
+        refreshControl={renderRefreshControl()}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       />
     </Screen>
   )

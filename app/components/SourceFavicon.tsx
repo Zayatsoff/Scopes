@@ -6,13 +6,17 @@ import { Text } from "./Text"
 
 // Define the sources we have icons for
 const FAVICON_SOURCES = {
+  "cbc news": require("../../assets/favicons/cbc.png"),
   "cbc.ca": require("../../assets/favicons/cbc.png"),
+  "global news": require("../../assets/favicons/globalnews.png"),
   "globalnews.ca": require("../../assets/favicons/globalnews.png"),
-  "ctvnews.ca": require("../../assets/favicons/ctv.png"),
+  "ctv news": require("../../assets/favicons/ctv.png"),
   "thestar.com": require("../../assets/favicons/torontostar.png"),
-  "nationalpost.com": require("../../assets/favicons/nationalpost.png"),
+  "nationalpost": require("../../assets/favicons/nationalpost.png"),
   "ottawa.ca": require("../../assets/favicons/ottawa.png"),
+  "ottawa business journal": require("../../assets/favicons/obj.png"),
   "obj.ca": require("../../assets/favicons/obj.png"),
+  "ottawa citizen": require("../../assets/favicons/ottawacitizen.png"),
   "ottawacitizen.com": require("../../assets/favicons/ottawacitizen.png"),
 }
 

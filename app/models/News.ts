@@ -94,6 +94,35 @@ export const NewsStoreModel = types
       }
     },
     
+    refreshNews: async (api: Api) => {
+      // Similar to fetchNews but intended to be used with pull-to-refresh
+      self.setProp("isLoading", true)
+      self.setProp("error", null)
+      
+      try {
+        const response = await api.news.getNews()
+        
+        if (response.ok && response.data?.news) {
+          // Process the news data to add formatted dates and ensure IDs
+          const processedItems = response.data.news.map((item: any) => ({
+            ...item,
+            id: item.id || item.link,
+            formattedDate: formatDate(item.date),
+          }))
+          
+          self.setProp("items", processedItems)
+        } else {
+          self.setProp("error", "Failed to refresh news")
+        }
+      } catch (error) {
+        self.setProp("error", String(error))
+      } finally {
+        self.setProp("isLoading", false)
+      }
+      
+      return true // Return success indicator for the refresh control
+    },
+    
     fetchNewsBySource: async (api: Api, source: string) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)

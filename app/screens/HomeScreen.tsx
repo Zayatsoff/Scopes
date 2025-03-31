@@ -1,6 +1,6 @@
-import { FC, useEffect, useRef } from "react"
+import { FC, useEffect, useRef, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle, Pressable } from "react-native"
+import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle, Pressable, RefreshControl } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
@@ -15,6 +15,8 @@ import Animated, {
   useAnimatedScrollHandler,
   interpolate,
   Extrapolate,
+  withTiming,
+  runOnJS,
 } from "react-native-reanimated"
 import { useStores } from "@/models"
 import { NewsCard } from "@/components/NewsCard"
@@ -23,6 +25,9 @@ import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
 import { Siren, Cloudy, Zap, BusFront } from "lucide-react-native"
 import { useTabHeader } from "@/components/TabHeader"
+import { LoadingIcon } from "@/components/LoadingIcon"
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
+import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -30,6 +35,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const { themed, theme } = useAppTheme()
   const { newsStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
+  const [refreshing, setRefreshing] = useState(false)
   
   // Set up image dimensions
   const IMAGE_HEIGHT = screenWidth * 0.8
@@ -39,6 +45,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const opacityValue = useSharedValue(0)
   const translateYValue = useSharedValue(10)
   const scrollY = useSharedValue(0)
+  const { progress, onScroll: refreshProgress, resetProgress } = usePullToRefreshProgress()
+
+  // Reset progress when refreshing state changes to false
+  useEffect(() => {
+    if (!refreshing) {
+      resetProgress();
+    }
+  }, [refreshing, resetProgress]);
 
   // Hide the header for this screen only
   useEffect(() => {
@@ -61,9 +75,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   // Scroll handler for animations
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      scrollY.value = event.contentOffset.y
+      scrollY.value = event.contentOffset.y;
     },
-  })
+  });
 
   // Greeting animation styles
   const greetingAnimatedStyle = useAnimatedStyle(() => {
@@ -135,6 +149,32 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const handleNewsPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
+  
+  // Handle refresh
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true)
+      await newsStore.refreshNews(api)
+    } catch (error) {
+      console.error("Error refreshing news:", error)
+    } finally {
+      setRefreshing(false)
+      // Ensure progress is reset when refresh completes
+      resetProgress()
+    }
+  }
+  
+  // Custom RefreshControl 
+  const renderRefreshControl = () => (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={theme.colors.transparent}
+      colors={[theme.colors.transparent]}
+      progressBackgroundColor={theme.colors.transparent}
+      progressViewOffset={IMAGE_HEIGHT / 2} // Place higher up so it's visible when pulling down
+    />
+  )
 
   return (
     <Screen
@@ -143,12 +183,18 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       safeAreaEdges={[]}
       ScrollViewProps={{
         onScroll: scrollHandler,
+        onScrollEndDrag: refreshProgress,
+        onMomentumScrollEnd: () => {
+          if (!refreshing) resetProgress();
+        },
         scrollEventThrottle: 16,
         showsVerticalScrollIndicator: false,
+        refreshControl: renderRefreshControl(),
       }}
     >
       {/* Top image with gradient overlay */}
       <Animated.View style={[themed($imageSection), headerContainerStyle]}>
+        <PullToRefreshIndicator visible={refreshing} progress={progress} />
         <Animated.Image
           source={require("../../assets/images/ottawa_cover.jpg")}
           style={[
@@ -354,7 +400,9 @@ const $gridItemWords: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 })
 
 const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
-  height: 36,
+  paddingHorizontal: 10,
+  paddingVertical: 2,
+  borderRadius: 8,
   justifyContent: 'center',
 })
 
