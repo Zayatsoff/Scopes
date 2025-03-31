@@ -36,8 +36,6 @@ const palette = {
   traffic: "#FF713D",
   alert: "#F6484B",
   weather: "#FFFFFF",
-  green: "#00A300",
-  mustard: "#B8860B",
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
@@ -50,8 +48,6 @@ export const colors = {
   traffic: palette.traffic,
   alert: palette.alert,
   weather: palette.weather,
-  green: palette.green,
-  mustard: palette.mustard,
   /**
    * A helper for making something see-thru.
    */

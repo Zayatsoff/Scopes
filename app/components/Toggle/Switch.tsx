@@ -230,7 +230,7 @@ function SwitchAccessibilityLabel(props: SwitchInputProps & { role: "on" | "off"
 
 const $inputOuter: StyleProp<ViewStyle> = [
   $inputOuterBase,
-  { height: 32, width: 56, borderRadius: 3, borderWidth: 0 },
+  { height: 32, width: 56, borderRadius: 32, borderWidth: 0 },
 ]
 
 const $switchInner: ThemedStyle<ViewStyle> = ({ colors }) => ({
@@ -241,7 +241,7 @@ const $switchInner: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $switchDetail: SwitchToggleProps["inputDetailStyle"] = {
-  borderRadius: 3,
+  borderRadius: 32,
   position: "absolute",
   width: 24,
   height: 24,
@@ -268,5 +268,5 @@ const $switchAccessibilityCircle: ViewStyle = {
   borderWidth: 2,
   width: 12,
   height: 12,
-  borderRadius: 3,
+  borderRadius: 32,
 }

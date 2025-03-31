@@ -22,7 +22,7 @@ import { NewsCard } from "@/components/NewsCard"
 import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
-import { Siren, Cloudy, TowerControl, BusFront } from "lucide-react-native"
+import { Siren, Cloudy, Zap, BusFront } from "lucide-react-native"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -206,8 +206,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           <View style={themed($gridItem)}>
             <View style={themed($gridItemContent)}>
               <View style={themed($iconTextRow)}>
-                <TowerControl size={24} color={theme.colors.green} />
-                <Text style={[themed($iconText), { color: theme.colors.green }]}>Hydro</Text>
+                <Zap size={24} color={theme.colors.hydro} />
+                <Text style={[themed($iconText), { color: theme.colors.hydro }]}>Hydro</Text>
               </View>
               <Text style={themed($gridItemWords)}>power outage restored</Text>
             </View>
@@ -215,8 +215,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           <View style={themed($gridItem)}>
             <View style={themed($gridItemContent)}>
               <View style={themed($iconTextRow)}>
-                <BusFront size={24} color={theme.colors.mustard} />
-                <Text style={[themed($iconText), { color: theme.colors.mustard }]}>Traffic</Text>
+                <BusFront size={24} color={theme.colors.traffic} />
+                <Text style={[themed($iconText), { color: theme.colors.traffic }]}>Traffic</Text>
               </View>
               <Text style={themed($gridItemWords)}>construction expect delays</Text>
             </View>
