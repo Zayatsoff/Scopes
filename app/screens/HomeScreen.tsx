@@ -299,7 +299,7 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 
 const $imageSection: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
-  marginBottom: 16,
+
   overflow: 'hidden',
 })
 
@@ -330,7 +330,6 @@ const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
   color: colors.cityName,
-  marginRight: spacing.sm,
   fontFamily: typography.customFontFamily,
   fontWeight: "700",
   fontSize: 36,
@@ -400,7 +399,7 @@ const $gridItemWords: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 })
 
 const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
-  paddingHorizontal: 10,
+
   paddingVertical: 2,
   borderRadius: 8,
   justifyContent: 'center',
