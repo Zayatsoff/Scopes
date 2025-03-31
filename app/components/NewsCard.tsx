@@ -14,44 +14,24 @@ export interface NewsCardProps {
 
 export const NewsCard = observer(function NewsCard({ item, onPress, compact }: NewsCardProps) {
   const { themed } = useAppTheme()
-  
+
   return (
-    <Pressable
-      style={[themed($container), compact && themed($compactContainer)]}
-      onPress={onPress}
-    >
+    <Pressable style={[themed($container), compact && themed($compactContainer)]} onPress={onPress}>
       <View style={themed($header)}>
-        <Text
-          text={item.sourceDisplay}
-          style={themed($source)}
-        />
-        <Text
-          text={item.formattedDate}
-          style={themed($date)}
-          numberOfLines={1}
-        />
+        <Text text={item.sourceDisplay} style={themed($source)} />
+        <Text text={item.formattedDate} style={themed($date)} numberOfLines={1} />
       </View>
-      
+
       <Text
         text={item.title}
         style={[themed($title), compact && themed($compactTitle)]}
         numberOfLines={compact ? 2 : 3}
       />
-      
-      {!compact && (
-        <Text
-          text={item.description}
-          style={themed($description)}
-          numberOfLines={3}
-        />
-      )}
-      
+
+      {!compact && <Text text={item.description} style={themed($description)} numberOfLines={3} />}
+
       {item.authors && !compact && (
-        <Text
-          text={item.authors}
-          style={themed($author)}
-          numberOfLines={1}
-        />
+        <Text text={item.authors} style={themed($author)} numberOfLines={1} />
       )}
     </Pressable>
   )
@@ -59,7 +39,7 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
 
 // Styles
 const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
+  backgroundColor: colors.containerBackground,
   borderRadius: spacing.sm,
   padding: spacing.sm,
   marginVertical: spacing.xs,
@@ -118,4 +98,4 @@ const $author: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   opacity: 0.7,
   fontStyle: "italic",
-}) 
+})

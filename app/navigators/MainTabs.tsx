@@ -27,8 +27,8 @@ export function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.tint,
-        tabBarInactiveTintColor: theme.colors.textDim || "#999",
+        tabBarActiveTintColor: theme.colors.navForeground,
+        tabBarInactiveTintColor: theme.colors.navForeground || "#999",
         tabBarStyle: {
           borderTopColor: theme.colors.separator,
           backgroundColor: theme.colors.background,
@@ -44,7 +44,7 @@ export function MainTabs() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "500",
-          marginTop: -5,
+          marginTop: 5,
         },
       }}
     >
@@ -52,8 +52,8 @@ export function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <View style={themed($iconContainer)}>
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={themed(focused ? $activeIconContainer : $iconContainer)}>
               <Home color={color} size={size} />
             </View>
           ),
@@ -63,8 +63,8 @@ export function MainTabs() {
         name="Alerts"
         component={AlertsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <View style={themed($iconContainer)}>
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={themed(focused ? $activeIconContainer : $iconContainer)}>
               <Megaphone color={color} size={size} />
             </View>
           ),
@@ -74,8 +74,8 @@ export function MainTabs() {
         name="News"
         component={NewsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <View style={themed($iconContainer)}>
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={themed(focused ? $activeIconContainer : $iconContainer)}>
               <Newspaper color={color} size={size} />
             </View>
           ),
@@ -85,8 +85,8 @@ export function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <View style={themed($iconContainer)}>
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={themed(focused ? $activeIconContainer : $iconContainer)}>
               <Settings color={color} size={size} />
             </View>
           ),
@@ -103,6 +103,15 @@ export function MainTabs() {
 const $iconContainer: ThemedStyle<any> = () => ({
   width: 24,
   height: 24,
+  alignItems: "center",
+  justifyContent: "center",
+})
+
+const $activeIconContainer: ThemedStyle<any> = ({ colors }) => ({
+  width: 60,
+  height: 28,
+  borderRadius: 6,
+  backgroundColor: colors.accent,
   alignItems: "center",
   justifyContent: "center",
 })

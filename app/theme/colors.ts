@@ -36,11 +36,6 @@ const palette = {
 } as const
 
 export const colors = {
-  /**
-   * The palette is available to use, but prefer using the name.
-   * This is only included for rare, one-off cases. Try to use
-   * semantic names as much as possible.
-   */
   palette,
   /**
    * A helper for making something see-thru.
@@ -49,7 +44,7 @@ export const colors = {
   /**
    * The default light header.
    */
-  header: palette.neutral800,
+  cityName: palette.neutral800,
   /**
    * The default text color in many components.
    */
@@ -62,6 +57,8 @@ export const colors = {
    * The default color of the screen background.
    */
   background: palette.neutral200,
+  containerBackground: palette.neutral400,
+  navForeground: palette.neutral500,
   /**
    * The default border color.
    */
@@ -74,6 +71,8 @@ export const colors = {
    * The inactive tinting color.
    */
   tintInactive: palette.neutral300,
+
+  accent: palette.accent100,
   /**
    * A subtle color used for lines.
    */

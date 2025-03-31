@@ -9,11 +9,11 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
 import { ChevronDown } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
   withSpring,
-  withDelay
+  withDelay,
 } from "react-native-reanimated"
 import { useStores } from "@/models"
 import { NewsCard } from "@/components/NewsCard"
@@ -27,11 +27,11 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const { themed, theme } = useAppTheme()
   const { newsStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
-  
+
   // Animation values
   const opacityValue = useSharedValue(0)
   const translateYValue = useSharedValue(10)
-  
+
   useHeader({
     title: "Home",
     titleMode: "center",
@@ -40,7 +40,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours()
-    
+
     if (hour >= 5 && hour < 12) {
       return "Good morning"
     } else if (hour >= 12 && hour < 18) {
@@ -49,15 +49,15 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       return "Good evening"
     }
   }
-  
+
   // Greeting animation styles
   const greetingAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: opacityValue.value,
-      transform: [{ translateY: translateYValue.value }]
+      transform: [{ translateY: translateYValue.value }],
     }
   })
-  
+
   // Start animation when component mounts
   useEffect(() => {
     opacityValue.value = withDelay(500, withSpring(1, { damping: 20 }))
@@ -116,10 +116,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
             >
               <View style={themed($gridItemContent)}>
                 <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
-                <Text 
-                  style={themed($gridNewsTitle)} 
-                  numberOfLines={2}
-                >
+                <Text style={themed($gridNewsTitle)} numberOfLines={2}>
                   {item.title}
                 </Text>
                 <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
@@ -136,10 +133,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
             >
               <View style={themed($gridItemContent)}>
                 <Text style={themed($gridNewsSource)}>{item.sourceDisplay}</Text>
-                <Text 
-                  style={themed($gridNewsTitle)} 
-                  numberOfLines={2}
-                >
+                <Text style={themed($gridNewsTitle)} numberOfLines={2}>
                   {item.title}
                 </Text>
                 <Text style={themed($gridNewsDate)}>{item.formattedDate}</Text>
@@ -152,12 +146,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       {/* 1x4 Grid of news items */}
       <View style={themed($newsSection)}>
         {newsStore.latestItems.slice(4, 8).map((item: NewsItem) => (
-          <NewsCard
-            key={item.id}
-            item={item}
-            compact
-            onPress={() => handleNewsPress(item.link)}
-          />
+          <NewsCard key={item.id} item={item} compact onPress={() => handleNewsPress(item.link)} />
         ))}
       </View>
 
@@ -165,15 +154,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       <View style={[themed($newsSection), { marginTop: theme.spacing.md }]}>
         <SectionHeader title="More News" />
         {newsStore.latestItems.slice(8, 16).map((item: NewsItem) => (
-          <NewsCard
-            key={item.id}
-            item={item}
-            compact
-            onPress={() => handleNewsPress(item.link)}
-          />
+          <NewsCard key={item.id} item={item} compact onPress={() => handleNewsPress(item.link)} />
         ))}
       </View>
-
     </Screen>
   )
 })
@@ -192,7 +175,6 @@ const $imageSection: ThemedStyle<ViewStyle> = () => ({
 })
 
 const $image: ThemedStyle<ImageStyle> = () => ({})
-
 
 const $gradient: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
@@ -218,7 +200,7 @@ const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
 })
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.header,
+  color: colors.cityName,
   marginRight: spacing.sm,
 })
 
@@ -238,7 +220,7 @@ const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   minHeight: 120,
   borderRadius: 12,
   overflow: "hidden",
-  backgroundColor: colors.background,
+  backgroundColor: colors.containerBackground,
   borderWidth: 1,
   borderColor: colors.border,
   shadowColor: "#000",
@@ -264,7 +246,7 @@ const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
-  alignItems: 'flex-start',
+  alignItems: "flex-start",
   marginTop: 0,
 })
 
@@ -294,7 +276,7 @@ const $gridNewsDate: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 12,
   fontFamily: typography.primary.normal,
   color: colors.textDim,
-  marginTop: 'auto',
+  marginTop: "auto",
 })
 
 export default HomeScreen
