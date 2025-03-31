@@ -216,7 +216,7 @@ const $imagePlaceholder: ThemedStyle<any> = () => ({
   width: 200,
   height: 200,
   backgroundColor: "gray",
-  borderRadius: 12,
+  borderRadius: 3,
 })
 
 const $heading: ThemedStyle<any> = () => ({
@@ -242,7 +242,7 @@ const $indicatorContainer: ThemedStyle<any> = () => ({
 const $dot: ThemedStyle<any> = () => ({
   width: 10,
   height: 10,
-  borderRadius: 5,
+  borderRadius: 3,
   marginHorizontal: 5,
 })
 
@@ -274,7 +274,7 @@ const $nextButton: ThemedStyle<any> = ({ colors }) => ({
   bottom: 40,
   width: 50,
   height: 50,
-  borderRadius: 25,
+  borderRadius: 3,
   backgroundColor: colors.tint,
   justifyContent: "center",
   alignItems: "center",
@@ -285,7 +285,7 @@ const $getStartedButton: ThemedStyle<any> = ({ colors }) => ({
   flexDirection: "row",
   paddingHorizontal: 24,
   paddingVertical: 14,
-  borderRadius: 30,
+  borderRadius: 3,
   backgroundColor: colors.tint,
   justifyContent: "center",
   alignItems: "center",

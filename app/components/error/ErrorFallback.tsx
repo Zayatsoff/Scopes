@@ -136,7 +136,7 @@ const $cardContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   justifyContent: "center",
   padding: spacing.md,
-  borderRadius: 8,
+  borderRadius: 3,
   backgroundColor: colors.background,
   borderWidth: 1,
   borderColor: colors.separator,
@@ -152,7 +152,7 @@ const $inlineContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
   padding: spacing.xs,
   backgroundColor: colors.background,
-  borderRadius: 6,
+  borderRadius: 3,
 })
 
 const $minimalContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -170,7 +170,7 @@ const $textContainer: ViewStyle = {
 const $detailsContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   marginVertical: spacing.md,
   padding: spacing.sm,
-  borderRadius: 6,
+  borderRadius: 3,
   backgroundColor: colors.separator,
   alignSelf: "stretch",
   maxHeight: 200,

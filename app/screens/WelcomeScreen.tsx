@@ -57,8 +57,8 @@ const $bottomContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexGrow: 0,
   flexBasis: "43%",
   backgroundColor: colors.palette.neutral100,
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
+  borderTopLeftRadius: 3,
+  borderTopRightRadius: 3,
   paddingHorizontal: spacing.lg,
   justifyContent: "space-around",
 })
