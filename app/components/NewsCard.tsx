@@ -60,41 +60,41 @@ const $header: ThemedStyle<ViewStyle> = () => ({
   flexWrap: "nowrap",
 })
 
-const $source: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 12,
+const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
   color: colors.tint,
   fontWeight: "bold",
 })
 
-const $date: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 12,
+const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
   color: colors.text,
   opacity: 0.7,
   flexShrink: 1,
   marginLeft: 4,
 })
 
-const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 16,
+const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.md,
   fontWeight: "bold",
   color: colors.text,
   marginBottom: 8,
 })
 
-const $compactTitle: ThemedStyle<TextStyle> = () => ({
-  fontSize: 14,
+const $compactTitle: ThemedStyle<TextStyle> = ({ typography }) => ({
+  fontSize: typography.sizes.sm,
   marginBottom: 0,
 })
 
-const $description: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 14,
+const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.sm,
   color: colors.text,
   opacity: 0.8,
   marginBottom: 8,
 })
 
-const $author: ThemedStyle<TextStyle> = ({ colors }) => ({
-  fontSize: 12,
+const $author: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
   color: colors.text,
   opacity: 0.7,
   fontStyle: "italic",

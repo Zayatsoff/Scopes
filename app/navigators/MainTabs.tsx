@@ -42,7 +42,7 @@ export function MainTabs() {
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: theme.typography.sizes.xs,
           fontWeight: "500",
           marginTop: 5,
         },

@@ -4,7 +4,6 @@ import { Dimensions, Image, ImageStyle, View, ViewStyle, TextStyle, Pressable } 
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
-import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { LinearGradient } from "expo-linear-gradient"
 import type { ThemedStyle } from "@/theme"
@@ -23,6 +22,7 @@ import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
 import { Siren, Cloudy, Zap, BusFront } from "lucide-react-native"
+import { useTabHeader } from "@/components/TabHeader"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 

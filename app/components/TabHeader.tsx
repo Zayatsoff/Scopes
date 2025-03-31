@@ -6,24 +6,32 @@ interface UseTabHeaderProps {
   title: string;
   titleMode?: "center" | "flex";
   RightActionComponent?: ReactElement;
+  backgroundColor?: string;
+  titleColor?: string;
 }
 
 /**
- * A hook that sets up a consistent orange tab header
+ * A hook that sets up a consistent header for main tabs
  * Can be used across different tabs in the app.
  */
 export function useTabHeader({ 
   title, 
   titleMode = "center", 
-  RightActionComponent 
+  RightActionComponent,
+  backgroundColor,
+  titleColor
 }: UseTabHeaderProps) {
   const { theme } = useAppTheme()
   
   useHeader({
     title,
     titleMode,
-    backgroundColor: theme.colors.palette.primary500,
-    titleStyle: { color: theme.colors.palette.neutral100 },
+    backgroundColor: backgroundColor || theme.colors.background,
+    titleStyle: { 
+      color: titleColor || theme.colors.text,
+      fontSize: theme.typography.sizes.xl,
+      fontWeight: "600"
+    },
     RightActionComponent
   })
 } 

@@ -260,7 +260,7 @@ const $inputStyle: ThemedStyle<ViewStyle> = ({ colors, typography, spacing }) =>
   alignSelf: "stretch",
   fontFamily: typography.primary.normal,
   color: colors.text,
-  fontSize: 16,
+  fontSize: typography.sizes.md,
   height: 24,
   // https://github.com/facebook/react-native/issues/21720#issuecomment-532642093
   paddingVertical: 0,
