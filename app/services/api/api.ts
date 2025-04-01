@@ -9,6 +9,7 @@ import { ApisauceInstance, create } from "apisauce"
 import Config from "../../config"
 import type { ApiConfig } from "./api.types"
 import { NewsApi } from "./news-api"
+import { PoliceNewsApi } from "./police-news-api"
 
 /**
  * Configuring the apisauce instance.
@@ -26,6 +27,7 @@ export class Api {
   apisauce: ApisauceInstance
   config: ApiConfig
   news: NewsApi
+  policeNews: PoliceNewsApi
 
   /**
    * Set up our API instance. Keep this lightweight!
@@ -42,6 +44,9 @@ export class Api {
     
     // Initialize news API
     this.news = new NewsApi(this.apisauce)
+    
+    // Initialize police news API
+    this.policeNews = new PoliceNewsApi(this.apisauce)
   }
 }
 

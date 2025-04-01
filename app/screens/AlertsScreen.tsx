@@ -1,27 +1,31 @@
 import { FC, useState, useEffect } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, TextStyle, RefreshControl } from "react-native"
+import { ViewStyle, View, TextStyle, RefreshControl, Linking } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
-import { Screen, Text } from "@/components"
+import { Screen, Text, Button } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { CategoryTabs, CategoryTab } from "@/components/CategoryTabs"
-import { AlertCard, AlertItem } from "@/components/AlertCard"
+import { AlertItem } from "@/components/AlertCard"
 import { FlashList } from "@shopify/flash-list"
 import { useTabHeader } from "@/components/TabHeader"
 import type { ThemedStyle } from "@/theme"
 import { CloudSun, Siren, Zap, BusFront } from "lucide-react-native"
-import { LoadingIcon } from "@/components/LoadingIcon"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
+import { useStores } from "@/models"
+import { PoliceNewsItem } from "@/models/PoliceNews"
+import { EnhancedAlertCard } from "@/components/EnhancedAlertCard"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
 export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScreen() {
   const { theme, themed, themeContext } = useAppTheme()
+  const { policeNewsStore, api } = useStores()
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("weather")
   const [alerts, setAlerts] = useState<AlertItem[]>([])
+  const [sortNewestFirst, setSortNewestFirst] = useState(true)
   const { progress, onScroll } = usePullToRefreshProgress()
 
   // Set up the tab header with customized styling
@@ -30,11 +34,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     titleMode: "center",
   }, [themeContext])
 
-  // Load initial alerts
+  // Load initial alerts and police news
   useEffect(() => {
     // Generate mock alerts for initial tab
-    setAlerts(generateMockAlerts(activeTab))
-  }, [])
+    const initialAlerts = generateMockAlerts(activeTab);
+    console.log(`Generated ${initialAlerts.length} initial ${activeTab} alerts`);
+    setAlerts(initialAlerts);
+    
+    // Fetch police news
+    policeNewsStore.fetchPoliceNews(api);
+  }, [api, policeNewsStore]);
 
   // Define category tabs
   const categoryTabs: CategoryTab[] = [
@@ -54,32 +63,65 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       traffic: "City of Ottawa Traffic"
     }
     
+    console.log(`Generating mock alerts for category: ${category}`);
+    
     // Generate mock alerts based on the category
-    return Array.from({ length: 10 }, (_, i) => ({
+    const mockAlerts = Array.from({ length: 10 }, (_, i) => ({
       id: `${category}-${i}`,
-      source: sources[category as keyof typeof sources],
+      source: sources[category as keyof typeof sources] || "Unknown Source",
       message: `This is a mock ${category} alert #${i+1} for testing.`,
       timestamp: new Date(Date.now() - i * 3600000).toLocaleString(),
       category,
-    }))
+      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Alert #${i+1}`,
+      excerpt: `Detailed information about this ${category} alert situation. This provides additional context for the alert message.`,
+      link: `https://example.com/${category}/alert/${i}`,
+      date: new Date(Date.now() - i * 3600000).toISOString(),
+      formattedDate: new Date(Date.now() - i * 3600000).toLocaleDateString(),
+    }));
+    
+    console.log(`Generated ${mockAlerts.length} ${category} alerts`);
+    return mockAlerts;
   }
 
   // Handle tab change
   const handleTabChange = (tabId: string) => {
+    console.log(`Tab changed to: ${tabId}`)
     setActiveTab(tabId)
-    setAlerts(generateMockAlerts(tabId))
+    if (tabId !== "police") {
+      setAlerts(generateMockAlerts(tabId))
+    } else {
+      // Log police news data when police tab is selected
+      console.log("Police news items count:", policeNewsStore.items.length)
+      console.log("Police news sorted items count:", policeNewsStore.sortedItems.length)
+      
+      // If no police news data is available, fetch it
+      if (policeNewsStore.items.length === 0) {
+        console.log("No police news found, fetching data...")
+        policeNewsStore.fetchPoliceNews(api)
+      }
+    }
   }
   
   // Handle refresh
   const onRefresh = async () => {
     setRefreshing(true)
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    if (activeTab === "police") {
+      await policeNewsStore.refreshPoliceNews(api)
+    } else {
+      // Simulate API call delay
+      setTimeout(() => {
+        // Update alerts
+        setAlerts(generateMockAlerts(activeTab))
+      }, 1000)
+    }
     
-    // Update alerts
-    setAlerts(generateMockAlerts(activeTab))
     setRefreshing(false)
+  }
+
+  // Handle police news item press
+  const handlePoliceNewsPress = (link: string) => {
+    Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
 
   // Get the icon and title for the current category
@@ -112,6 +154,98 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     return categoryTabs.find(tab => tab.id === activeTab)?.label || ""
   }
   
+  // Toggle sort order for non-police alerts
+  const toggleSortOrder = () => {
+    setSortNewestFirst(!sortNewestFirst)
+  }
+
+  // Sort alerts based on date
+  const getSortedAlerts = () => {
+    return [...alerts].sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : new Date(a.timestamp).getTime()
+      const dateB = b.date ? new Date(b.date).getTime() : new Date(b.timestamp).getTime()
+      return sortNewestFirst ? dateB - dateA : dateA - dateB
+    })
+  }
+
+  // Render the appropriate list based on active tab
+  const renderContent = () => {
+    if (activeTab === "police") {
+      // Show Police News
+      console.log("Rendering police content with items:", policeNewsStore.sortedItems.length);
+      
+      return (
+        <View style={themed($listWrapper)}>
+          <FlashList
+            data={policeNewsStore.sortedItems}
+            renderItem={({ item }: { item: PoliceNewsItem }) => {
+              console.log("Rendering police news item:", item.id, item.title);
+              return (
+                <EnhancedAlertCard 
+                  item={item} 
+                  onPress={() => handlePoliceNewsPress(item.link)}
+                  categoryColor={theme.colors.police}
+                />
+              );
+            }}
+            estimatedItemSize={120}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={themed($listContent)}
+            refreshControl={renderRefreshControl()}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            ListEmptyComponent={
+              <View style={themed($emptyContainer)}>
+                <Text
+                  text={policeNewsStore.isLoading ? "Loading police news..." : policeNewsStore.error || "No police alerts available"}
+                  style={themed($emptyText)}
+                />
+              </View>
+            }
+          />
+        </View>
+      );
+    }
+    
+    // Other categories - show mock alerts that match the format of PoliceNewsItem
+    console.log(`Rendering ${alerts.length} alerts for ${activeTab} category`);
+    
+    // Get sorted alerts
+    const sortedAlerts = getSortedAlerts();
+    
+    return (
+      <View style={themed($listWrapper)}>
+        <FlashList
+          data={sortedAlerts}
+          renderItem={({ item }) => {
+            console.log(`Rendering alert: ${item.id}`);
+            return (
+              <EnhancedAlertCard 
+                item={item} 
+                onPress={() => item.link && Linking.openURL(item.link)}
+                categoryColor={getCategoryColor()}
+              />
+            );
+          }}
+          estimatedItemSize={100}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={themed($listContent)}
+          refreshControl={renderRefreshControl()}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          ListEmptyComponent={
+            <View style={themed($emptyContainer)}>
+              <Text
+                text="No alerts available. Pull down to refresh."
+                style={themed($emptyText)}
+              />
+            </View>
+          }
+        />
+      </View>
+    );
+  }
+  
   // Custom RefreshControl 
   const renderRefreshControl = () => (
     <RefreshControl
@@ -125,7 +259,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   )
 
   return (
-    <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]}>
+    <Screen style={themed($root)} preset="auto" safeAreaEdges={[]}>
       <View style={themed($categoryContainer)}>
         <CategoryTabs 
           tabs={categoryTabs}
@@ -134,25 +268,31 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         />
       </View>
       
-      <View style={themed($categoryHeaderContainer)}>
-        {getCategoryIcon()}
-        <Text 
-          text={getCategoryTitle()} 
-          style={[themed($categoryHeaderText), { color: getCategoryColor() }]} 
+      <View style={themed($headerRow)}>
+        <View style={themed($categoryHeaderContainer)}>
+          {getCategoryIcon()}
+          <Text 
+            text={getCategoryTitle()}
+            style={[themed($categoryHeaderText), { color: getCategoryColor() }]} 
+          />
+        </View>
+        
+        <Button
+          text={activeTab === "police" 
+            ? (policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First")
+            : (sortNewestFirst ? "Newest First" : "Oldest First")
+          }
+          onPress={activeTab === "police" ? policeNewsStore.toggleSortOrder : toggleSortOrder}
+          style={themed($sortButton)}
+          textStyle={themed($sortButtonText)}
         />
       </View>
       
       <PullToRefreshIndicator visible={refreshing} color={getCategoryColor()} progress={progress} />
       
-      <FlashList
-        data={alerts}
-        renderItem={({ item }) => <AlertCard item={item} />}
-        estimatedItemSize={100}
-        contentContainerStyle={themed($listContent)}
-        refreshControl={renderRefreshControl()}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-      />
+      <View style={themed($contentContainer)}>
+        {renderContent()}
+      </View>
     </Screen>
   )
 })
@@ -167,11 +307,17 @@ const $categoryContainer: ThemedStyle<ViewStyle> = () => ({
   width: "100%",
 })
 
-const $categoryHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $headerRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
+  justifyContent: "space-between",
   alignItems: "center",
   paddingHorizontal: spacing.md,
   paddingVertical: spacing.sm,
+})
+
+const $categoryHeaderContainer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
   justifyContent: "flex-start",
 })
 
@@ -183,6 +329,101 @@ const $categoryHeaderText: ThemedStyle<TextStyle> = ({ spacing, typography }) =>
   textAlignVertical: "center",
 })
 
+const $contentContainer: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  width: "100%",
+})
+
 const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.sm,
+  paddingBottom: spacing.lg,
+})
+
+const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  padding: spacing.lg,
+  alignItems: "center",
+  justifyContent: "center",
+  height: 200,
+  width: '100%',
+})
+
+const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  textAlign: "center",
+})
+
+const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.transparent,
+  paddingHorizontal: 0,
+  borderWidth: 0,
+})
+
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 14,
+  color: colors.tint,
+})
+
+const $listWrapper: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  minHeight: 200, // Ensure minimum height for measurement
+  width: '100%',
+})
+
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.containerBackground,
+  borderRadius: 3,
+  padding: spacing.sm,
+  marginVertical: spacing.xs,
+  marginHorizontal: 0,
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderLeftWidth: 4,
+  borderLeftColor: colors.tint, // Default color, will be overridden by getCategoryColor
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2.22,
+  elevation: 2,
+})
+
+const $header: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 4,
+  flexWrap: "nowrap",
+})
+
+const $sourceContainer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+})
+
+const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  fontWeight: "bold",
+})
+
+const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  color: colors.text,
+  opacity: 0.7,
+  flexShrink: 1,
+  marginLeft: 4,
+})
+
+const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.md,
+  fontWeight: "bold",
+  color: colors.text,
+  marginBottom: 8,
+})
+
+const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.sm,
+  color: colors.text,
+  opacity: 0.8,
+  marginBottom: 8,
 })

@@ -11,6 +11,11 @@ export interface AlertItem {
   message: string
   timestamp: string
   category: string
+  title?: string
+  excerpt?: string
+  link?: string
+  date?: string
+  formattedDate?: string
 }
 
 interface AlertCardProps {

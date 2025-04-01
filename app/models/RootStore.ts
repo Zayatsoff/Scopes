@@ -1,5 +1,6 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { NewsStoreModel } from "./News"
+import { PoliceNewsStoreModel } from "./PoliceNews"
 import { Api, api } from "@/services/api/api"
 
 /**
@@ -7,6 +8,7 @@ import { Api, api } from "@/services/api/api"
  */
 export const RootStoreModel = types.model("RootStore").props({
   newsStore: types.optional(NewsStoreModel, {}),
+  policeNewsStore: types.optional(PoliceNewsStoreModel, {}),
 })
 .views((self) => ({
   get api() {

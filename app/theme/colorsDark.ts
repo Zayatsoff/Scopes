@@ -31,7 +31,7 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
-  police: "#F6484B",
+  police: "#7396FF",
   hydro: "#FFE241",
   traffic: "#FF713D",
   alert: "#F6484B",

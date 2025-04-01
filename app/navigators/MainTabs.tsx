@@ -110,7 +110,7 @@ const $iconContainer: ThemedStyle<any> = () => ({
 const $activeIconContainer: ThemedStyle<any> = ({ colors }) => ({
   width: 60,
   height: 28,
-  borderRadius: 3,
+  borderRadius: 6,
   backgroundColor: colors.accent,
   alignItems: "center",
   justifyContent: "center",
