@@ -1,7 +1,45 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatDate } from "@/utils/formatDate"
+import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
+
+/**
+ * Source to full name mapping
+ */
+const SOURCE_NAMES = {
+  "cbc.ca": "CBC News",
+  "globalnews.ca": "Global News",
+  "ctv.ca": "CTV News",
+  "ctvnews.ca": "CTV News",
+  "thestar.com": "Toronto Star",
+  "nationalpost.com": "National Post",
+  "ottawa.ca": "City of Ottawa",
+  "obj.ca": "Ottawa Business Journal",
+  "ottawacitizen.com": "Ottawa Citizen",
+  "ottawasun.com": "Ottawa Sun",
+  "ottawamatters.com": "Ottawa Matters",
+}
+
+/**
+ * Helper function to convert string to title case
+ */
+const toTitleCase = (str: string) => {
+  // Special case for short abbreviations - keep them uppercase
+  if (str.length <= 3) return str.toUpperCase();
+  
+  // Split by spaces, dashes and underscores
+  return str.split(/[\s-_]+/)
+    .map(word => {
+      // Keep common abbreviations uppercase
+      if (word.toLowerCase() === 'cbc' || word.toLowerCase() === 'ctv') {
+        return word.toUpperCase();
+      }
+      // For other words, capitalize first letter and lowercase the rest
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
 
 /**
  * News item model
@@ -21,9 +59,19 @@ export const NewsItemModel = types
   .actions(withSetPropAction)
   .views((self) => ({
     get sourceDisplay() {
-      // Clean up source display (e.g., www.cbc.ca -> CBC)
-      const domain = self.source.replace(/^www\./i, "")
-      return domain.split(".")[0].toUpperCase()
+      // Try to find a full name match from our mapping
+      const domain = self.source.replace(/^www\./i, "").toLowerCase()
+      
+      // Check if we have a direct match in our mapping
+      for (const [key, value] of Object.entries(SOURCE_NAMES)) {
+        if (domain.includes(key)) {
+          return value
+        }
+      }
+      
+      // Fallback to a properly formatted name if no match
+      const sourceName = domain.split(".")[0];
+      return toTitleCase(sourceName);
     },
   }))
 
@@ -80,7 +128,7 @@ export const NewsStoreModel = types
           const processedItems = response.data.news.map((item: any) => ({
             ...item,
             id: item.id || item.link, // Use link as fallback ID if none provided
-            formattedDate: formatDate(item.date),
+            formattedDate: formatRelativeTime(item.date),
           }))
           
           self.setProp("items", processedItems)
@@ -107,7 +155,7 @@ export const NewsStoreModel = types
           const processedItems = response.data.news.map((item: any) => ({
             ...item,
             id: item.id || item.link,
-            formattedDate: formatDate(item.date),
+            formattedDate: formatRelativeTime(item.date),
           }))
           
           self.setProp("items", processedItems)
@@ -134,7 +182,7 @@ export const NewsStoreModel = types
           const processedItems = response.data.news.map((item: any) => ({
             ...item,
             id: item.id || item.link,
-            formattedDate: formatDate(item.date),
+            formattedDate: formatRelativeTime(item.date),
           }))
           
           self.setProp("items", processedItems)

@@ -5,7 +5,6 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { LinearGradient } from "expo-linear-gradient"
 import type { ThemedStyle } from "@/theme"
 import Animated, {
   useSharedValue,
@@ -38,8 +37,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const [refreshing, setRefreshing] = useState(false)
   
   // Set up image dimensions
-  const IMAGE_HEIGHT = screenWidth * 0.8
-  const MIN_IMAGE_HEIGHT = 150
+  const IMAGE_HEIGHT = screenWidth * 0.5
+  const MIN_IMAGE_HEIGHT = 120
 
   // Animation values
   const opacityValue = useSharedValue(0)
@@ -172,7 +171,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       tintColor={theme.colors.transparent}
       colors={[theme.colors.transparent]}
       progressBackgroundColor={theme.colors.transparent}
-      progressViewOffset={IMAGE_HEIGHT / 2} // Place higher up so it's visible when pulling down
+      progressViewOffset={IMAGE_HEIGHT / 2} // Adjusted automatically with new IMAGE_HEIGHT
     />
   )
 
@@ -192,7 +191,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         refreshControl: renderRefreshControl(),
       }}
     >
-      {/* Top image with gradient overlay */}
+      {/* Top image with black overlay */}
       <Animated.View style={[themed($imageSection), headerContainerStyle]}>
         <PullToRefreshIndicator visible={refreshing} progress={progress} />
         <Animated.Image
@@ -204,9 +203,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           ]}
           resizeMode="cover"
         />
-        <LinearGradient
-          colors={["transparent", theme.colors.background]}
-          style={[{ width: screenWidth, height: 180 }, themed($gradient)]}
+        <View
+          style={[{ width: screenWidth, height: IMAGE_HEIGHT }, themed($overlay)]}
         >
           <View style={themed($headerOverlay)}>
             <View style={themed($headerTextContainer)}>
@@ -223,7 +221,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               </Text>
             </Animated.View>
           </View>
-        </LinearGradient>
+        </View>
       </Animated.View>
 
       {/* 2x2 Grid of containers */}
@@ -305,11 +303,12 @@ const $imageSection: ThemedStyle<ViewStyle> = () => ({
 
 const $image: ThemedStyle<ImageStyle> = () => ({})
 
-const $gradient: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $overlay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
   left: 0,
   right: 0,
   bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.3)', // Black overlay with 30% opacity
   paddingHorizontal: spacing.md,
   justifyContent: "flex-end",
 })
@@ -325,7 +324,6 @@ const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "flex-start",
-  marginBottom: 4,
 })
 
 const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
@@ -333,7 +331,6 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
   fontFamily: typography.customFontFamily,
   fontWeight: "700",
   fontSize: 36,
-  includeFontPadding: false,
   textAlignVertical: 'center',
 })
 
@@ -374,7 +371,7 @@ const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
 })
 
 const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  color: colors.tint,
+  color: colors.text,
   fontFamily: typography.primary.semiBold,
   fontSize: 18,
 })

@@ -85,8 +85,9 @@ export const typography = {
    * Font sizes
    */
   sizes: {
-    xs: 10,
-    sm: 12,
+    xxs: 10,
+    xs: 12,
+    sm: 14,
     md: 16,
     lg: 20,
     xl: 24,

@@ -25,7 +25,6 @@ export const PoliceNewsCard = observer(function PoliceNewsCard({ item, onPress }
           <Siren size={16} color={theme.colors.police} />
           <Text text="Ottawa Police" style={themed($source)} />
         </View>
-        <Text text={item.formattedDate || new Date(item.date).toLocaleDateString()} style={themed($date)} numberOfLines={1} />
       </View>
 
       <Text
@@ -35,6 +34,14 @@ export const PoliceNewsCard = observer(function PoliceNewsCard({ item, onPress }
       />
 
       <Text text={item.excerpt} style={themed($description)} numberOfLines={3} />
+      
+      <View style={themed($footer)}>
+        <Text 
+          text={item.formattedDate || new Date(item.date).toLocaleDateString()} 
+          style={themed($date)} 
+          numberOfLines={1} 
+        />
+      </View>
     </Pressable>
   )
 })
@@ -74,16 +81,8 @@ const $sourceContainer: ThemedStyle<ViewStyle> = () => ({
 
 const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.xs,
-  color: colors.police,
-  fontWeight: "bold",
-})
-
-const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.xs,
   color: colors.text,
-  opacity: 0.7,
-  flexShrink: 1,
-  marginLeft: 4,
+  fontWeight: "bold",
 })
 
 const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
@@ -98,4 +97,17 @@ const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.8,
   marginBottom: 8,
+})
+
+const $footer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+})
+
+const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  color: colors.text,
+  opacity: 0.7,
+  flexShrink: 1,
 }) 

@@ -1,41 +1,41 @@
 const palette = {
   neutral100: "#FFFFFF",
-  neutral200: "#F4F2F1",
-  neutral300: "#D7CEC9",
-  neutral400: "#B6ACA6",
-  neutral500: "#978F8A",
-  neutral600: "#564E4A",
-  neutral700: "#3C3836",
-  neutral800: "#191015",
+  neutral200: "#F8F7F6",
+  neutral300: "#E5E0DC",
+  neutral400: "#C8BFB9",
+  neutral500: "#A89D97",
+  neutral600: "#645A54",
+  neutral700: "#4A443F",
+  neutral800: "#2D2520",
   neutral900: "#000000",
 
-  primary100: "#F4E0D9",
-  primary200: "#E8C1B4",
-  primary300: "#DDA28E",
-  primary400: "#D28468",
+  primary100: "#F6E9E2",
+  primary200: "#EACDBF",
+  primary300: "#E0AD96",
+  primary400: "#D68F72",
   primary500: "#C76542",
   primary600: "#A54F31",
 
-  secondary100: "#DCDDE9",
-  secondary200: "#BCC0D6",
-  secondary300: "#9196B9",
-  secondary400: "#626894",
+  secondary100: "#E2E3ED",
+  secondary200: "#C6C9DC",
+  secondary300: "#9CA1BE",
+  secondary400: "#7176A0",
   secondary500: "#41476E",
 
-  accent100: "#FFEED4",
-  accent200: "#FFE1B2",
-  accent300: "#FDD495",
-  accent400: "#FBC878",
-  accent500: "#FFBB50",
+  accent100: "#862729",
+  accent200: "#A83133",
+  accent300: "#CA3B3D",
+  accent400: "#EC4547",
+  accent500: "#F6484B",
 
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
   police: "#7396FF",
-  hydro: "#FFE241",
+  hydro: "#FFB440",
   traffic: "#FF713D",
   alert: "#F6484B",
-  weather: "#FFFFFF",
+  weather: "#A89D97",
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
@@ -48,52 +48,22 @@ export const colors = {
   traffic: palette.traffic,
   alert: palette.alert,
   weather: palette.weather,
-  /**
-   * A helper for making something see-thru.
-   */
   transparent: "rgba(0, 0, 0, 0)",
-  /**
-   * The default light header.
-   */
   cityName: palette.neutral800,
-  /**
-   * The default text color in many components.
-   */
   text: palette.neutral800,
-  /**
-   * Secondary text information.
-   */
   textDim: palette.neutral600,
-  /**
-   * The default color of the screen background.
-   */
   background: palette.neutral200,
-  containerBackground: palette.neutral400,
-  navForeground: palette.neutral500,
-  /**
-   * The default border color.
-   */
+  containerBackground: palette.neutral300,
+  navForeground: palette.primary500,
   border: palette.neutral400,
-  /**
-   * The main tinting color.
-   */
   tint: palette.primary500,
-  /**
-   * The inactive tinting color.
-   */
   tintInactive: palette.neutral300,
 
-  accent: palette.accent100,
-  /**
-   * A subtle color used for lines.
-   */
+  accent: palette.accent500,
+  accentDim: palette.accent300,
   separator: palette.neutral300,
-  /**
-   * Error messages.
-   */
   error: palette.angry500,
-  /**
-   * Error Background.
-   */
   errorBackground: palette.angry100,
+  navActive: palette.neutral600,
+  navInactive: palette.neutral600,
 } as const

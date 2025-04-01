@@ -116,7 +116,7 @@ const $screenContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.sm,
+  paddingHorizontal: spacing.md,
   paddingBottom: spacing.lg,
 })
 
@@ -137,14 +137,14 @@ const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingHorizontal: spacing.sm,
+  paddingHorizontal: spacing.md,
   marginTop: spacing.sm,
   marginBottom: spacing.xs,
 })
 
 const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.transparent,
-  paddingHorizontal: 0,
+  paddingHorizontal: 12,
   borderWidth: 0,
 })
 

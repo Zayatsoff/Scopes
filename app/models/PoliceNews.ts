@@ -1,6 +1,7 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatDate } from "@/utils/formatDate"
+import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
 
 /**
@@ -65,7 +66,7 @@ export const PoliceNewsStoreModel = types
             console.log("Processing item:", item.id, item.title)
             return {
               ...item,
-              formattedDate: formatDate(item.date),
+              formattedDate: formatRelativeTime(item.date),
             }
           })
           
@@ -94,7 +95,7 @@ export const PoliceNewsStoreModel = types
           // Process the police news data to add formatted dates
           const processedItems = response.data.policeNews.map((item: any) => ({
             ...item,
-            formattedDate: formatDate(item.date),
+            formattedDate: formatRelativeTime(item.date),
           }))
           
           self.setProp("items", processedItems)

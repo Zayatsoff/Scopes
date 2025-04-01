@@ -265,7 +265,7 @@ const $skipButton: ThemedStyle<any> = () => ({
 const $skipText: ThemedStyle<any> = ({ colors }) => ({
   fontSize: 16,
   fontWeight: "bold",
-  color: colors.tint,
+  color: colors.text,
 })
 
 const $nextButton: ThemedStyle<any> = ({ colors }) => ({
@@ -274,8 +274,8 @@ const $nextButton: ThemedStyle<any> = ({ colors }) => ({
   bottom: 40,
   width: 50,
   height: 50,
-  borderRadius: 3,
-  backgroundColor: colors.tint,
+  borderRadius: 32,
+  backgroundColor: colors.accent,
   justifyContent: "center",
   alignItems: "center",
   zIndex: 999,
@@ -286,7 +286,7 @@ const $getStartedButton: ThemedStyle<any> = ({ colors }) => ({
   paddingHorizontal: 24,
   paddingVertical: 14,
   borderRadius: 3,
-  backgroundColor: colors.tint,
+  backgroundColor: colors.accent,
   justifyContent: "center",
   alignItems: "center",
   marginTop: 20,

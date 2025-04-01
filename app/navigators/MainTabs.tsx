@@ -27,8 +27,8 @@ export function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.navForeground,
-        tabBarInactiveTintColor: theme.colors.navForeground || "#999",
+        tabBarActiveTintColor: theme.colors.navActive,
+        tabBarInactiveTintColor: theme.colors.navInactive || "#999",
         tabBarStyle: {
           borderTopColor: theme.colors.containerBackground,
           backgroundColor: theme.colors.containerBackground,

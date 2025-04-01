@@ -48,7 +48,7 @@ export interface NavigationProps extends Partial<ComponentProps<typeof Navigatio
 
 export const AppNavigator = observer(function AppNavigator(props: NavigationProps) {
   const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider()
+    useThemeProvider("dark")
 
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
 

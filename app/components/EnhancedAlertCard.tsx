@@ -1,12 +1,12 @@
 import React from "react"
-import { Pressable, View, ViewStyle, TextStyle } from "react-native"
+import { Pressable, View, ViewStyle, TextStyle, Image, ImageStyle } from "react-native"
 import { Text } from "./Text"
 import { type ThemedStyle } from "@/theme"
 import { PoliceNewsItem } from "@/models/PoliceNews"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { AlertItem } from "./AlertCard"
-import { Siren, CloudSun, Zap, BusFront } from "lucide-react-native"
+import { CloudSun, Zap, BusFront } from "lucide-react-native"
 
 export interface EnhancedAlertCardProps {
   item: PoliceNewsItem | AlertItem
@@ -30,13 +30,21 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
       case "weather":
         return <CloudSun size={16} color={categoryColor || theme.colors.weather} />
       case "police":
-        return <Siren size={16} color={categoryColor || theme.colors.police} />
+        return (
+          <Image 
+            source={require("../../assets/favicons/ottpolice.png")}
+            style={themed($policeIcon)}
+          />
+        )
       case "hydro": 
         return <Zap size={16} color={categoryColor || theme.colors.hydro} />
       case "traffic":
         return <BusFront size={16} color={categoryColor || theme.colors.traffic} />
       default:
-        return <Siren size={16} color={categoryColor || theme.colors.tint} />
+        return <Image 
+          source={require("../../assets/favicons/ottpolice.png")}
+          style={themed($policeIcon)}
+        />
     }
   }
 
@@ -86,11 +94,6 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
             ]} 
           />
         </View>
-        <Text 
-          text={getFormattedDate()} 
-          style={themed($date)} 
-          numberOfLines={1} 
-        />
       </View>
 
       <Text
@@ -104,6 +107,14 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
         style={themed($description)} 
         numberOfLines={3} 
       />
+      
+      <View style={themed($footer)}>
+        <Text 
+          text={getFormattedDate()} 
+          style={themed($date)} 
+          numberOfLines={1} 
+        />
+      </View>
     </Pressable>
   )
 })
@@ -126,6 +137,12 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   elevation: 2,
 })
 
+const $policeIcon: ThemedStyle<ImageStyle> = () => ({
+  width: 16,
+  height: 16,
+  resizeMode: 'contain',
+})
+
 const $header: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   justifyContent: "space-between",
@@ -145,14 +162,6 @@ const $source: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontWeight: "bold",
 })
 
-const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.xs,
-  color: colors.text,
-  opacity: 0.7,
-  flexShrink: 1,
-  marginLeft: 4,
-})
-
 const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.md,
   fontWeight: "bold",
@@ -165,4 +174,17 @@ const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.8,
   marginBottom: 8,
+})
+
+const $footer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+})
+
+const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  color: colors.text,
+  opacity: 0.7,
+  flexShrink: 1,
 }) 

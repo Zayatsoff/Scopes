@@ -22,10 +22,10 @@ const palette = {
   secondary200: "#626894",
   secondary100: "#41476E",
 
-  accent500: "#FFEED4",
-  accent400: "#FFE1B2",
-  accent300: "#FDD495",
-  accent200: "#FBC878",
+  accent500: "#862729",
+  accent400: "#A83133",
+  accent300: "#CA3B3D",
+  accent200: "#EC4547",
   accent100: "#F6484B",
 
   angry100: "#F2D6CD",
@@ -59,7 +59,10 @@ export const colors = {
   tint: palette.primary500,
   tintInactive: palette.neutral200,
   accent: palette.accent100,
+  accentDim: palette.accent300,
   separator: palette.neutral200,
   error: palette.angry500,
   errorBackground: palette.angry100,
+  navActive: palette.neutral900,
+  navInactive: palette.neutral900,
 } as const

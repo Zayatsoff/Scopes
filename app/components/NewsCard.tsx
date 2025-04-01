@@ -21,9 +21,8 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
       <View style={themed($header)}>
         <View style={themed($sourceContainer)}>
           <SourceFavicon source={item.source} size={16} />
-          <Text text={item.sourceDisplay} style={themed($source)} />
+          <Text text={item.sourceDisplay} style={themed($source)} numberOfLines={1} />
         </View>
-        <Text text={item.formattedDate} style={themed($date)} numberOfLines={1} />
       </View>
 
       <Text
@@ -34,8 +33,28 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
 
       {!compact && <Text text={item.description} style={themed($description)} numberOfLines={3} />}
 
-      {item.authors && !compact && (
-        <Text text={item.authors} style={themed($author)} numberOfLines={1} />
+      {!compact ? (
+        <View style={themed($footer)}>
+          <Text text={item.formattedDate} style={themed($date)} numberOfLines={1} />
+          {item.authors && (
+            <Text text={item.authors} style={themed($author)} numberOfLines={1} />
+          )}
+        </View>
+      ) : (
+        <View style={themed($compactFooter)}>
+          <Text 
+            text={item.formattedDate} 
+            style={[themed($date), themed($compactDate)]} 
+            numberOfLines={1} 
+          />
+          {item.authors && (
+            <Text 
+              text={item.authors} 
+              style={[themed($author), themed($compactAuthor)]} 
+              numberOfLines={1} 
+            />
+          )}
+        </View>
       )}
     </Pressable>
   )
@@ -47,12 +66,10 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderRadius: 3,
   padding: spacing.sm,
   marginVertical: spacing.xs,
-  borderWidth: 1,
-  borderColor: colors.border,
 })
 
 const $compactContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.xs,
+  padding: spacing.sm,
   marginVertical: spacing.xxs,
 })
 
@@ -62,18 +79,54 @@ const $header: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   marginBottom: 4,
   flexWrap: "nowrap",
+  gap: 4,
 })
 
 const $sourceContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 4,
+  flex: 1,
 })
 
 const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.xs,
-  color: colors.tint,
-  fontWeight: "bold",
+  color: colors.text,
+  flexShrink: 1,
+  flexGrow: 0,
+  paddingLeft: spacing.xs,
+})
+
+const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.md,
+  // fontWeight: "bold",
+  color: colors.text,
+  marginBottom: 8,
+})
+
+const $compactTitle: ThemedStyle<TextStyle> = ({ typography }) => ({
+  fontSize: typography.sizes.md,
+  marginBottom: 4,
+})
+
+const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  color: colors.text,
+  opacity: 0.8,
+  marginBottom: 8,
+})
+
+const $footer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+})
+
+const $compactFooter: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginTop: 0,
 })
 
 const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
@@ -81,26 +134,11 @@ const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.7,
   flexShrink: 1,
-  marginLeft: 4,
 })
 
-const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.md,
-  fontWeight: "bold",
-  color: colors.text,
-  marginBottom: 8,
-})
-
-const $compactTitle: ThemedStyle<TextStyle> = ({ typography }) => ({
-  fontSize: typography.sizes.sm,
-  marginBottom: 0,
-})
-
-const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.sm,
-  color: colors.text,
-  opacity: 0.8,
-  marginBottom: 8,
+const $compactDate: ThemedStyle<TextStyle> = ({ typography }) => ({
+  marginTop: 0,
+  fontSize: typography.sizes.xs,
 })
 
 const $author: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
@@ -108,4 +146,10 @@ const $author: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.7,
   fontStyle: "italic",
+  textAlign: "right",
+  flexShrink: 1,
+})
+
+const $compactAuthor: ThemedStyle<TextStyle> = ({ typography }) => ({
+  fontSize: typography.sizes.xs,
 })
