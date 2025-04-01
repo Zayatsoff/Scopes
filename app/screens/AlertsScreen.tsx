@@ -194,6 +194,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
             refreshControl={renderRefreshControl()}
             onScroll={onScroll}
             scrollEventThrottle={16}
+            ListFooterComponent={<View style={{ height: 100 }} />}
             ListEmptyComponent={
               <View style={themed($emptyContainer)}>
                 <Text
@@ -233,6 +234,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           refreshControl={renderRefreshControl()}
           onScroll={onScroll}
           scrollEventThrottle={16}
+          ListFooterComponent={<View style={{ height: 100 }} />}
           ListEmptyComponent={
             <View style={themed($emptyContainer)}>
               <Text
@@ -259,33 +261,36 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   )
 
   return (
-    <Screen style={themed($root)} preset="auto" safeAreaEdges={[]}>
-      <View style={themed($categoryContainer)}>
-        <CategoryTabs 
-          tabs={categoryTabs}
-          onTabChange={handleTabChange}
-          initialTabId="weather"
-        />
-      </View>
-      
-      <View style={themed($headerRow)}>
-        <View style={themed($categoryHeaderContainer)}>
-          {getCategoryIcon()}
-          <Text 
-            text={getCategoryTitle()}
-            style={[themed($categoryHeaderText), { color: getCategoryColor() }]} 
+    <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]}>
+      {/* Sticky header section */}
+      <View style={themed($stickyHeaderContainer)}>
+        <View style={themed($categoryContainer)}>
+          <CategoryTabs 
+            tabs={categoryTabs}
+            onTabChange={handleTabChange}
+            initialTabId="weather"
           />
         </View>
         
-        <Button
-          text={activeTab === "police" 
-            ? (policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First")
-            : (sortNewestFirst ? "Newest First" : "Oldest First")
-          }
-          onPress={activeTab === "police" ? policeNewsStore.toggleSortOrder : toggleSortOrder}
-          style={themed($sortButton)}
-          textStyle={themed($sortButtonText)}
-        />
+        <View style={themed($headerRow)}>
+          <View style={themed($categoryHeaderContainer)}>
+            {getCategoryIcon()}
+            <Text 
+              text={getCategoryTitle()}
+              style={[themed($categoryHeaderText), { color: getCategoryColor() }]} 
+            />
+          </View>
+          
+          <Button
+            text={activeTab === "police" 
+              ? (policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First")
+              : (sortNewestFirst ? "Newest First" : "Oldest First")
+            }
+            onPress={activeTab === "police" ? policeNewsStore.toggleSortOrder : toggleSortOrder}
+            style={themed($sortButton)}
+            textStyle={themed($sortButtonText)}
+          />
+        </View>
       </View>
       
       <PullToRefreshIndicator visible={refreshing} color={getCategoryColor()} progress={progress} />
@@ -301,6 +306,17 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
 const $root: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
+})
+
+const $stickyHeaderContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: "100%",
+  backgroundColor: colors.background,
+  zIndex: 10,
+  elevation: 3, // For Android shadow
+  shadowColor: "#000", // For iOS shadow
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
 })
 
 const $categoryContainer: ThemedStyle<ViewStyle> = () => ({
@@ -337,7 +353,7 @@ const $contentContainer: ThemedStyle<ViewStyle> = () => ({
 const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingHorizontal: spacing.sm,
-  paddingBottom: spacing.lg,
+  paddingBottom: spacing.xxl * 6,
 })
 
 const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -366,7 +382,7 @@ const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 
 const $listWrapper: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
-  minHeight: 200, // Ensure minimum height for measurement
+  minHeight: 800, // Increased from 200 to ensure enough space
   width: '100%',
 })
 

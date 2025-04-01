@@ -145,10 +145,10 @@ const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.transparent,
   paddingHorizontal: 0,
+  borderWidth: 0,
 })
 
-const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 14,
   color: colors.tint,
-  marginRight: spacing.xs,
 })
