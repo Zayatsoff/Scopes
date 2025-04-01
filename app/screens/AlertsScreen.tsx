@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from "react"
+import { FC, useState, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
 import { ViewStyle, View, TextStyle, RefreshControl, Linking } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
@@ -16,6 +16,7 @@ import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { useStores } from "@/models"
 import { PoliceNewsItem } from "@/models/PoliceNews"
 import { EnhancedAlertCard } from "@/components/EnhancedAlertCard"
+import { useIsFocused } from "@react-navigation/native"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
@@ -27,6 +28,20 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [sortNewestFirst, setSortNewestFirst] = useState(true)
   const { progress, onScroll } = usePullToRefreshProgress()
+  const weatherListRef = useRef<FlashList<AlertItem>>(null)
+  const policeListRef = useRef<FlashList<PoliceNewsItem>>(null)
+  const hydroListRef = useRef<FlashList<AlertItem>>(null)
+  const trafficListRef = useRef<FlashList<AlertItem>>(null)
+  const isFocused = useIsFocused()
+  
+  // Track visited tabs and their scroll positions
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set())
+  const scrollPositions = useRef<Record<string, number>>({
+    weather: 0,
+    police: 0,
+    hydro: 0,
+    traffic: 0
+  })
 
   // Set up the tab header with customized styling
   useTabHeader({
@@ -36,6 +51,10 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
 
   // Load initial alerts and police news
   useEffect(() => {
+    // Load saved active tab from storage if available
+    // This would require adding a method to your storage module
+    // For now, we're just using the default "weather"
+    
     // Generate mock alerts for initial tab
     const initialAlerts = generateMockAlerts(activeTab);
     console.log(`Generated ${initialAlerts.length} initial ${activeTab} alerts`);
@@ -45,48 +64,33 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     policeNewsStore.fetchPoliceNews(api);
   }, [api, policeNewsStore]);
 
-  // Define category tabs
-  const categoryTabs: CategoryTab[] = [
-    { id: "weather", label: "Weather", color: theme.colors.weather },
-    { id: "police", label: "Police", color: theme.colors.police },
-    { id: "hydro", label: "Hydro", color: theme.colors.hydro },
-    { id: "traffic", label: "Road & Traffic", color: theme.colors.traffic },
-  ]
-
-  // Generate mock alerts for demonstration
-  const generateMockAlerts = (category: string): AlertItem[] => {
-    // Sources by category
-    const sources = {
-      weather: "Environment Canada",
-      police: "Ottawa Police Service",
-      hydro: "Hydro Ottawa",
-      traffic: "City of Ottawa Traffic"
+  // Save active tab when screen loses focus
+  useEffect(() => {
+    if (!isFocused) {
+      // Save active tab to storage
+      // This would require adding a method to your storage module
+      console.log(`Saving active tab: ${activeTab}`)
     }
+  }, [isFocused, activeTab]);
+
+  // Track scroll position for current tab
+  const handleScroll = (event: any) => {
+    // Call the original onScroll handler
+    onScroll(event);
     
-    console.log(`Generating mock alerts for category: ${category}`);
+    // Save the scroll position for current tab
+    const offset = event.nativeEvent.contentOffset.y;
+    scrollPositions.current[activeTab] = offset;
     
-    // Generate mock alerts based on the category
-    const mockAlerts = Array.from({ length: 10 }, (_, i) => ({
-      id: `${category}-${i}`,
-      source: sources[category as keyof typeof sources] || "Unknown Source",
-      message: `This is a mock ${category} alert #${i+1} for testing.`,
-      timestamp: new Date(Date.now() - i * 3600000).toLocaleString(),
-      category,
-      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Alert #${i+1}`,
-      excerpt: `Detailed information about this ${category} alert situation. This provides additional context for the alert message.`,
-      link: `https://example.com/${category}/alert/${i}`,
-      date: new Date(Date.now() - i * 3600000).toISOString(),
-      formattedDate: new Date(Date.now() - i * 3600000).toLocaleDateString(),
-    }));
-    
-    console.log(`Generated ${mockAlerts.length} ${category} alerts`);
-    return mockAlerts;
-  }
+    // Debug log
+    console.log(`Saved scroll position for ${activeTab}: ${offset}`);
+  };
 
   // Handle tab change
   const handleTabChange = (tabId: string) => {
     console.log(`Tab changed to: ${tabId}`)
     setActiveTab(tabId)
+    
     if (tabId !== "police") {
       setAlerts(generateMockAlerts(tabId))
     } else {
@@ -99,6 +103,52 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         console.log("No police news found, fetching data...")
         policeNewsStore.fetchPoliceNews(api)
       }
+    }
+    
+    // Determine if this is the first visit to this tab
+    const isFirstVisit = !visitedTabs.has(tabId);
+    
+    // If first visit, scroll to top, otherwise restore previous position
+    setTimeout(() => {
+      if (isFirstVisit) {
+        // Scroll to top for first visit
+        scrollToTop();
+        // Mark tab as visited
+        setVisitedTabs(prev => new Set([...prev, tabId]));
+      } else {
+        // Restore previous scroll position
+        const savedPosition = scrollPositions.current[tabId] || 0;
+        console.log(`Restoring scroll position for ${tabId}: ${savedPosition}`);
+        
+        const currentListRef = getListRefForTab(tabId);
+        if (currentListRef?.current) {
+          currentListRef.current.scrollToOffset({ 
+            offset: savedPosition, 
+            animated: false 
+          });
+        }
+      }
+    }, 100);
+  }
+  
+  // Get list ref for the given tab
+  const getListRefForTab = (tabId: string) => {
+    switch (tabId) {
+      case "weather": return weatherListRef;
+      case "police": return policeListRef;
+      case "hydro": return hydroListRef;
+      case "traffic": return trafficListRef;
+      default: return null;
+    }
+  };
+  
+  // Scroll to top when needed
+  const scrollToTop = () => {
+    const currentListRef = getListRefForTab(activeTab);
+    if (currentListRef?.current) {
+      currentListRef.current.scrollToOffset({ offset: 0, animated: true });
+      // Reset saved position for this tab
+      scrollPositions.current[activeTab] = 0;
     }
   }
   
@@ -115,6 +165,9 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         setAlerts(generateMockAlerts(activeTab))
       }, 1000)
     }
+    
+    // Scroll to top after refreshing
+    setTimeout(scrollToTop, 300);
     
     setRefreshing(false)
   }
@@ -168,6 +221,44 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     })
   }
 
+  // Define category tabs
+  const categoryTabs: CategoryTab[] = [
+    { id: "weather", label: "Weather", color: theme.colors.weather },
+    { id: "police", label: "Police", color: theme.colors.police },
+    { id: "hydro", label: "Hydro", color: theme.colors.hydro },
+    { id: "traffic", label: "Road & Traffic", color: theme.colors.traffic },
+  ]
+
+  // Generate mock alerts for demonstration
+  const generateMockAlerts = (category: string): AlertItem[] => {
+    // Sources by category
+    const sources = {
+      weather: "Environment Canada",
+      police: "Ottawa Police Service",
+      hydro: "Hydro Ottawa",
+      traffic: "City of Ottawa Traffic"
+    }
+    
+    console.log(`Generating mock alerts for category: ${category}`);
+    
+    // Generate mock alerts based on the category
+    const mockAlerts = Array.from({ length: 10 }, (_, i) => ({
+      id: `${category}-${i}`,
+      source: sources[category as keyof typeof sources] || "Unknown Source",
+      message: `This is a mock ${category} alert #${i+1} for testing.`,
+      timestamp: new Date(Date.now() - i * 3600000).toLocaleString(),
+      category,
+      title: `${category.charAt(0).toUpperCase() + category.slice(1)} Alert #${i+1}`,
+      excerpt: `Detailed information about this ${category} alert situation. This provides additional context for the alert message.`,
+      link: `https://example.com/${category}/alert/${i}`,
+      date: new Date(Date.now() - i * 3600000).toISOString(),
+      formattedDate: new Date(Date.now() - i * 3600000).toLocaleDateString(),
+    }));
+    
+    console.log(`Generated ${mockAlerts.length} ${category} alerts`);
+    return mockAlerts;
+  }
+
   // Render the appropriate list based on active tab
   const renderContent = () => {
     if (activeTab === "police") {
@@ -177,6 +268,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       return (
         <View style={themed($listWrapper)}>
           <FlashList
+            ref={policeListRef}
             data={policeNewsStore.sortedItems}
             renderItem={({ item }: { item: PoliceNewsItem }) => {
               console.log("Rendering police news item:", item.id, item.title);
@@ -192,7 +284,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
             keyExtractor={(item) => item.id}
             contentContainerStyle={themed($listContent)}
             refreshControl={renderRefreshControl()}
-            onScroll={onScroll}
+            onScroll={handleScroll}
             scrollEventThrottle={16}
             ListFooterComponent={<View style={{ height: 100 }} />}
             ListEmptyComponent={
@@ -217,6 +309,9 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     return (
       <View style={themed($listWrapper)}>
         <FlashList
+          ref={activeTab === "weather" ? weatherListRef : 
+               activeTab === "hydro" ? hydroListRef : 
+               trafficListRef}
           data={sortedAlerts}
           renderItem={({ item }) => {
             console.log(`Rendering alert: ${item.id}`);
@@ -232,7 +327,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           keyExtractor={(item) => item.id}
           contentContainerStyle={themed($listContent)}
           refreshControl={renderRefreshControl()}
-          onScroll={onScroll}
+          onScroll={handleScroll}
           scrollEventThrottle={16}
           ListFooterComponent={<View style={{ height: 100 }} />}
           ListEmptyComponent={
