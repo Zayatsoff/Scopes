@@ -22,17 +22,20 @@ import { NewsCard } from "@/components/NewsCard"
 import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
-import { Siren, Cloudy, Zap, BusFront } from "lucide-react-native"
+import { Siren, CloudSun } from "lucide-react-native"
 import { useTabHeader } from "@/components/TabHeader"
 import { LoadingIcon } from "@/components/LoadingIcon"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
+import { PoliceSummaryCard } from "@/components/PoliceSummaryCard"
+import { WeatherAlertSummaryCard } from "@/components/WeatherAlertSummaryCard"
+import { WeatherSummaryCard } from "@/components/WeatherSummaryCard"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
   const { themed, theme } = useAppTheme()
-  const { newsStore, api } = useStores()
+  const { newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
   const [refreshing, setRefreshing] = useState(false)
   
@@ -132,20 +135,53 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     }
   })
 
-  // Start animation when component mounts
+  // Fetch data when component mounts
   useEffect(() => {
+    // Start animation when component mounts
     opacityValue.value = withDelay(500, withSpring(1, { damping: 20 }))
     translateYValue.value = withDelay(500, withSpring(0, { damping: 20 }))
-  }, [])
-
-  useEffect(() => {
-    // Fetch news when component mounts if we don't have any yet
+    
+    // Fetch news if we don't have any yet
     if (newsStore.items.length === 0) {
       newsStore.fetchNews(api)
     }
-  }, [api, newsStore])
+    
+    // Fetch police summaries
+    policeSummaryFetch()
+    
+    // Fetch weather alerts (for Alerts screen)
+    weatherAlertFetch()
+    
+    // Fetch weather summaries (for Home screen)
+    weatherSummaryFetch()
+  }, [api, newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore])
+  
+  // Fetch police summaries
+  const policeSummaryFetch = () => {
+    if (policeSummaryStore.items.length === 0) {
+      policeSummaryStore.fetchPoliceSummaries(api)
+    }
+  }
+  
+  // Fetch weather alerts
+  const weatherAlertFetch = () => {
+    if (weatherAlertStore.items.length === 0) {
+      weatherAlertStore.fetchWeatherAlerts(api)
+    }
+  }
+  
+  // Fetch weather summaries
+  const weatherSummaryFetch = () => {
+    if (weatherSummaryStore.items.length === 0) {
+      weatherSummaryStore.fetchWeatherSummaries(api)
+    }
+  }
 
   const handleNewsPress = (link: string) => {
+    Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
+  }
+  
+  const handleWeatherAlertPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
   
@@ -153,9 +189,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const onRefresh = async () => {
     try {
       setRefreshing(true)
-      await newsStore.refreshNews(api)
+      await Promise.all([
+        newsStore.refreshNews(api),
+        policeSummaryStore.refreshPoliceSummaries(api),
+        weatherAlertStore.refreshWeatherAlerts(api),
+        weatherSummaryStore.refreshWeatherSummaries(api)
+      ])
     } catch (error) {
-      console.error("Error refreshing news:", error)
+      console.error("Error refreshing data:", error)
     } finally {
       setRefreshing(false)
       // Ensure progress is reset when refresh completes
@@ -171,7 +212,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       tintColor={theme.colors.transparent}
       colors={[theme.colors.transparent]}
       progressBackgroundColor={theme.colors.transparent}
-      progressViewOffset={IMAGE_HEIGHT / 2} // Adjusted automatically with new IMAGE_HEIGHT
+      progressViewOffset={IMAGE_HEIGHT / 2}
     />
   )
 
@@ -224,48 +265,56 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         </View>
       </Animated.View>
 
-      {/* 2x2 Grid of containers */}
-      <View style={themed($gridSection)}>
-        <View style={themed($gridRow)}>
-          <View style={themed($gridItem)}>
-            <View style={themed($gridItemContent)}>
-              <View style={themed($iconTextRow)}>
-                <Siren size={24} color={theme.colors.police} />
-                <Text style={[themed($iconText), { color: theme.colors.police }]}>Police</Text>
-              </View>
-              <Text style={themed($gridItemWords)}>urgent response required</Text>
-            </View>
-          </View>
-          <View style={themed($gridItem)}>
-            <View style={themed($gridItemContent)}>
-              <View style={themed($iconTextRow)}>
-                <Cloudy size={24} color={theme.colors.weather} />
-                <Text style={[themed($iconText), { color: theme.colors.weather }]}>Weather</Text>
-              </View>
-              <Text style={themed($gridItemWords)}>sunny partly cloudy</Text>
-            </View>
-          </View>
+      {/* Weather Summary Section */}
+      <View style={themed($weatherSummarySection)}>
+        <View style={themed($sectionTitleContainer)}>
+          <CloudSun size={20} color={theme.colors.weather} />
+          <Text style={[themed($sectionTitle), { color: theme.colors.weather }]}>
+            Weather Updates
+          </Text>
         </View>
-        <View style={themed($gridRow)}>
-          <View style={themed($gridItem)}>
-            <View style={themed($gridItemContent)}>
-              <View style={themed($iconTextRow)}>
-                <Zap size={24} color={theme.colors.hydro} />
-                <Text style={[themed($iconText), { color: theme.colors.hydro }]}>Hydro</Text>
-              </View>
-              <Text style={themed($gridItemWords)}>power outage restored</Text>
-            </View>
+        
+        {weatherSummaryStore.isLoading && (
+          <View style={themed($loadingContainer)}>
+            <LoadingIcon />
           </View>
-          <View style={themed($gridItem)}>
-            <View style={themed($gridItemContent)}>
-              <View style={themed($iconTextRow)}>
-                <BusFront size={24} color={theme.colors.traffic} />
-                <Text style={[themed($iconText), { color: theme.colors.traffic }]}>Traffic</Text>
-              </View>
-              <Text style={themed($gridItemWords)}>construction expect delays</Text>
-            </View>
+        )}
+        
+        {!weatherSummaryStore.isLoading && weatherSummaryStore.latestSummary && (
+          <WeatherSummaryCard item={weatherSummaryStore.latestSummary} />
+        )}
+        
+        {!weatherSummaryStore.isLoading && !weatherSummaryStore.latestSummary && (
+          <View style={themed($emptyContainer)}>
+            <Text style={themed($emptyText)}>No weather updates available.</Text>
           </View>
+        )}
+      </View>
+
+      {/* Police Summary Section */}
+      <View style={themed($policeSummarySection)}>
+        <View style={themed($sectionTitleContainer)}>
+          <Siren size={20} color={theme.colors.police} />
+          <Text style={[themed($sectionTitle), { color: theme.colors.police }]}>
+            Police Updates
+          </Text>
         </View>
+        
+        {policeSummaryStore.isLoading && (
+          <View style={themed($loadingContainer)}>
+            <LoadingIcon />
+          </View>
+        )}
+        
+        {!policeSummaryStore.isLoading && policeSummaryStore.latestSummary && (
+          <PoliceSummaryCard item={policeSummaryStore.latestSummary} />
+        )}
+        
+        {!policeSummaryStore.isLoading && !policeSummaryStore.latestSummary && (
+          <View style={themed($emptyContainer)}>
+            <Text style={themed($emptyText)}>No police updates available.</Text>
+          </View>
+        )}
       </View>
 
       {/* 1x4 Grid of news items */}
@@ -297,7 +346,6 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 
 const $imageSection: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
-
   overflow: 'hidden',
 })
 
@@ -334,29 +382,48 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
   textAlignVertical: 'center',
 })
 
-const $gridSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.md,
-  paddingVertical: spacing.md,
+const $weatherSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
+  paddingTop: spacing.md,
+
 })
 
-const $gridRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $policeSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
+  paddingTop: spacing.md,
+})
+
+const $sectionTitleContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
-  marginBottom: spacing.sm,
-  gap: spacing.md,
+  alignItems: "center",
+  marginBottom: 8,
 })
 
-const $gridItem: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
-  flex: 1,
+const $sectionTitle: ThemedStyle<TextStyle> = ({ typography }) => ({
+  ...typography.secondary,
+  fontWeight: "600",
+  fontSize: 18,
+  marginLeft: 8,
+})
+
+const $loadingContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.md,
+  alignItems: "center",
+  justifyContent: "center",
+})
+
+const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  paddingVertical: spacing.md,
+  alignItems: "center",
+  justifyContent: "center",
   backgroundColor: colors.containerBackground,
   borderRadius: 3,
-  height: 100,
-  overflow: "hidden",
+  padding: spacing.md,
 })
 
-const $gridItemContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flex: 1,
-  padding: spacing.sm,
-  justifyContent: "space-between",
+const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  opacity: 0.7,
 })
 
 const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -376,27 +443,7 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 18,
 })
 
-const $iconTextRow: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 8,
-})
-
-const $iconText: ThemedStyle<TextStyle> = ({ typography }) => ({
-  ...typography.secondary,
-  marginLeft: 8,
-  fontWeight: "600",
-  fontSize: 16,
-})
-
-const $gridItemWords: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  ...typography.secondary,
-  color: colors.text,
-  fontSize: 14,
-})
-
 const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
-
   paddingVertical: 2,
   borderRadius: 8,
   justifyContent: 'center',

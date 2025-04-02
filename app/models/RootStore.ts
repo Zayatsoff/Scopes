@@ -1,6 +1,9 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
 import { NewsStoreModel } from "./News"
 import { PoliceNewsStoreModel } from "./PoliceNews"
+import { PoliceSummaryStoreModel } from "./PoliceSummary"
+import { WeatherAlertStoreModel } from "./WeatherAlert"
+import { WeatherSummaryStoreModel } from "./WeatherSummary"
 import { Api, api } from "@/services/api/api"
 
 /**
@@ -9,6 +12,9 @@ import { Api, api } from "@/services/api/api"
 export const RootStoreModel = types.model("RootStore").props({
   newsStore: types.optional(NewsStoreModel, {}),
   policeNewsStore: types.optional(PoliceNewsStoreModel, {}),
+  policeSummaryStore: types.optional(PoliceSummaryStoreModel, {}),
+  weatherAlertStore: types.optional(WeatherAlertStoreModel, {}),
+  weatherSummaryStore: types.optional(WeatherSummaryStoreModel, {}),
 })
 .views((self) => ({
   get api() {

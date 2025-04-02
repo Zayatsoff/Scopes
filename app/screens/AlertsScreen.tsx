@@ -15,6 +15,7 @@ import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { useStores } from "@/models"
 import { PoliceNewsItem } from "@/models/PoliceNews"
+import { WeatherAlertItem } from "@/models/WeatherAlert"
 import { EnhancedAlertCard } from "@/components/EnhancedAlertCard"
 import { useIsFocused } from "@react-navigation/native"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
@@ -23,13 +24,13 @@ interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Aler
 
 export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScreen() {
   const { theme, themed, themeContext } = useAppTheme()
-  const { policeNewsStore, api } = useStores()
+  const { policeNewsStore, weatherAlertStore, api } = useStores()
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("weather")
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [sortNewestFirst, setSortNewestFirst] = useState(true)
   const { progress, onScroll } = usePullToRefreshProgress()
-  const weatherListRef = useRef<FlashList<AlertItem>>(null)
+  const weatherListRef = useRef<FlashList<WeatherAlertItem>>(null)
   const policeListRef = useRef<FlashList<PoliceNewsItem>>(null)
   const hydroListRef = useRef<FlashList<AlertItem>>(null)
   const trafficListRef = useRef<FlashList<AlertItem>>(null)
@@ -60,13 +61,21 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
 
   // Load initial alerts and police news
   useEffect(() => {
-    // Generate mock alerts for initial tab
-    const initialAlerts = generateMockAlerts(activeTab)
-    setAlerts(initialAlerts)
-    
-    // Fetch police news
-    policeNewsStore.fetchPoliceNews(api)
-  }, [api, policeNewsStore])
+    // Fetch weather alerts if that's the active tab
+    if (activeTab === "weather") {
+      console.log("Fetching weather alerts because active tab is weather")
+      weatherAlertStore.fetchWeatherAlerts(api)
+    } else if (activeTab === "police") {
+      // Fetch police news
+      console.log("Fetching police news because active tab is police")
+      policeNewsStore.fetchPoliceNews(api)
+    } else {
+      // Generate mock alerts for other tabs
+      console.log(`Generating mock alerts for tab: ${activeTab}`)
+      const initialAlerts = generateMockAlerts(activeTab)
+      setAlerts(initialAlerts)
+    }
+  }, [api, policeNewsStore, weatherAlertStore, activeTab])
 
   // Save active tab when screen loses focus
   useEffect(() => {
@@ -110,10 +119,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId)
     
-    if (tabId !== "police") {
+    if (tabId === "weather") {
+      if (weatherAlertStore.items.length === 0) {
+        weatherAlertStore.fetchWeatherAlerts(api)
+      }
+    } else if (tabId === "police") {
+      if (policeNewsStore.items.length === 0) {
+        policeNewsStore.fetchPoliceNews(api)
+      }
+    } else {
       setAlerts(generateMockAlerts(tabId))
-    } else if (policeNewsStore.items.length === 0) {
-      policeNewsStore.fetchPoliceNews(api)
     }
     
     // Determine if this is the first visit to this tab
@@ -147,6 +162,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     
     if (activeTab === "police") {
       await policeNewsStore.refreshPoliceNews(api)
+    } else if (activeTab === "weather") {
+      await weatherAlertStore.refreshWeatherAlerts(api)
     } else {
       // Simulate API call delay
       setTimeout(() => {
@@ -160,8 +177,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     setRefreshing(false)
   }
 
-  // Handle police news item press
-  const handlePoliceNewsPress = (link: string) => {
+  // Handle alert item press
+  const handleAlertPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
 
@@ -255,31 +272,77 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
 
   // Render the appropriate list based on active tab
   const renderContent = () => {
+    // Add a key to each FlashList to ensure proper remounting when switching tabs
     if (activeTab === "police") {
       // Show Police News
+      console.log(`Rendering police news, items: ${policeNewsStore.sortedItems.length}`)
       return (
-        <View style={themed($listWrapper)}>
+        <View style={themed($listWrapper)} key="police-list">
           <FlashList
             ref={policeListRef}
             data={policeNewsStore.sortedItems}
             renderItem={({ item }: { item: PoliceNewsItem }) => (
               <EnhancedAlertCard 
                 item={item} 
-                onPress={() => handlePoliceNewsPress(item.link)}
+                onPress={() => handleAlertPress(item.link)}
                 categoryColor={theme.colors.police}
               />
             )}
-            estimatedItemSize={120}
+            estimatedItemSize={150}
             keyExtractor={(item) => item.id}
             contentContainerStyle={themed($listContent)}
             refreshControl={renderRefreshControl()}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            ListFooterComponent={<View style={{ height: 100 }} />}
+            ListFooterComponent={<View style={{ height: 150 }} />}
             ListEmptyComponent={
               <View style={themed($emptyContainer)}>
                 <Text
-                  text={policeNewsStore.isLoading ? "Loading police news..." : policeNewsStore.error || "No police alerts available"}
+                  text={policeNewsStore.isLoading ? "Loading police alerts..." : policeNewsStore.error || "No police alerts available"}
+                  style={themed($emptyText)}
+                />
+              </View>
+            }
+          />
+        </View>
+      )
+    } else if (activeTab === "weather") {
+      // Show Weather Alerts
+      console.log(`Rendering weather alerts, items: ${weatherAlertStore.sortedItems.length}`)
+      return (
+        <View style={themed($listWrapper)} key="weather-list">
+          <FlashList
+            ref={weatherListRef}
+            data={weatherAlertStore.sortedItems}
+            renderItem={({ item }: { item: WeatherAlertItem }) => (
+              <EnhancedAlertCard 
+                item={{
+                  id: item.id,
+                  title: item.title,
+                  excerpt: item.summary,
+                  link: item.link,
+                  date: item.pubDate,
+                  formattedDate: item.formattedDate,
+                  category: "weather",
+                  source: "Environment Canada",
+                  message: item.summary,
+                  timestamp: item.formattedDate
+                }}
+                onPress={() => handleAlertPress(item.link)}
+                categoryColor={theme.colors.weather}
+              />
+            )}
+            estimatedItemSize={150}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={themed($listContent)}
+            refreshControl={renderRefreshControl()}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            ListFooterComponent={<View style={{ height: 150 }} />}
+            ListEmptyComponent={
+              <View style={themed($emptyContainer)}>
+                <Text
+                  text={weatherAlertStore.isLoading ? "Loading weather alerts..." : weatherAlertStore.error || "No weather alerts available"}
                   style={themed($emptyText)}
                 />
               </View>
@@ -293,26 +356,24 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     const sortedAlerts = getSortedAlerts()
     
     return (
-      <View style={themed($listWrapper)}>
+      <View style={themed($listWrapper)} key={`${activeTab}-list`}>
         <FlashList
-          ref={activeTab === "weather" ? weatherListRef : 
-               activeTab === "hydro" ? hydroListRef : 
-               trafficListRef}
+          ref={activeTab === "hydro" ? hydroListRef : trafficListRef}
           data={sortedAlerts}
           renderItem={({ item }) => (
             <EnhancedAlertCard 
               item={item} 
-              onPress={() => item.link && Linking.openURL(item.link)}
+              onPress={() => item.link && handleAlertPress(item.link)}
               categoryColor={getCategoryColor()}
             />
           )}
-          estimatedItemSize={100}
+          estimatedItemSize={150}
           keyExtractor={(item) => item.id}
           contentContainerStyle={themed($listContent)}
           refreshControl={renderRefreshControl()}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          ListFooterComponent={<View style={{ height: 100 }} />}
+          ListFooterComponent={<View style={{ height: 150 }} />}
           ListEmptyComponent={
             <View style={themed($emptyContainer)}>
               <Text
@@ -327,7 +388,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   }
 
   return (
-    <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]}>
+    <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]} contentContainerStyle={themed($screenContent)}>
       {/* Sticky header section */}
       <View style={themed($stickyHeaderContainer)}>
         <View style={themed($categoryContainer)}>
@@ -348,11 +409,20 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           </View>
           
           <Button
-            text={activeTab === "police" 
-              ? (policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First")
-              : (sortNewestFirst ? "Newest First" : "Oldest First")
+            text={
+              activeTab === "police" 
+                ? (policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First")
+                : activeTab === "weather"
+                  ? (weatherAlertStore.sortNewestFirst ? "Newest First" : "Oldest First")
+                  : (sortNewestFirst ? "Newest First" : "Oldest First")
             }
-            onPress={activeTab === "police" ? policeNewsStore.toggleSortOrder : toggleSortOrder}
+            onPress={
+              activeTab === "police" 
+                ? policeNewsStore.toggleSortOrder
+                : activeTab === "weather"
+                  ? weatherAlertStore.toggleSortOrder
+                  : toggleSortOrder
+            }
             style={themed($sortButton)}
             textStyle={themed($sortButtonText)}
           />
@@ -414,6 +484,8 @@ const $categoryHeaderText: ThemedStyle<TextStyle> = ({ spacing, typography }) =>
 const $contentContainer: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
   width: "100%",
+  flexGrow: 1,
+  height: "100%"
 })
 
 const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -450,6 +522,12 @@ const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 
 const $listWrapper: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
-  minHeight: 800,
-  width: '100%',
+  width: "100%",
+  minHeight: 800
+})
+
+const $screenContent: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  flexGrow: 1,
+  height: "100%",
 })
