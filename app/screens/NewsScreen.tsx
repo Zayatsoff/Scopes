@@ -54,6 +54,7 @@ export const NewsScreen = observer(function NewsScreen() {
     <NewsCard
       item={item}
       onPress={() => handleNewsPress(item.link)}
+      compact={newsStore.compactView}
     />
   )
   
@@ -96,9 +97,10 @@ export const NewsScreen = observer(function NewsScreen() {
       <PullToRefreshIndicator visible={refreshing} progress={progress} />
       
       <FlashList
+        key={newsStore.compactView ? "compact" : "full"}
         data={newsStore.sortedItems}
         renderItem={renderItem}
-        estimatedItemSize={150}
+        estimatedItemSize={newsStore.compactView ? 100 : 150}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={themed($listContainer)}
         refreshControl={renderRefreshControl()}

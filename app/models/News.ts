@@ -89,6 +89,7 @@ export const NewsStoreModel = types
     isLoading: types.optional(types.boolean, false),
     error: types.maybeNull(types.string),
     sortNewestFirst: types.optional(types.boolean, true), // Default newest first
+    compactView: types.optional(types.boolean, false), // Default to full view
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -114,6 +115,10 @@ export const NewsStoreModel = types
   .actions((self) => ({
     toggleSortOrder() {
       self.setProp("sortNewestFirst", !self.sortNewestFirst)
+    },
+
+    toggleCompactView() {
+      self.setProp("compactView", !self.compactView)
     },
     
     fetchNews: async (api: Api) => {

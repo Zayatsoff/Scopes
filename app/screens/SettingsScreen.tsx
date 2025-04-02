@@ -5,6 +5,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { ListItem, Screen, Text, Switch } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
+import { useStores } from "@/models"
 import { 
   Bell, 
   MoonIcon, 
@@ -25,27 +26,23 @@ import type { ThemedStyle } from "@/theme"
 import { StyleProp } from "react-native"
 import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
+import { useNavigation } from "@react-navigation/native"
+import type { SettingsStackParamList } from "@/navigators/SettingsStack"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 
 interface SettingsScreenProps extends BottomTabScreenProps<MainTabParamList, "Settings"> {}
 
 export const SettingsScreen: FC<SettingsScreenProps> = observer(function SettingsScreen() {
   const { themed, theme, themeContext, setThemeContextOverride } = useAppTheme()
+  const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>()
+  const { newsStore } = useStores()
   
   // Set up the tab header
   useTabHeader({ title: "Settings" }, [themeContext]);
   
   // State for toggle settings
-  const [notificationSettings, setNotificationSettings] = useState({
-    policeAlerts: true,
-    hydroAlerts: true,
-    governmentAlerts: true,
-    emergencyAlerts: true,
-  })
-
   const [displaySettings, setDisplaySettings] = useState({
-    largeText: false,
     showWeather: true,
-    compactNewsView: false,
   })
 
   const [otherSettings, setOtherSettings] = useState({
@@ -53,13 +50,6 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
     autoLocation: true,
     sendAnalytics: false,
   })
-
-  const toggleNotificationSetting = (key: keyof typeof notificationSettings) => {
-    setNotificationSettings({
-      ...notificationSettings,
-      [key]: !notificationSettings[key],
-    })
-  }
 
   const toggleDisplaySetting = (key: keyof typeof displaySettings) => {
     setDisplaySettings({
@@ -111,47 +101,12 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       <SectionHeader title="Notifications" />
       <View style={themed($section)}>
         <ListItem 
-          text="Police Alerts"
+          text="Notification Settings"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Bell, sectionColors.notifications)}
-          bottomSeparator
+          RightComponent={renderIcon(ChevronRight, sectionColors.notifications)}
+          onPress={() => navigation.navigate("NotificationSettings")}
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.policeAlerts,
-            () => toggleNotificationSetting("policeAlerts")
-          )}
-        />
-        <ListItem 
-          text="Hydro Alerts"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(Bell, sectionColors.notifications)}
-          bottomSeparator
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.hydroAlerts,
-            () => toggleNotificationSetting("hydroAlerts")
-          )}
-        />
-        <ListItem 
-          text="Government Alerts"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(Bell, sectionColors.notifications)}
-          bottomSeparator
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.governmentAlerts,
-            () => toggleNotificationSetting("governmentAlerts")
-          )}
-        />
-        <ListItem 
-          text="Emergency Alerts"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(Bell, sectionColors.notifications)}
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.emergencyAlerts,
-            () => toggleNotificationSetting("emergencyAlerts")
-          )}
         />
       </View>
 
@@ -170,24 +125,13 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           )}
         />
         <ListItem 
-          text="Large Text"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(Type, sectionColors.display)}
-          bottomSeparator
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            displaySettings.largeText,
-            () => toggleDisplaySetting("largeText")
-          )}
-        />
-        <ListItem 
           text="Compact News View"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(LayoutDashboard, sectionColors.display)}
           containerStyle={themed($listItemContainer)}
           RightComponent={renderSwitch(
-            displaySettings.compactNewsView,
-            () => toggleDisplaySetting("compactNewsView")
+            newsStore.compactView,
+            () => newsStore.toggleCompactView()
           )}
         />
       </View>
@@ -219,17 +163,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
             () => toggleOtherSetting("autoLocation")
           )}
         />
-        <ListItem 
-          text="Save Browse History"
-          textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(History, sectionColors.general)}
-          bottomSeparator
-          containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            otherSettings.saveHistory,
-            () => toggleOtherSetting("saveHistory")
-          )}
-        />
+        
         <ListItem 
           text="Send Anonymous Analytics"
           textStyle={themed($listItemText)}
@@ -274,7 +208,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Info, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("About")}
           containerStyle={themed($listItemContainer)}
         />
       </View>
@@ -286,7 +220,6 @@ const $root: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 1,
   backgroundColor: colors.background,
   paddingHorizontal: spacing.md, 
-
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -295,7 +228,6 @@ const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 })
 
 const $listItemContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-
   paddingVertical: spacing.sm,
 })
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, ViewStyle, TextStyle, ScrollView } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
@@ -13,14 +13,13 @@ interface CategoryTabsProps {
   tabs: CategoryTab[]
   onTabChange: (tabId: string) => void
   initialTabId?: string
+  currentIndex?: number
 }
 
-export function CategoryTabs({ tabs, onTabChange, initialTabId }: CategoryTabsProps) {
-  const [activeTabId, setActiveTabId] = useState(initialTabId || tabs[0]?.id || "")
+export function CategoryTabs({ tabs, onTabChange, initialTabId, currentIndex }: CategoryTabsProps) {
   const { themed } = useAppTheme()
 
   const handleTabPress = (tabId: string) => {
-    setActiveTabId(tabId)
     onTabChange(tabId)
   }
 
@@ -32,7 +31,7 @@ export function CategoryTabs({ tabs, onTabChange, initialTabId }: CategoryTabsPr
       contentContainerStyle={themed($contentContainer)}
     >
       {tabs.map((tab, index) => {
-        const isActive = tab.id === activeTabId
+        const isActive = currentIndex !== undefined ? index === currentIndex : tab.id === initialTabId
         const isFirst = index === 0
         const isLast = index === tabs.length - 1
         

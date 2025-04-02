@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { HomeScreen } from "@/screens/HomeScreen"
 import { AlertsScreen } from "@/screens/AlertsScreen"
 import { NewsScreen } from "@/screens/NewsScreen"
-import { SettingsScreen } from "@/screens/SettingsScreen"
+import { SettingsStack } from "@/navigators/SettingsStack"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Home, Megaphone, Newspaper, Settings } from "lucide-react-native"
 import { Platform, View } from "react-native"
@@ -83,7 +83,7 @@ export function MainTabs() {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsStack}
         options={{
           tabBarIcon: ({ color, size, focused }) => (
             <View style={themed(focused ? $activeIconContainer : $iconContainer)}>

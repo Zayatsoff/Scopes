@@ -1,6 +1,6 @@
 import { FC, useState, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, TextStyle, RefreshControl, Linking, NativeSyntheticEvent, NativeScrollEvent } from "react-native"
+import { ViewStyle, View, TextStyle, RefreshControl, Linking, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text, Button } from "@/components"
@@ -19,6 +19,19 @@ import { WeatherAlertItem } from "@/models/WeatherAlert"
 import { EnhancedAlertCard } from "@/components/EnhancedAlertCard"
 import { useIsFocused } from "@react-navigation/native"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
+import { GestureDetector, Gesture } from "react-native-gesture-handler"
+import Animated, { 
+  useAnimatedStyle, 
+  withTiming, 
+  useSharedValue, 
+  runOnJS,
+  interpolate,
+  Extrapolation,
+  withSpring,
+  withDecay,
+  Easing,
+  cancelAnimation
+} from "react-native-reanimated"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
@@ -27,6 +40,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const { policeNewsStore, weatherAlertStore, api } = useStores()
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("weather")
+  const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [sortNewestFirst, setSortNewestFirst] = useState(true)
   const { progress, onScroll } = usePullToRefreshProgress()
@@ -35,6 +49,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const hydroListRef = useRef<FlashList<AlertItem>>(null)
   const trafficListRef = useRef<FlashList<AlertItem>>(null)
   const isFocused = useIsFocused()
+  const screenWidth = Dimensions.get("window").width
   
   // Track visited tabs and their scroll positions
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set())
@@ -58,6 +73,135 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     title: "Alerts",
     titleMode: "center",
   }, [themeContext])
+
+  // Handle tab change
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId)
+    setCurrentTabIndex(categoryTabs.findIndex(tab => tab.id === tabId))
+    
+    if (tabId === "weather") {
+      if (weatherAlertStore.items.length === 0) {
+        weatherAlertStore.fetchWeatherAlerts(api)
+      }
+    } else if (tabId === "police") {
+      if (policeNewsStore.items.length === 0) {
+        policeNewsStore.fetchPoliceNews(api)
+      }
+    } else {
+      setAlerts(generateMockAlerts(tabId))
+    }
+    
+    // Determine if this is the first visit to this tab
+    const isFirstVisit = !visitedTabs.has(tabId)
+    
+    // If first visit, scroll to top, otherwise restore previous position
+    setTimeout(() => {
+      if (isFirstVisit) {
+        // Scroll to top for first visit
+        scrollToTop()
+        // Mark tab as visited
+        setVisitedTabs(prev => new Set([...prev, tabId]))
+      } else {
+        // Restore previous scroll position
+        const savedPosition = scrollPositions.current[tabId] || 0
+        
+        const currentListRef = getListRefForTab(tabId)
+        if (currentListRef?.current) {
+          currentListRef.current.scrollToOffset({ 
+            offset: savedPosition, 
+            animated: false 
+          })
+        }
+      }
+    }, 100)
+  }
+
+  // Animation values for swipe
+  const translateX = useSharedValue(0)
+  const velocityX = useSharedValue(0)
+  const context = useSharedValue({ x: 0, startX: 0 })
+
+  // Gesture handlers
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      context.value = { 
+        x: translateX.value,
+        startX: translateX.value
+      }
+      // Cancel any ongoing animations when starting a new gesture
+      cancelAnimation(translateX)
+    })
+    .onUpdate((event) => {
+      const currentIndex = categoryTabs.findIndex(tab => tab.id === activeTab)
+      
+      // Apply resistance at the edges
+      if ((currentIndex === 0 && event.translationX > 0) || 
+          (currentIndex === categoryTabs.length - 1 && event.translationX < 0)) {
+        // Apply resistance by reducing the translation
+        const resistance = 0.3
+        translateX.value = context.value.startX + (event.translationX * resistance)
+      } else {
+        translateX.value = context.value.startX + event.translationX
+      }
+      
+      // Store velocity for spring animation
+      velocityX.value = event.velocityX
+    })
+    .onEnd(() => {
+      const currentIndex = categoryTabs.findIndex(tab => tab.id === activeTab)
+      const threshold = screenWidth * 0.25 // Reduced threshold for easier triggering
+      const velocity = velocityX.value
+
+      // Determine if we should switch tabs based on velocity and distance
+      const shouldSwitch = 
+        Math.abs(translateX.value) > threshold || 
+        Math.abs(velocity) > 300 // Reduced velocity threshold
+
+      if (shouldSwitch) {
+        if ((translateX.value > 0 || velocity > 0) && currentIndex > 0) {
+          // Swipe right - go to previous tab
+          const newIndex = currentIndex - 1
+          runOnJS(setCurrentTabIndex)(newIndex)
+          runOnJS(handleTabChange)(categoryTabs[newIndex].id)
+          translateX.value = withSpring(screenWidth, {
+            velocity: velocity,
+            damping: 15, // Reduced damping for snappier animation
+            stiffness: 300, // Increased stiffness for faster animation
+            mass: 0.5, // Reduced mass for lighter feel
+          }, () => {
+            translateX.value = 0
+          })
+        } else if ((translateX.value < 0 || velocity < 0) && currentIndex < categoryTabs.length - 1) {
+          // Swipe left - go to next tab
+          const newIndex = currentIndex + 1
+          runOnJS(setCurrentTabIndex)(newIndex)
+          runOnJS(handleTabChange)(categoryTabs[newIndex].id)
+          translateX.value = withSpring(-screenWidth, {
+            velocity: velocity,
+            damping: 15, // Reduced damping for snappier animation
+            stiffness: 300, // Increased stiffness for faster animation
+            mass: 0.5, // Reduced mass for lighter feel
+          }, () => {
+            translateX.value = 0
+          })
+        }
+      } else {
+        // Reset animation with spring for a more natural feel
+        translateX.value = withSpring(0, {
+          velocity: velocity,
+          damping: 15, // Reduced damping for snappier animation
+          stiffness: 300, // Increased stiffness for faster animation
+          mass: 0.5, // Reduced mass for lighter feel
+        })
+      }
+    })
+
+  // Animated style for content
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    }
+  })
 
   // Load initial alerts and police news
   useEffect(() => {
@@ -115,47 +259,6 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     }
   }
 
-  // Handle tab change
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId)
-    
-    if (tabId === "weather") {
-      if (weatherAlertStore.items.length === 0) {
-        weatherAlertStore.fetchWeatherAlerts(api)
-      }
-    } else if (tabId === "police") {
-      if (policeNewsStore.items.length === 0) {
-        policeNewsStore.fetchPoliceNews(api)
-      }
-    } else {
-      setAlerts(generateMockAlerts(tabId))
-    }
-    
-    // Determine if this is the first visit to this tab
-    const isFirstVisit = !visitedTabs.has(tabId)
-    
-    // If first visit, scroll to top, otherwise restore previous position
-    setTimeout(() => {
-      if (isFirstVisit) {
-        // Scroll to top for first visit
-        scrollToTop()
-        // Mark tab as visited
-        setVisitedTabs(prev => new Set([...prev, tabId]))
-      } else {
-        // Restore previous scroll position
-        const savedPosition = scrollPositions.current[tabId] || 0
-        
-        const currentListRef = getListRefForTab(tabId)
-        if (currentListRef?.current) {
-          currentListRef.current.scrollToOffset({ 
-            offset: savedPosition, 
-            animated: false 
-          })
-        }
-      }
-    }, 100)
-  }
-  
   // Handle refresh
   const onRefresh = async () => {
     setRefreshing(true)
@@ -258,18 +361,6 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     })
   }
 
-  // Custom RefreshControl 
-  const renderRefreshControl = () => (
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-      tintColor={theme.colors.transparent}
-      colors={[theme.colors.transparent]}
-      progressBackgroundColor={theme.colors.transparent}
-      progressViewOffset={20}
-    />
-  )
-
   // Render the appropriate list based on active tab
   const renderContent = () => {
     // Add a key to each FlashList to ensure proper remounting when switching tabs
@@ -291,7 +382,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
             estimatedItemSize={150}
             keyExtractor={(item) => item.id}
             contentContainerStyle={themed($listContent)}
-            refreshControl={renderRefreshControl()}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.transparent}
+                colors={[theme.colors.transparent]}
+                progressBackgroundColor={theme.colors.transparent}
+                progressViewOffset={20}
+              />
+            }
             onScroll={handleScroll}
             scrollEventThrottle={16}
             ListFooterComponent={<View style={{ height: 150 }} />}
@@ -335,7 +435,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
             estimatedItemSize={150}
             keyExtractor={(item) => item.id}
             contentContainerStyle={themed($listContent)}
-            refreshControl={renderRefreshControl()}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={theme.colors.transparent}
+                colors={[theme.colors.transparent]}
+                progressBackgroundColor={theme.colors.transparent}
+                progressViewOffset={20}
+              />
+            }
             onScroll={handleScroll}
             scrollEventThrottle={16}
             ListFooterComponent={<View style={{ height: 150 }} />}
@@ -370,7 +479,16 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           estimatedItemSize={150}
           keyExtractor={(item) => item.id}
           contentContainerStyle={themed($listContent)}
-          refreshControl={renderRefreshControl()}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.colors.transparent}
+              colors={[theme.colors.transparent]}
+              progressBackgroundColor={theme.colors.transparent}
+              progressViewOffset={20}
+            />
+          }
           onScroll={handleScroll}
           scrollEventThrottle={16}
           ListFooterComponent={<View style={{ height: 150 }} />}
@@ -387,6 +505,11 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     )
   }
 
+  // Initialize currentTabIndex
+  useEffect(() => {
+    setCurrentTabIndex(categoryTabs.findIndex(tab => tab.id === activeTab))
+  }, [])
+
   return (
     <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]} contentContainerStyle={themed($screenContent)}>
       {/* Sticky header section */}
@@ -395,7 +518,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           <CategoryTabs 
             tabs={categoryTabs}
             onTabChange={handleTabChange}
-            initialTabId="weather"
+            initialTabId={activeTab}
+            currentIndex={currentTabIndex}
           />
         </View>
         
@@ -431,9 +555,11 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       
       <PullToRefreshIndicator visible={refreshing} color={getCategoryColor()} progress={progress} />
       
-      <View style={themed($contentContainer)}>
-        {renderContent()}
-      </View>
+      <GestureDetector gesture={panGesture}>
+        <Animated.View style={[themed($contentContainer), contentAnimatedStyle]}>
+          {renderContent()}
+        </Animated.View>
+      </GestureDetector>
     </Screen>
   )
 })
