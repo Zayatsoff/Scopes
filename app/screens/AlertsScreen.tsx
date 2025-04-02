@@ -1,6 +1,6 @@
-import { FC, useState, useEffect, useRef } from "react"
+import { FC, useState, useEffect, useRef, useMemo } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, TextStyle, RefreshControl, Linking, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native"
+import { ViewStyle, View, TextStyle, RefreshControl, Linking, NativeSyntheticEvent, NativeScrollEvent, Dimensions, LayoutChangeEvent, Platform } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen, Text, Button } from "@/components"
@@ -30,7 +30,13 @@ import Animated, {
   withSpring,
   withDecay,
   Easing,
-  cancelAnimation
+  cancelAnimation,
+  useDerivedValue,
+  FadeIn,
+  FadeOut,
+  clamp,
+  useAnimatedScrollHandler,
+  SharedValue
 } from "react-native-reanimated"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
@@ -41,15 +47,18 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState("weather")
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
-  const [alerts, setAlerts] = useState<AlertItem[]>([])
+  const [alerts, setAlerts] = useState<Record<string, AlertItem[]>>({
+    hydro: [],
+    traffic: []
+  })
   const [sortNewestFirst, setSortNewestFirst] = useState(true)
-  const { progress, onScroll } = usePullToRefreshProgress()
+  const { progress, onScroll: pullRefreshOnScroll } = usePullToRefreshProgress()
   const weatherListRef = useRef<FlashList<WeatherAlertItem>>(null)
   const policeListRef = useRef<FlashList<PoliceNewsItem>>(null)
   const hydroListRef = useRef<FlashList<AlertItem>>(null)
   const trafficListRef = useRef<FlashList<AlertItem>>(null)
   const isFocused = useIsFocused()
-  const screenWidth = Dimensions.get("window").width
+  const { width: screenWidth, height: screenHeight } = Dimensions.get("window")
   
   // Track visited tabs and their scroll positions
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set())
@@ -59,6 +68,62 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     hydro: 0,
     traffic: 0
   })
+  const [containerLayout, setContainerLayout] = useState({ width: screenWidth, height: 0 })
+  const [allTabsPreloaded, setAllTabsPreloaded] = useState(false)
+
+  // Animation values for swipe
+  const translateX = useSharedValue(0)
+  const prevTranslateX = useSharedValue(0)
+  const isAnimating = useSharedValue(false)
+  const activeIndex = useSharedValue(currentTabIndex)
+  const scrollEnabled = useSharedValue(true)
+  
+  // Animation constants
+  const offscreenRight = screenWidth
+  const offscreenLeft = -screenWidth
+  const ANIMATION_CONFIG = useMemo(() => ({
+    timing: {
+      duration: 200, // Faster animation
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1), // Modified curve for faster feel
+    },
+    spring: {
+      damping: 18, // Less damping for faster animation
+      stiffness: 350, // Higher stiffness for quicker movement
+      mass: 0.6, // Lower mass for faster response
+      overshootClamping: false,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 2,
+    },
+    edge: {
+      damping: 12, 
+      stiffness: 200,
+      mass: 0.5,
+    }
+  }), [])
+
+  // Derive values for paralax and fade effects
+  const tabOpacity = useDerivedValue(() => {
+    return interpolate(
+      Math.abs(translateX.value),
+      [0, screenWidth * 0.8],
+      [1, 0.5], // Increased minimum opacity for better visibility
+      Extrapolation.CLAMP
+    )
+  })
+
+  const tabScale = useDerivedValue(() => {
+    return interpolate(
+      Math.abs(translateX.value),
+      [0, screenWidth],
+      [1, 0.96], // Less scale effect for faster perception
+      Extrapolation.CLAMP
+    )
+  })
+
+  // Update activeIndex when currentTabIndex changes
+  useEffect(() => {
+    activeIndex.value = currentTabIndex
+  }, [currentTabIndex, activeIndex])
 
   // Define category tabs
   const categoryTabs: CategoryTab[] = [
@@ -68,170 +133,244 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     { id: "traffic", label: "Road & Traffic", color: theme.colors.traffic },
   ]
 
+  // Preload all tab data when app mounts
+  useEffect(() => {
+    const preloadAllTabs = async () => {
+      // Preload weather alerts
+      if (weatherAlertStore.items.length === 0) {
+        weatherAlertStore.fetchWeatherAlerts(api)
+      }
+      
+      // Preload police news
+      if (policeNewsStore.items.length === 0) {
+        policeNewsStore.fetchPoliceNews(api)
+      }
+      
+      // Generate mock alerts for other tabs
+      const hydroAlerts = generateMockAlerts("hydro")
+      const trafficAlerts = generateMockAlerts("traffic")
+      
+      setAlerts({
+        hydro: hydroAlerts,
+        traffic: trafficAlerts
+      })
+      
+      // Mark all tabs as visited to prevent refreshing when first accessing
+      setVisitedTabs(new Set(["weather", "police", "hydro", "traffic"]))
+      setAllTabsPreloaded(true)
+    }
+    
+    preloadAllTabs()
+  }, [api, policeNewsStore, weatherAlertStore])
+
   // Set up the tab header with customized styling
   useTabHeader({
     title: "Alerts",
     titleMode: "center",
   }, [themeContext])
 
-  // Handle tab change
-  const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId)
-    setCurrentTabIndex(categoryTabs.findIndex(tab => tab.id === tabId))
-    
-    if (tabId === "weather") {
-      if (weatherAlertStore.items.length === 0) {
-        weatherAlertStore.fetchWeatherAlerts(api)
-      }
-    } else if (tabId === "police") {
-      if (policeNewsStore.items.length === 0) {
-        policeNewsStore.fetchPoliceNews(api)
-      }
-    } else {
-      setAlerts(generateMockAlerts(tabId))
+  // Handle container layout changes
+  useEffect(() => {
+    const updateLayout = () => {
+      const { width, height } = Dimensions.get('window')
+      setContainerLayout({ width, height })
     }
     
-    // Determine if this is the first visit to this tab
-    const isFirstVisit = !visitedTabs.has(tabId)
+    // Initial update
+    updateLayout()
     
-    // If first visit, scroll to top, otherwise restore previous position
-    setTimeout(() => {
-      if (isFirstVisit) {
-        // Scroll to top for first visit
-        scrollToTop()
-        // Mark tab as visited
-        setVisitedTabs(prev => new Set([...prev, tabId]))
-      } else {
-        // Restore previous scroll position
-        const savedPosition = scrollPositions.current[tabId] || 0
-        
-        const currentListRef = getListRefForTab(tabId)
-        if (currentListRef?.current) {
-          currentListRef.current.scrollToOffset({ 
-            offset: savedPosition, 
-            animated: false 
-          })
+    // Setup listener for dimension changes
+    const subscription = Dimensions.addEventListener('change', updateLayout)
+    
+    return () => {
+      subscription.remove()
+    }
+  }, [])
+
+  // Handle tab change with optimized animation
+  const handleTabChange = (tabId: string, animate = true) => {
+    const prevIndex = currentTabIndex
+    const newIndex = categoryTabs.findIndex(tab => tab.id === tabId)
+    
+    // Don't do anything if it's the same tab
+    if (prevIndex === newIndex) return
+    
+    // Update state immediately
+    setActiveTab(tabId)
+    setCurrentTabIndex(newIndex)
+    
+    // Direction of transition (-1 = right to left, 1 = left to right)
+    const direction = prevIndex < newIndex ? -1 : 1
+    const startPosition = direction * containerLayout.width
+    
+    if (animate) {
+      // Start animation sequence - much faster now
+      isAnimating.value = true
+      scrollEnabled.value = false
+      
+      // Setup animation to start from offscreen position
+      translateX.value = startPosition
+      
+      // Animate to centered position with optimized animation
+      translateX.value = withTiming(
+        0, 
+        {
+          duration: 250, // Much faster animation
+          easing: Easing.out(Easing.cubic),
+        },
+        () => {
+          // Mark animation as complete
+          isAnimating.value = false
+          scrollEnabled.value = true
         }
+      )
+    } else {
+      // Jump to position without animation
+      translateX.value = 0
+      isAnimating.value = false
+      scrollEnabled.value = true
+    }
+    
+    // Restore previous scroll position if available
+    setTimeout(() => {
+      const savedPosition = scrollPositions.current[tabId] || 0
+      const currentListRef = getListRefForTab(tabId)
+      
+      if (currentListRef?.current) {
+        currentListRef.current.scrollToOffset({ 
+          offset: savedPosition, 
+          animated: false 
+        })
       }
-    }, 100)
+    }, 0) // No delay needed now
   }
 
-  // Animation values for swipe
-  const translateX = useSharedValue(0)
-  const velocityX = useSharedValue(0)
-  const context = useSharedValue({ x: 0, startX: 0 })
-
-  // Gesture handlers
+  // Enhanced gesture handlers for more responsive swipe
   const panGesture = Gesture.Pan()
     .onStart(() => {
-      context.value = { 
-        x: translateX.value,
-        startX: translateX.value
-      }
-      // Cancel any ongoing animations when starting a new gesture
+      // Don't start a new gesture if we're already animating
+      if (isAnimating.value) return
+      
+      prevTranslateX.value = translateX.value
       cancelAnimation(translateX)
     })
     .onUpdate((event) => {
-      const currentIndex = categoryTabs.findIndex(tab => tab.id === activeTab)
-      
-      // Apply resistance at the edges
-      if ((currentIndex === 0 && event.translationX > 0) || 
-          (currentIndex === categoryTabs.length - 1 && event.translationX < 0)) {
-        // Apply resistance by reducing the translation
-        const resistance = 0.3
-        translateX.value = context.value.startX + (event.translationX * resistance)
-      } else {
-        translateX.value = context.value.startX + event.translationX
-      }
-      
-      // Store velocity for spring animation
-      velocityX.value = event.velocityX
+      // Don't track gesture if scrolling content
+      if (!scrollEnabled.value) return
+
+      // Apply the translation - with less resistance for faster response
+      translateX.value = prevTranslateX.value + event.translationX * 1.0
     })
-    .onEnd(() => {
-      const currentIndex = categoryTabs.findIndex(tab => tab.id === activeTab)
-      const threshold = screenWidth * 0.25 // Reduced threshold for easier triggering
-      const velocity = velocityX.value
+    .onEnd((event) => {
+      // Don't handle gesture if scrolling content
+      if (!scrollEnabled.value) {
+        translateX.value = withTiming(0, { duration: 200 })
+        return
+      }
 
-      // Determine if we should switch tabs based on velocity and distance
-      const shouldSwitch = 
-        Math.abs(translateX.value) > threshold || 
-        Math.abs(velocity) > 300 // Reduced velocity threshold
-
-      if (shouldSwitch) {
-        if ((translateX.value > 0 || velocity > 0) && currentIndex > 0) {
-          // Swipe right - go to previous tab
-          const newIndex = currentIndex - 1
-          runOnJS(setCurrentTabIndex)(newIndex)
-          runOnJS(handleTabChange)(categoryTabs[newIndex].id)
-          translateX.value = withSpring(screenWidth, {
-            velocity: velocity,
-            damping: 15, // Reduced damping for snappier animation
-            stiffness: 300, // Increased stiffness for faster animation
-            mass: 0.5, // Reduced mass for lighter feel
-          }, () => {
-            translateX.value = 0
-          })
-        } else if ((translateX.value < 0 || velocity < 0) && currentIndex < categoryTabs.length - 1) {
-          // Swipe left - go to next tab
-          const newIndex = currentIndex + 1
-          runOnJS(setCurrentTabIndex)(newIndex)
-          runOnJS(handleTabChange)(categoryTabs[newIndex].id)
-          translateX.value = withSpring(-screenWidth, {
-            velocity: velocity,
-            damping: 15, // Reduced damping for snappier animation
-            stiffness: 300, // Increased stiffness for faster animation
-            mass: 0.5, // Reduced mass for lighter feel
-          }, () => {
-            translateX.value = 0
-          })
-        }
+      const currentIndex = activeIndex.value
+      const maxIndex = categoryTabs.length - 1
+      
+      // More sensitive thresholds for faster switching
+      const threshold = containerLayout.width * 0.15 // 15% of width to trigger
+      const velocityThreshold = 300 // Lower velocity threshold
+      
+      const shouldGoToNextTab = 
+        (translateX.value < -threshold || event.velocityX < -velocityThreshold) && 
+        currentIndex < maxIndex
+        
+      const shouldGoToPrevTab = 
+        (translateX.value > threshold || event.velocityX > velocityThreshold) && 
+        currentIndex > 0
+      
+      if (shouldGoToNextTab) {
+        // Go to next tab with optimized animation
+        isAnimating.value = true
+        const nextIndex = currentIndex + 1
+        
+        // Use timing animation which can be faster than spring
+        translateX.value = withTiming(
+          offscreenLeft, 
+          { duration: 150 }, // Super quick transition
+          () => {
+            runOnJS(handleTabChange)(categoryTabs[nextIndex].id, false)
+          }
+        )
+      } else if (shouldGoToPrevTab) {
+        // Go to previous tab with optimized animation
+        isAnimating.value = true
+        const prevIndex = currentIndex - 1
+        
+        // Use timing animation which can be faster than spring
+        translateX.value = withTiming(
+          offscreenRight, 
+          { duration: 150 }, // Super quick transition
+          () => {
+            runOnJS(handleTabChange)(categoryTabs[prevIndex].id, false)
+          }
+        )
       } else {
-        // Reset animation with spring for a more natural feel
-        translateX.value = withSpring(0, {
-          velocity: velocity,
-          damping: 15, // Reduced damping for snappier animation
-          stiffness: 300, // Increased stiffness for faster animation
-          mass: 0.5, // Reduced mass for lighter feel
+        // Return to center with timing for predictable animation
+        translateX.value = withTiming(0, { 
+          duration: 150,
+          easing: Easing.out(Easing.cubic),
         })
       }
     })
+    .minDistance(5) // Lower minimum distance to detect swipe sooner
+    .enabled(true)
 
-  // Animated style for content
+  // Enhanced animated styles
   const contentAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: translateX.value }],
+      transform: [
+        { translateX: translateX.value },
+        { scale: tabScale.value }
+      ],
+      opacity: tabOpacity.value,
     }
   })
 
-  // Load initial alerts and police news
-  useEffect(() => {
-    // Fetch weather alerts if that's the active tab
-    if (activeTab === "weather") {
-      console.log("Fetching weather alerts because active tab is weather")
-      weatherAlertStore.fetchWeatherAlerts(api)
-    } else if (activeTab === "police") {
-      // Fetch police news
-      console.log("Fetching police news because active tab is police")
-      policeNewsStore.fetchPoliceNews(api)
-    } else {
-      // Generate mock alerts for other tabs
-      console.log(`Generating mock alerts for tab: ${activeTab}`)
-      const initialAlerts = generateMockAlerts(activeTab)
-      setAlerts(initialAlerts)
+  // Handle refresh with preloading for all tabs
+  const onRefresh = async () => {
+    setRefreshing(true)
+    
+    try {
+      // Refresh all data at once regardless of active tab
+      const promises = []
+      
+      // Refresh weather alerts
+      promises.push(weatherAlertStore.refreshWeatherAlerts(api))
+      
+      // Refresh police news
+      promises.push(policeNewsStore.refreshPoliceNews(api))
+      
+      // Refresh mock alerts
+      const hydroAlerts = generateMockAlerts("hydro")
+      const trafficAlerts = generateMockAlerts("traffic")
+      
+      // Wait for all refreshes to complete
+      await Promise.all(promises)
+      
+      // Update alerts
+      setAlerts({
+        hydro: hydroAlerts,
+        traffic: trafficAlerts
+      })
+      
+      // Scroll active tab to top
+      scrollToTop()
+    } catch (error) {
+      console.error("Error refreshing data:", error)
+    } finally {
+      setRefreshing(false)
     }
-  }, [api, policeNewsStore, weatherAlertStore, activeTab])
+  }
 
-  // Save active tab when screen loses focus
-  useEffect(() => {
-    if (!isFocused) {
-      // Save active tab to storage (TODO: implement storage method)
-    }
-  }, [isFocused, activeTab])
-
-  // Track scroll position for current tab
+  // Combined scroll handler that works for both swipe and pull-to-refresh
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    // Call the original onScroll handler
-    onScroll(event)
+    // Call the original onScroll handler for pull-to-refresh
+    pullRefreshOnScroll(event)
     
     // Save the scroll position for current tab
     const offset = event.nativeEvent.contentOffset.y
@@ -257,27 +396,6 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       // Reset saved position for this tab
       scrollPositions.current[activeTab] = 0
     }
-  }
-
-  // Handle refresh
-  const onRefresh = async () => {
-    setRefreshing(true)
-    
-    if (activeTab === "police") {
-      await policeNewsStore.refreshPoliceNews(api)
-    } else if (activeTab === "weather") {
-      await weatherAlertStore.refreshWeatherAlerts(api)
-    } else {
-      // Simulate API call delay
-      setTimeout(() => {
-        setAlerts(generateMockAlerts(activeTab))
-      }, 1000)
-    }
-    
-    // Scroll to top after refreshing
-    setTimeout(scrollToTop, 300)
-    
-    setRefreshing(false)
   }
 
   // Handle alert item press
@@ -322,9 +440,10 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     setSortNewestFirst(!sortNewestFirst)
   }
 
-  // Sort alerts based on date
-  const getSortedAlerts = () => {
-    return [...alerts].sort((a, b) => {
+  // Get sorted alerts for the current tab
+  const getSortedAlerts = (category: string) => {
+    const tabAlerts = alerts[category] || []
+    return [...tabAlerts].sort((a, b) => {
       const dateA = a.date ? new Date(a.date).getTime() : new Date(a.timestamp).getTime()
       const dateB = b.date ? new Date(b.date).getTime() : new Date(b.timestamp).getTime()
       return sortNewestFirst ? dateB - dateA : dateA - dateB
@@ -366,18 +485,19 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     // Add a key to each FlashList to ensure proper remounting when switching tabs
     if (activeTab === "police") {
       // Show Police News
-      console.log(`Rendering police news, items: ${policeNewsStore.sortedItems.length}`)
       return (
         <View style={themed($listWrapper)} key="police-list">
           <FlashList
             ref={policeListRef}
             data={policeNewsStore.sortedItems}
             renderItem={({ item }: { item: PoliceNewsItem }) => (
-              <EnhancedAlertCard 
-                item={item} 
-                onPress={() => handleAlertPress(item.link)}
-                categoryColor={theme.colors.police}
-              />
+              <Animated.View entering={FadeIn.duration(200)}>
+                <EnhancedAlertCard 
+                  item={item} 
+                  onPress={() => handleAlertPress(item.link)}
+                  categoryColor={theme.colors.police}
+                />
+              </Animated.View>
             )}
             estimatedItemSize={150}
             keyExtractor={(item) => item.id}
@@ -408,29 +528,30 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       )
     } else if (activeTab === "weather") {
       // Show Weather Alerts
-      console.log(`Rendering weather alerts, items: ${weatherAlertStore.sortedItems.length}`)
       return (
         <View style={themed($listWrapper)} key="weather-list">
           <FlashList
             ref={weatherListRef}
             data={weatherAlertStore.sortedItems}
             renderItem={({ item }: { item: WeatherAlertItem }) => (
-              <EnhancedAlertCard 
-                item={{
-                  id: item.id,
-                  title: item.title,
-                  excerpt: item.summary,
-                  link: item.link,
-                  date: item.pubDate,
-                  formattedDate: item.formattedDate,
-                  category: "weather",
-                  source: "Environment Canada",
-                  message: item.summary,
-                  timestamp: item.formattedDate
-                }}
-                onPress={() => handleAlertPress(item.link)}
-                categoryColor={theme.colors.weather}
-              />
+              <Animated.View entering={FadeIn.duration(200)}>
+                <EnhancedAlertCard 
+                  item={{
+                    id: item.id,
+                    title: item.title,
+                    excerpt: item.summary,
+                    link: item.link,
+                    date: item.pubDate,
+                    formattedDate: item.formattedDate,
+                    category: "weather",
+                    source: "Environment Canada",
+                    message: item.summary,
+                    timestamp: item.formattedDate
+                  }}
+                  onPress={() => handleAlertPress(item.link)}
+                  categoryColor={theme.colors.weather}
+                />
+              </Animated.View>
             )}
             estimatedItemSize={150}
             keyExtractor={(item) => item.id}
@@ -461,8 +582,9 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       )
     }
     
-    // Other categories - show mock alerts
-    const sortedAlerts = getSortedAlerts()
+    // Other categories - show preloaded mock alerts
+    const category = activeTab // 'hydro' or 'traffic'
+    const sortedAlerts = getSortedAlerts(category)
     
     return (
       <View style={themed($listWrapper)} key={`${activeTab}-list`}>
@@ -470,11 +592,13 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           ref={activeTab === "hydro" ? hydroListRef : trafficListRef}
           data={sortedAlerts}
           renderItem={({ item }) => (
-            <EnhancedAlertCard 
-              item={item} 
-              onPress={() => item.link && handleAlertPress(item.link)}
-              categoryColor={getCategoryColor()}
-            />
+            <Animated.View entering={FadeIn.duration(200)}>
+              <EnhancedAlertCard 
+                item={item} 
+                onPress={() => item.link && handleAlertPress(item.link)}
+                categoryColor={getCategoryColor()}
+              />
+            </Animated.View>
           )}
           estimatedItemSize={150}
           keyExtractor={(item) => item.id}
@@ -495,7 +619,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
           ListEmptyComponent={
             <View style={themed($emptyContainer)}>
               <Text
-                text="No alerts available. Pull down to refresh."
+                text={refreshing ? `Loading ${activeTab} alerts...` : `No ${activeTab} alerts available. Pull down to refresh.`}
                 style={themed($emptyText)}
               />
             </View>
@@ -511,7 +635,12 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   }, [])
 
   return (
-    <Screen style={themed($root)} preset="fixed" safeAreaEdges={["bottom"]} contentContainerStyle={themed($screenContent)}>
+    <Screen 
+      style={themed($root)} 
+      preset="fixed" 
+      safeAreaEdges={["bottom"]} 
+      contentContainerStyle={themed($screenContent)}
+    >
       {/* Sticky header section */}
       <View style={themed($stickyHeaderContainer)}>
         <View style={themed($categoryContainer)}>
