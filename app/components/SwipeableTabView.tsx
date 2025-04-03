@@ -141,30 +141,51 @@ export function SwipeableTabView<T extends string>({
       // Don't track gesture if scrolling content
       if (!scrollEnabled.value) return
 
-      // Apply the translation - with less resistance for faster response
-      translateX.value = prevTranslateX.value + event.translationX * 1.0
+      // Check if the gesture is more vertical than horizontal
+      // If the absolute vertical movement is greater than the horizontal movement,
+      // consider it a vertical scroll gesture and ignore it
+      const isVerticalSwipe = Math.abs(event.translationY) > Math.abs(event.translationX * 1.2)
+      
+      if (isVerticalSwipe) {
+        // Set the scrollEnabled to false so the tab view doesn't respond to this gesture
+        scrollEnabled.value = false
+        // Reset translation to avoid unwanted horizontal movement
+        translateX.value = 0
+        return
+      }
+      
+      // Apply the translation with a bit of resistance for better control
+      translateX.value = prevTranslateX.value + event.translationX * 0.8
     })
     .onEnd((event) => {
-      // Don't handle gesture if scrolling content
-      if (!scrollEnabled.value) {
-        translateX.value = withTiming(0, { duration: 200 })
+      // Re-enable scrolling for next gesture
+      scrollEnabled.value = true
+      
+      // Check if the gesture had significant vertical movement
+      const isVerticalSwipe = Math.abs(event.translationY) > Math.abs(event.translationX * 1.2)
+      
+      if (isVerticalSwipe) {
+        // If it was primarily a vertical swipe, don't change tabs
+        translateX.value = withTiming(0, { duration: 150 })
         return
       }
 
       const currentIdx = activeIndex.value
       const maxIndex = tabs.length - 1
       
-      // More sensitive thresholds for faster switching
-      const threshold = (containerLayout.width || screenWidth) * 0.15 // 15% of width to trigger
-      const velocityThreshold = 300 // Lower velocity threshold
+      // More sensitive thresholds for switching, but with direction check
+      const threshold = (containerLayout.width || screenWidth) * 0.2 // 20% of width to trigger
+      const velocityThreshold = 400 // Velocity threshold for intentional swipes
       
       const shouldGoToNextTab = 
         (translateX.value < -threshold || event.velocityX < -velocityThreshold) && 
-        currentIdx < maxIndex
+        currentIdx < maxIndex &&
+        Math.abs(event.velocityX) > Math.abs(event.velocityY) // Ensure horizontal velocity dominates
         
       const shouldGoToPrevTab = 
         (translateX.value > threshold || event.velocityX > velocityThreshold) && 
-        currentIdx > 0
+        currentIdx > 0 &&
+        Math.abs(event.velocityX) > Math.abs(event.velocityY) // Ensure horizontal velocity dominates
       
       if (shouldGoToNextTab) {
         // Go to next tab with optimized animation
@@ -200,7 +221,9 @@ export function SwipeableTabView<T extends string>({
         })
       }
     })
-    .minDistance(5) // Lower minimum distance to detect swipe sooner
+    .minDistance(10) // Increased minimum distance to detect intentional swipes
+    .activeOffsetX([-15, 15]) // Only activate after moving 15px horizontally
+    .failOffsetY([-10, 10]) // Fail the gesture if there's 10px of vertical movement first
     .enabled(!disableSwipe && isReady)
 
   // Enhanced animated styles

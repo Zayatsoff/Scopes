@@ -10,8 +10,9 @@ import type { ThemedStyle } from "@/theme"
 import { PoliceNewsItem } from "@/models/PoliceNews"
 import { WeatherAlertItem } from "@/models/WeatherAlert"
 import { AlertCategory } from "@/utils/alertCategoryUtils"
+import { TrafficAlertItem } from "@/models/TrafficAlert"
 
-type AlertData = AlertItem | PoliceNewsItem | WeatherAlertItem
+type AlertData = AlertItem | PoliceNewsItem | WeatherAlertItem | TrafficAlertItem
 
 interface AlertListViewProps<T extends AlertData> {
   /**
@@ -106,6 +107,18 @@ export function AlertListView<T extends AlertData>({
           />
         </Animated.View>
       )
+    } else if (category === "traffic" && "improvedHeadline" in item) {
+      // Traffic alert
+      const trafficItem = item as unknown as TrafficAlertItem
+      return (
+        <Animated.View entering={FadeIn.duration(200)}>
+          <EnhancedAlertCard 
+            item={trafficItem}
+            onPress={() => onAlertPress(`https://traffic.ottawa.ca/map/?incident=${trafficItem.id}`)}
+            categoryColor={categoryColor}
+          />
+        </Animated.View>
+      )
     } else {
       // Default for other alert types
       const alertItem = item as AlertItem | PoliceNewsItem
@@ -156,6 +169,10 @@ export function AlertListView<T extends AlertData>({
         }
         onScroll={onScroll}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={true}
+        scrollIndicatorInsets={{ right: 1 }}
+        overScrollMode="never"
+        bounces={true}
         ListFooterComponent={<View style={{ height: 150 }} />}
         ListEmptyComponent={getEmptyComponent()}
       />

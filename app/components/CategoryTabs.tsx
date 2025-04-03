@@ -18,8 +18,24 @@ interface CategoryTabsProps {
 
 export function CategoryTabs({ tabs, onTabChange, initialTabId, currentIndex }: CategoryTabsProps) {
   const { themed } = useAppTheme()
+  const [selectedTabId, setSelectedTabId] = useState(initialTabId || tabs[0]?.id || "")
+
+  // Keep local state in sync with props
+  useEffect(() => {
+    if (currentIndex !== undefined && tabs[currentIndex]) {
+      setSelectedTabId(tabs[currentIndex].id)
+    }
+  }, [currentIndex, tabs])
+
+  // Keep local state in sync with initialTabId prop
+  useEffect(() => {
+    if (initialTabId) {
+      setSelectedTabId(initialTabId)
+    }
+  }, [initialTabId])
 
   const handleTabPress = (tabId: string) => {
+    setSelectedTabId(tabId)
     onTabChange(tabId)
   }
 
@@ -31,7 +47,7 @@ export function CategoryTabs({ tabs, onTabChange, initialTabId, currentIndex }: 
       contentContainerStyle={themed($contentContainer)}
     >
       {tabs.map((tab, index) => {
-        const isActive = currentIndex !== undefined ? index === currentIndex : tab.id === initialTabId
+        const isActive = tab.id === selectedTabId
         const isFirst = index === 0
         const isLast = index === tabs.length - 1
         

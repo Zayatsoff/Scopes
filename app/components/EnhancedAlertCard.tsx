@@ -6,10 +6,11 @@ import { PoliceNewsItem } from "@/models/PoliceNews"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { AlertItem } from "./AlertCard"
-import { CloudSun, Zap, BusFront } from "lucide-react-native"
+import { CloudSun, Zap, BusFront, Calendar } from "lucide-react-native"
+import { TrafficAlertItem } from "@/models/TrafficAlert"
 
 export interface EnhancedAlertCardProps {
-  item: PoliceNewsItem | AlertItem
+  item: PoliceNewsItem | AlertItem | TrafficAlertItem
   onPress?: () => void
   categoryColor?: string
 }
@@ -22,7 +23,8 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
   const { themed, theme } = useAppTheme()
   
   // Get the item's category (if it's an AlertItem) or default to "police" for PoliceNewsItem
-  const category = 'category' in item ? item.category : "police"
+  const category = 'category' in item ? item.category : 
+                   'eventType' in item ? "traffic" : "police"
   
   // Get the appropriate icon based on category
   const getIcon = () => {
@@ -72,8 +74,82 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
       }
     }
     
+    if ('created' in item && item.created) {
+      try {
+        return new Date(item.created).toLocaleDateString();
+      } catch (e) {
+        return '';
+      }
+    }
+    
     return ('timestamp' in item) ? item.timestamp : '';
   }
+  
+  // Get title from item
+  const getTitle = () => {
+    if ('improvedHeadline' in item && item.improvedHeadline) return item.improvedHeadline;
+    if ('headline' in item) return item.headline;
+    if (item.title) return item.title;
+    if ('message' in item) return item.message;
+    return "";
+  }
+  
+  // Get description from item
+  const getDescription = () => {
+    if ('headline' in item && 'message' in item) return item.message;
+    if (item.excerpt) return item.excerpt;
+    if ('message' in item && !item.title) return "";
+    return "";
+  }
+  
+  // Check if item has an event type tag
+  const hasEventTypeTag = () => {
+    return 'eventType' in item && item.eventType;
+  }
+
+  // Format schedule dates for traffic alerts
+  const getScheduleInfo = () => {
+    if (!('schedule' in item) || !item.schedule || item.schedule.length === 0) return null;
+    
+    // Get the most relevant schedule item (first one)
+    const scheduleItem = item.schedule[0];
+    
+    if (!scheduleItem.startDateTime && !scheduleItem.endDateTime) return null;
+    
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return "";
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString(undefined, { 
+          month: 'short', 
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    };
+    
+    const startDate = formatDate(scheduleItem.startDateTime);
+    const endDate = formatDate(scheduleItem.endDateTime);
+    
+    if (startDate && endDate) {
+      return `${startDate} — ${endDate}`;
+    } else if (startDate) {
+      return `Starts: ${startDate}`;
+    } else if (endDate) {
+      return `Ends: ${endDate}`;
+    }
+    
+    return null;
+  };
+
+  // Check if the item has a schedule
+  const hasSchedule = () => {
+    return 'schedule' in item && item.schedule && item.schedule.length > 0 &&
+           (item.schedule[0].startDateTime || item.schedule[0].endDateTime);
+  };
 
   return (
     <Pressable 
@@ -87,26 +163,43 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
         <View style={themed($sourceContainer)}>
           {getIcon()}
           <Text 
-            text={'source' in item ? item.source : "Ottawa Police"} 
+            text={
+              'source' in item ? item.source : 
+              'generation_source' in item ? (item.generation_source === "MTO" ? "Ministry of Transportation" : "City of Ottawa Traffic") : 
+              "Ottawa Police"
+            } 
             style={[
               themed($source), 
               { color: getColor() }
             ]} 
           />
         </View>
+        
+        {hasEventTypeTag() && (
+          <View style={[themed($tagContainer), { backgroundColor: getColor() }]}>
+            <Text text={('eventType' in item) ? item.eventType : ""} style={themed($tagText)} />
+          </View>
+        )}
       </View>
 
       <Text
-        text={item.title || ('message' in item ? item.message : "")}
+        text={getTitle()}
         style={themed($title)}
         numberOfLines={3}
       />
 
       <Text 
-        text={item.excerpt || ('message' in item && !item.title ? "" : "")} 
+        text={getDescription()} 
         style={themed($description)} 
         numberOfLines={3} 
       />
+      
+      {hasSchedule() && (
+        <View style={themed($scheduleContainer)}>
+          <Calendar size={14} color={getColor()} />
+          <Text text={getScheduleInfo() || ""} style={themed($scheduleText)} />
+        </View>
+      )}
       
       <View style={themed($footer)}>
         <Text 
@@ -157,6 +250,20 @@ const $sourceContainer: ThemedStyle<ViewStyle> = () => ({
   gap: 4,
 })
 
+const $tagContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.xs,
+  paddingVertical: 2,
+  borderRadius: 4,
+  alignSelf: "flex-start",
+})
+
+const $tagText: ThemedStyle<TextStyle> = ({ typography }) => ({
+  fontSize: typography.sizes.xxs,
+  fontWeight: "bold",
+  color: "white",
+  textTransform: "uppercase",
+})
+
 const $source: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: typography.sizes.xs,
   fontWeight: "bold",
@@ -174,6 +281,20 @@ const $description: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.8,
   marginBottom: 8,
+})
+
+const $scheduleContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: spacing.xs,
+  gap: 4,
+})
+
+const $scheduleText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xs,
+  color: colors.text,
+  opacity: 0.8,
+  flex: 1,
 })
 
 const $footer: ThemedStyle<ViewStyle> = () => ({

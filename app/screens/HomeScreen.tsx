@@ -22,7 +22,7 @@ import { NewsCard } from "@/components/NewsCard"
 import { Linking } from "react-native"
 import { NewsItem } from "@/models/News"
 import { SectionHeader } from "@/components/SectionHeader"
-import { Siren, CloudSun } from "lucide-react-native"
+import { Siren, CloudSun, BusFront } from "lucide-react-native"
 import { useTabHeader } from "@/components/TabHeader"
 import { LoadingIcon } from "@/components/LoadingIcon"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
@@ -30,12 +30,13 @@ import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { PoliceSummaryCard } from "@/components/PoliceSummaryCard"
 import { WeatherAlertSummaryCard } from "@/components/WeatherAlertSummaryCard"
 import { WeatherSummaryCard } from "@/components/WeatherSummaryCard"
+import { TrafficSummaryCard } from "@/components/TrafficSummaryCard"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
   const { themed, theme } = useAppTheme()
-  const { newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, api } = useStores()
+  const { newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
   const [refreshing, setRefreshing] = useState(false)
   
@@ -154,7 +155,10 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     
     // Fetch weather summaries (for Home screen)
     weatherSummaryFetch()
-  }, [api, newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore])
+    
+    // Fetch traffic summaries
+    trafficSummaryFetch()
+  }, [api, newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore])
   
   // Fetch police summaries
   const policeSummaryFetch = () => {
@@ -176,6 +180,13 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       weatherSummaryStore.fetchWeatherSummaries(api)
     }
   }
+  
+  // Fetch traffic summaries
+  const trafficSummaryFetch = () => {
+    if (trafficSummaryStore.items.length === 0) {
+      trafficSummaryStore.fetchTrafficSummaries(api)
+    }
+  }
 
   const handleNewsPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
@@ -189,11 +200,12 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const onRefresh = async () => {
     try {
       setRefreshing(true)
+      // Only refresh summaries and news, not alerts when pulling down on Home screen
       await Promise.all([
         newsStore.refreshNews(api),
         policeSummaryStore.refreshPoliceSummaries(api),
-        weatherAlertStore.refreshWeatherAlerts(api),
-        weatherSummaryStore.refreshWeatherSummaries(api)
+        weatherSummaryStore.refreshWeatherSummaries(api),
+        trafficSummaryStore.refreshTrafficSummaries(api)
       ])
     } catch (error) {
       console.error("Error refreshing data:", error)
@@ -316,6 +328,32 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           </View>
         )}
       </View>
+      
+      {/* Traffic Summary Section */}
+      <View style={themed($trafficSummarySection)}>
+        <View style={themed($sectionTitleContainer)}>
+          <BusFront size={20} color={theme.colors.traffic} />
+          <Text style={[themed($sectionTitle), { color: theme.colors.traffic }]}>
+            Traffic Updates
+          </Text>
+        </View>
+        
+        {trafficSummaryStore.isLoading && (
+          <View style={themed($loadingContainer)}>
+            <LoadingIcon />
+          </View>
+        )}
+        
+        {!trafficSummaryStore.isLoading && trafficSummaryStore.latestSummary && (
+          <TrafficSummaryCard item={trafficSummaryStore.latestSummary} />
+        )}
+        
+        {!trafficSummaryStore.isLoading && !trafficSummaryStore.latestSummary && (
+          <View style={themed($emptyContainer)}>
+            <Text style={themed($emptyText)}>No traffic updates available.</Text>
+          </View>
+        )}
+      </View>
 
       {/* 1x4 Grid of news items */}
       <View style={themed($newsSection)}>
@@ -385,10 +423,14 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
 const $weatherSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
   paddingTop: spacing.md,
-
 })
 
 const $policeSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
+  paddingTop: spacing.md,
+})
+
+const $trafficSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
   paddingTop: spacing.md,
 })

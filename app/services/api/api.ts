@@ -11,6 +11,7 @@ import type { ApiConfig } from "./api.types"
 import { NewsApi } from "./news-api"
 import { PoliceNewsApi } from "./police-news-api"
 import { WeatherAlertsApi } from "./weather-alerts-api"
+import { TrafficAlertsApi } from "./traffic-alerts-api"
 
 /**
  * Configuring the apisauce instance.
@@ -30,6 +31,7 @@ export class Api {
   news: NewsApi
   policeNews: PoliceNewsApi
   weatherAlerts: WeatherAlertsApi
+  trafficAlerts: TrafficAlertsApi
 
   /**
    * Set up our API instance. Keep this lightweight!
@@ -52,6 +54,9 @@ export class Api {
     
     // Initialize weather alerts API
     this.weatherAlerts = new WeatherAlertsApi(this.apisauce)
+    
+    // Initialize traffic alerts API
+    this.trafficAlerts = new TrafficAlertsApi(this.apisauce)
   }
 }
 

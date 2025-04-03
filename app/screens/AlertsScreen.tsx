@@ -26,19 +26,18 @@ interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Aler
 
 export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScreen() {
   const { theme, themed, themeContext } = useAppTheme()
-  const { policeNewsStore, weatherAlertStore, api } = useStores()
+  const { policeNewsStore, weatherAlertStore, trafficAlertsStore, api } = useStores()
   const [refreshing, setRefreshing] = useState(false)
   const [activeTab, setActiveTab] = useState<AlertCategory>("weather")
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [alerts, setAlerts] = useState<Record<string, AlertItem[]>>({
-    hydro: [],
-    traffic: []
+    hydro: []
   })
   const { progress, onScroll: pullRefreshOnScroll } = usePullToRefreshProgress()
   const weatherListRef = useRef<FlashList<WeatherAlertItem>>(null)
   const policeListRef = useRef<FlashList<PoliceNewsItem>>(null)
   const hydroListRef = useRef<FlashList<AlertItem>>(null)
-  const trafficListRef = useRef<FlashList<AlertItem>>(null)
+  const trafficListRef = useRef<FlashList<any>>(null)
   const isFocused = useIsFocused()
   const { width: screenWidth } = Dimensions.get("window")
   
@@ -84,20 +83,23 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         policeNewsStore.fetchPoliceNews(api)
       }
       
+      // Preload traffic alerts
+      if (trafficAlertsStore.items.length === 0) {
+        trafficAlertsStore.fetchTrafficAlerts(api)
+      }
+      
       // Generate mock alerts for other tabs
       const hydroAlerts = generateMockAlerts("hydro")
-      const trafficAlerts = generateMockAlerts("traffic")
       
       setAlerts({
-        hydro: hydroAlerts,
-        traffic: trafficAlerts
+        hydro: hydroAlerts
       })
       
       setAllTabsPreloaded(true)
     }
     
     preloadAllTabs()
-  }, [api, policeNewsStore, weatherAlertStore])
+  }, [api, policeNewsStore, weatherAlertStore, trafficAlertsStore])
 
   // Set up the tab header with customized styling
   useTabHeader({
@@ -126,6 +128,11 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   // Handle tab change
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId as AlertCategory)
+    // Find the index of the selected tab and update currentTabIndex
+    const tabIndex = categoryTabs.findIndex(tab => tab.id === tabId)
+    if (tabIndex !== -1) {
+      setCurrentTabIndex(tabIndex)
+    }
   }
 
   // Get list ref for the given tab
@@ -159,7 +166,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     setRefreshing(true)
     
     try {
-      // Refresh all data at once regardless of active tab
+      // Refresh weather alerts, police news, and traffic alerts when pulling down on Alerts screen
       const promises = []
       
       // Refresh weather alerts
@@ -168,17 +175,18 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       // Refresh police news
       promises.push(policeNewsStore.refreshPoliceNews(api))
       
+      // Refresh traffic alerts
+      promises.push(trafficAlertsStore.refreshTrafficAlerts(api))
+      
       // Refresh mock alerts
       const hydroAlerts = generateMockAlerts("hydro")
-      const trafficAlerts = generateMockAlerts("traffic")
       
       // Wait for all refreshes to complete
       await Promise.all(promises)
       
       // Update alerts
       setAlerts({
-        hydro: hydroAlerts,
-        traffic: trafficAlerts
+        hydro: hydroAlerts
       })
       
       // Scroll active tab to top
@@ -206,6 +214,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       return policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First"
     } else if (activeTab === "weather") {
       return weatherAlertStore.sortNewestFirst ? "Newest First" : "Oldest First"
+    } else if (activeTab === "traffic") {
+      return trafficAlertsStore.sortNewestFirst ? "Newest First" : "Oldest First"
     } else {
       // For mock data
       return "Newest First"
@@ -218,6 +228,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       policeNewsStore.toggleSortOrder()
     } else if (activeTab === "weather") {
       weatherAlertStore.toggleSortOrder()
+    } else if (activeTab === "traffic") {
+      trafficAlertsStore.toggleSortOrder()
     }
   }
 
@@ -232,7 +244,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     } else if (activeTab === "hydro") {
       return alerts.hydro || []
     } else if (activeTab === "traffic") {
-      return alerts.traffic || []
+      return trafficAlertsStore.sortedItems as any[]
     } else {
       return []
     }
@@ -245,6 +257,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         return weatherAlertStore.isLoading
       case "police":
         return policeNewsStore.isLoading
+      case "traffic":
+        return trafficAlertsStore.isLoading
       default:
         return false
     }
@@ -257,6 +271,8 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         return weatherAlertStore.error || undefined
       case "police":
         return policeNewsStore.error || undefined
+      case "traffic":
+        return trafficAlertsStore.error || undefined
       default:
         return undefined
     }
@@ -287,11 +303,22 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       
       <SwipeableTabView
         activeTab={activeTab}
-        setActiveTab={setActiveTab as (tab: string) => void}
+        setActiveTab={(tabId) => {
+          // Ensure both activeTab and currentTabIndex are updated together
+          setActiveTab(tabId as AlertCategory)
+          const index = categoryTabs.findIndex(tab => tab.id === tabId)
+          if (index !== -1) {
+            setCurrentTabIndex(index)
+          }
+        }}
         tabs={categoryTabs.map(tab => tab.id) as readonly string[]}
         currentIndex={currentTabIndex}
-        setCurrentIndex={setCurrentTabIndex}
+        setCurrentIndex={(index) => {
+          setCurrentTabIndex(index)
+          setActiveTab(categoryTabs[index].id as AlertCategory)
+        }}
         containerLayout={containerLayout}
+        disableSwipe={false}
       >
         <AlertListView
           category={activeTab}
