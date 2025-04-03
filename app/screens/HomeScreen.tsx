@@ -27,10 +27,7 @@ import { useTabHeader } from "@/components/TabHeader"
 import { LoadingIcon } from "@/components/LoadingIcon"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
-import { PoliceSummaryCard } from "@/components/PoliceSummaryCard"
-import { WeatherAlertSummaryCard } from "@/components/WeatherAlertSummaryCard"
-import { WeatherSummaryCard } from "@/components/WeatherSummaryCard"
-import { TrafficSummaryCard } from "@/components/TrafficSummaryCard"
+import { CompactSummaryCards } from "@/components/CompactSummaryCards"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -277,82 +274,17 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         </View>
       </Animated.View>
 
-      {/* Weather Summary Section */}
-      <View style={themed($weatherSummarySection)}>
-        <View style={themed($sectionTitleContainer)}>
-          <CloudSun size={20} color={theme.colors.weather} />
-          <Text style={[themed($sectionTitle), { color: theme.colors.weather }]}>
-            Weather Updates
-          </Text>
-        </View>
-        
-        {weatherSummaryStore.isLoading && (
-          <View style={themed($loadingContainer)}>
-            <LoadingIcon />
-          </View>
-        )}
-        
-        {!weatherSummaryStore.isLoading && weatherSummaryStore.latestSummary && (
-          <WeatherSummaryCard item={weatherSummaryStore.latestSummary} />
-        )}
-        
-        {!weatherSummaryStore.isLoading && !weatherSummaryStore.latestSummary && (
-          <View style={themed($emptyContainer)}>
-            <Text style={themed($emptyText)}>No weather updates available.</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Police Summary Section */}
-      <View style={themed($policeSummarySection)}>
-        <View style={themed($sectionTitleContainer)}>
-          <Siren size={20} color={theme.colors.police} />
-          <Text style={[themed($sectionTitle), { color: theme.colors.police }]}>
-            Police Updates
-          </Text>
-        </View>
-        
-        {policeSummaryStore.isLoading && (
-          <View style={themed($loadingContainer)}>
-            <LoadingIcon />
-          </View>
-        )}
-        
-        {!policeSummaryStore.isLoading && policeSummaryStore.latestSummary && (
-          <PoliceSummaryCard item={policeSummaryStore.latestSummary} />
-        )}
-        
-        {!policeSummaryStore.isLoading && !policeSummaryStore.latestSummary && (
-          <View style={themed($emptyContainer)}>
-            <Text style={themed($emptyText)}>No police updates available.</Text>
-          </View>
-        )}
-      </View>
-      
-      {/* Traffic Summary Section */}
-      <View style={themed($trafficSummarySection)}>
-        <View style={themed($sectionTitleContainer)}>
-          <BusFront size={20} color={theme.colors.traffic} />
-          <Text style={[themed($sectionTitle), { color: theme.colors.traffic }]}>
-            Traffic Updates
-          </Text>
-        </View>
-        
-        {trafficSummaryStore.isLoading && (
-          <View style={themed($loadingContainer)}>
-            <LoadingIcon />
-          </View>
-        )}
-        
-        {!trafficSummaryStore.isLoading && trafficSummaryStore.latestSummary && (
-          <TrafficSummaryCard item={trafficSummaryStore.latestSummary} />
-        )}
-        
-        {!trafficSummaryStore.isLoading && !trafficSummaryStore.latestSummary && (
-          <View style={themed($emptyContainer)}>
-            <Text style={themed($emptyText)}>No traffic updates available.</Text>
-          </View>
-        )}
+      {/* City Updates Section - Compact cards for Police, Weather, and Traffic */}
+      <View style={themed($updatesSection)}>
+        <SectionHeader title="City Updates" />
+        <CompactSummaryCards
+          policeSummary={policeSummaryStore.latestSummary || undefined}
+          weatherSummary={weatherSummaryStore.latestSummary || undefined}
+          trafficSummary={trafficSummaryStore.latestSummary || undefined}
+          policeLoading={policeSummaryStore.isLoading}
+          weatherLoading={weatherSummaryStore.isLoading}
+          trafficLoading={trafficSummaryStore.isLoading}
+        />
       </View>
 
       {/* 1x4 Grid of news items */}
@@ -420,19 +352,9 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
   textAlignVertical: 'center',
 })
 
-const $weatherSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $updatesSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
-  paddingTop: spacing.md,
-})
-
-const $policeSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.md,
-  paddingTop: spacing.md,
-})
-
-const $trafficSummarySection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.md,
-  paddingTop: spacing.md,
+  paddingVertical: spacing.sm,
 })
 
 const $sectionTitleContainer: ThemedStyle<ViewStyle> = () => ({
