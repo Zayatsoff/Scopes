@@ -99,6 +99,16 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
     if ('headline' in item && 'message' in item) return item.message;
     if (item.excerpt) return item.excerpt;
     if ('message' in item && !item.title) return "";
+    
+    // Include locations affected for weather alerts if available
+    if ('locationsAffected' in item && Array.isArray(item.locationsAffected) && item.locationsAffected.length > 0) {
+      const locations = item.locationsAffected.join(", ");
+      if (item.excerpt) {
+        return `${item.excerpt}\n\nRegions affected: ${locations}`;
+      }
+      return `Regions affected: ${locations}`;
+    }
+    
     return "";
   }
   

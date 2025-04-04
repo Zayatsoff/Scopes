@@ -6,6 +6,7 @@ import { WeatherAlertStoreModel } from "./WeatherAlert"
 import { WeatherSummaryStoreModel } from "./WeatherSummary"
 import { TrafficAlertsStoreModel } from "./TrafficAlert"
 import { TrafficSummaryStoreModel } from "./TrafficSummary"
+import { CityStatusStoreModel } from "./CityStatus"
 import { Api, api } from "@/services/api/api"
 
 /**
@@ -19,6 +20,7 @@ export const RootStoreModel = types.model("RootStore").props({
   weatherSummaryStore: types.optional(WeatherSummaryStoreModel, {}),
   trafficAlertsStore: types.optional(TrafficAlertsStoreModel, {}),
   trafficSummaryStore: types.optional(TrafficSummaryStoreModel, {}),
+  cityStatusStore: types.optional(CityStatusStoreModel, {}),
 })
 .views((self) => ({
   get api() {

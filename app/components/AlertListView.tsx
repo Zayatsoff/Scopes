@@ -11,6 +11,7 @@ import { PoliceNewsItem } from "@/models/PoliceNews"
 import { WeatherAlertItem } from "@/models/WeatherAlert"
 import { AlertCategory } from "@/utils/alertCategoryUtils"
 import { TrafficAlertItem } from "@/models/TrafficAlert"
+import { formatRelativeTime } from "@/utils/formatRelativeTime"
 
 type AlertData = AlertItem | PoliceNewsItem | WeatherAlertItem | TrafficAlertItem
 
@@ -87,21 +88,29 @@ export function AlertListView<T extends AlertData>({
     if (category === "weather" && "summary" in item) {
       // Weather alert
       const weatherItem = item as unknown as WeatherAlertItem
+      
+      // Log the item to verify it's being processed correctly
+      console.log(`Rendering weather alert: ${weatherItem.id}, title: ${weatherItem.title}`)
+      
+      // Create a properly formatted item for the alert card
+      const cardItem = {
+        id: weatherItem.id,
+        title: weatherItem.title,
+        excerpt: weatherItem.summary || "",
+        link: weatherItem.link || "https://weather.gc.ca/index_e.html", // Default to Environment Canada
+        date: weatherItem.pubDate,
+        formattedDate: weatherItem.formattedDate || formatRelativeTime(weatherItem.pubDate),
+        category: "weather",
+        source: "Environment Canada",
+        message: weatherItem.summary || "",
+        timestamp: weatherItem.formattedDate || formatRelativeTime(weatherItem.pubDate),
+        locationsAffected: weatherItem.locationsAffected || []
+      }
+      
       return (
         <Animated.View entering={FadeIn.duration(200)}>
           <EnhancedAlertCard 
-            item={{
-              id: weatherItem.id,
-              title: weatherItem.title,
-              excerpt: weatherItem.summary,
-              link: weatherItem.link,
-              date: weatherItem.pubDate,
-              formattedDate: weatherItem.formattedDate,
-              category: "weather",
-              source: "Environment Canada",
-              message: weatherItem.summary,
-              timestamp: weatherItem.formattedDate
-            }}
+            item={cardItem}
             onPress={() => onAlertPress(weatherItem.link)}
             categoryColor={categoryColor}
           />

@@ -3,12 +3,19 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 import { NotificationSettingsScreen } from "@/screens/NotificationSettingsScreen"
 import { AboutScreen } from "@/screens/AboutScreen"
+import { SchoolBusProviderScreen } from "@/screens/SchoolBusProviderScreen"
+import { FeedbackScreen } from "@/screens/FeedbackScreen"
 import { useAppTheme } from "@/utils/useAppTheme"
 
 export type SettingsStackParamList = {
   Settings: undefined
   NotificationSettings: undefined
   About: undefined
+  SchoolBusProvider: {
+    currentProvider: string
+    onSelect: (provider: string) => void
+  }
+  Feedback: undefined
 }
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>()
@@ -27,6 +34,8 @@ export function SettingsStack() {
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="About" component={AboutScreen} />
+      <Stack.Screen name="SchoolBusProvider" component={SchoolBusProviderScreen} />
+      <Stack.Screen name="Feedback" component={FeedbackScreen} />
     </Stack.Navigator>
   )
 } 

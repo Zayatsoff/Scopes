@@ -28,12 +28,13 @@ import { LoadingIcon } from "@/components/LoadingIcon"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { CompactSummaryCards } from "@/components/CompactSummaryCards"
+import { CityStatus } from "@/components/CityStatus"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
   const { themed, theme } = useAppTheme()
-  const { newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore, api } = useStores()
+  const { newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore, cityStatusStore, api } = useStores()
   const screenWidth = Dimensions.get("window").width
   const [refreshing, setRefreshing] = useState(false)
   
@@ -155,7 +156,10 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     
     // Fetch traffic summaries
     trafficSummaryFetch()
-  }, [api, newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore])
+    
+    // Fetch city status information
+    cityStatusFetch()
+  }, [api, newsStore, policeSummaryStore, weatherAlertStore, weatherSummaryStore, trafficSummaryStore, cityStatusStore])
   
   // Fetch police summaries
   const policeSummaryFetch = () => {
@@ -185,6 +189,18 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     }
   }
 
+  // Fetch city status
+  const cityStatusFetch = () => {
+    if (cityStatusStore.items.length === 0) {
+      cityStatusStore.fetchCityStatus(api)
+      
+      // Add school bus item directly for testing
+      setTimeout(() => {
+        cityStatusStore.addSchoolBusItem()
+      }, 2000)
+    }
+  }
+
   const handleNewsPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
@@ -202,7 +218,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         newsStore.refreshNews(api),
         policeSummaryStore.refreshPoliceSummaries(api),
         weatherSummaryStore.refreshWeatherSummaries(api),
-        trafficSummaryStore.refreshTrafficSummaries(api)
+        trafficSummaryStore.refreshTrafficSummaries(api),
+        cityStatusStore.refreshCityStatus(api)
       ])
     } catch (error) {
       console.error("Error refreshing data:", error)
@@ -273,10 +290,20 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           </View>
         </View>
       </Animated.View>
-
+      {/* City Status Section */}
+      <View style={themed($updatesSection)}>
+        <SectionHeader title="City Status" />
+        <CityStatus 
+          statusItems={[
+            ...cityStatusStore.items,
+            
+          ]}
+          loading={cityStatusStore.isLoading}
+        />
+      </View>
       {/* City Updates Section - Compact cards for Police, Weather, and Traffic */}
       <View style={themed($updatesSection)}>
-        <SectionHeader title="City Updates" />
+        <SectionHeader title="City Summaries" />
         <CompactSummaryCards
           policeSummary={policeSummaryStore.latestSummary || undefined}
           weatherSummary={weatherSummaryStore.latestSummary || undefined}
@@ -286,6 +313,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
           trafficLoading={trafficSummaryStore.isLoading}
         />
       </View>
+      
 
       {/* 1x4 Grid of news items */}
       <View style={themed($newsSection)}>
@@ -354,7 +382,7 @@ const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) =>
 
 const $updatesSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
-  paddingVertical: spacing.sm,
+  paddingTop: spacing.sm,
 })
 
 const $sectionTitleContainer: ThemedStyle<ViewStyle> = () => ({

@@ -5,6 +5,7 @@ import { Text, Button } from "@/components"
 import { CategoryTabs, CategoryTab } from "@/components/CategoryTabs"
 import { AlertCategory, CategoryInfo } from "@/utils/alertCategoryUtils"
 import type { ThemedStyle } from "@/theme"
+import type { LucideIcon } from "lucide-react-native"
 
 interface AlertCategoryHeaderProps {
   /**
@@ -41,6 +42,11 @@ interface AlertCategoryHeaderProps {
    * Function to call when the sort button is pressed
    */
   onSortPress: () => void
+
+  /**
+   * Icon to display for the sort button
+   */
+  sortIcon?: LucideIcon
 }
 
 export function AlertCategoryHeader({
@@ -50,9 +56,10 @@ export function AlertCategoryHeader({
   activeCategoryInfo,
   onTabChange,
   sortButtonText,
-  onSortPress
+  onSortPress,
+  sortIcon
 }: AlertCategoryHeaderProps) {
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
 
   return (
     <View style={themed($stickyHeaderContainer)}>
@@ -82,6 +89,9 @@ export function AlertCategoryHeader({
           onPress={onSortPress}
           style={themed($sortButton)}
           textStyle={themed($sortButtonText)}
+          RightAccessory={sortIcon ? 
+            () => React.createElement(sortIcon, { size: 18, color: theme.colors.text }) : 
+            undefined}
         />
       </View>
     </View>
@@ -132,9 +142,10 @@ const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 14,
-  color: colors.tint,
+  fontSize: 16,
+  color: colors.text,
   backgroundColor: colors.transparent,
-  paddingHorizontal: 12,
+  paddingHorizontal: 4,
+  marginRight: 4,
   borderWidth: 0,
 }) 

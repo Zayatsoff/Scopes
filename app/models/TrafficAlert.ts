@@ -56,28 +56,44 @@ export const TrafficAlertsStoreModel = types
     sortNewestFirst: types.optional(types.boolean, true), // Default newest first
   })
   .actions(withSetPropAction)
-  .views((self) => ({
+  .views((store) => ({
     get sortedItems() {
-      return [...self.items].sort((a, b) => {
+      return [...store.items].sort((a, b) => {
         const dateA = new Date(a.created).getTime()
         const dateB = new Date(b.created).getTime()
-        return self.sortNewestFirst ? dateB - dateA : dateA - dateB
+        return store.sortNewestFirst ? dateB - dateA : dateA - dateB
       })
     },
   }))
-  .actions((self) => ({
-    toggleSortOrder: () => {
-      self.setProp("sortNewestFirst", !self.sortNewestFirst)
-    },
+  .actions((store) => {
+    // Define actions that don't depend on other actions
+    const clearItems = () => {
+      store.setProp("items", [])
+    }
     
-    fetchTrafficAlerts: async (api: Api) => {
-      self.setProp("isLoading", true)
-      self.setProp("error", null)
+    const toggleSortOrder = () => {
+      store.setProp("sortNewestFirst", !store.sortNewestFirst)
+    }
+    
+    // Return the actions to make them available
+    return {
+      clearItems,
+      toggleSortOrder,
+    }
+  })
+  .actions((store) => {
+    // Define actions that depend on the previously defined actions
+    const fetchTrafficAlerts = async (api: Api) => {
+      store.setProp("isLoading", true)
+      store.setProp("error", null)
       
       try {
         const response = await api.trafficAlerts.getTrafficAlerts()
         
         if (response.ok && response.data?.trafficAlerts?.events) {
+          // Clear old cached items before setting new ones
+          store.clearItems()
+          
           // Process the traffic alerts data to add formatted dates and convert numeric IDs to strings
           const processedItems = response.data.trafficAlerts.events.map((item: any) => ({
             ...item,
@@ -93,27 +109,30 @@ export const TrafficAlertsStoreModel = types
             formattedDate: formatRelativeTime(item.created),
           }))
           
-          self.setProp("items", processedItems)
+          store.setProp("items", processedItems)
         } else {
           console.error("Failed to fetch traffic alerts:", response.problem, response.status)
-          self.setProp("error", "Failed to fetch traffic alerts")
+          store.setProp("error", "Failed to fetch traffic alerts")
         }
       } catch (error) {
         console.error("Traffic alerts fetch error:", error)
-        self.setProp("error", String(error))
+        store.setProp("error", String(error))
       } finally {
-        self.setProp("isLoading", false)
+        store.setProp("isLoading", false)
       }
-    },
+    }
     
-    refreshTrafficAlerts: async (api: Api) => {
-      self.setProp("isLoading", true)
-      self.setProp("error", null)
+    const refreshTrafficAlerts = async (api: Api) => {
+      store.setProp("isLoading", true)
+      store.setProp("error", null)
       
       try {
         const response = await api.trafficAlerts.getTrafficAlerts()
         
         if (response.ok && response.data?.trafficAlerts?.events) {
+          // Clear old cached items before setting new ones
+          store.clearItems()
+          
           // Process the traffic alerts data to add formatted dates and convert numeric IDs to strings
           const processedItems = response.data.trafficAlerts.events.map((item: any) => ({
             ...item,
@@ -129,19 +148,25 @@ export const TrafficAlertsStoreModel = types
             formattedDate: formatRelativeTime(item.created),
           }))
           
-          self.setProp("items", processedItems)
+          store.setProp("items", processedItems)
         } else {
-          self.setProp("error", "Failed to refresh traffic alerts")
+          store.setProp("error", "Failed to refresh traffic alerts")
         }
       } catch (error) {
-        self.setProp("error", String(error))
+        store.setProp("error", String(error))
       } finally {
-        self.setProp("isLoading", false)
+        store.setProp("isLoading", false)
       }
       
       return true // Return success indicator for the refresh control
     }
-  }))
+    
+    // Return the actions to make them available
+    return {
+      fetchTrafficAlerts,
+      refreshTrafficAlerts,
+    }
+  })
 
 export interface TrafficAlertsStore extends Instance<typeof TrafficAlertsStoreModel> {}
 export interface TrafficAlertsStoreSnapshotOut extends SnapshotOut<typeof TrafficAlertsStoreModel> {}

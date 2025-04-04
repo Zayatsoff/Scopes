@@ -97,7 +97,7 @@ export const NotificationSettingsScreen: FC = observer(function NotificationSett
         <ListItem 
           text="School Buses"
           textStyle={themed($listItemText)}
-          LeftComponent={renderIcon(Bus, theme.colors.palette.secondary500)}
+          LeftComponent={renderIcon(Bus, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
           RightComponent={renderSwitch(

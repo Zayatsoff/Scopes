@@ -16,6 +16,7 @@ export interface AlertItem {
   link?: string
   date?: string
   formattedDate?: string
+  locationsAffected?: string[]
 }
 
 interface AlertCardProps {

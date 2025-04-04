@@ -20,7 +20,9 @@ import {
   ShieldCheck,
   FileText,
   Info,
-  ChevronRight
+  ChevronRight,
+  Bus,
+  MessageSquare
 } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import { StyleProp } from "react-native"
@@ -50,6 +52,9 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
     autoLocation: true,
     sendAnalytics: false,
   })
+  
+  // State for school bus provider selection
+  const [schoolBusProvider, setSchoolBusProvider] = useState("OSTA")
 
   const toggleDisplaySetting = (key: keyof typeof displaySettings) => {
     setDisplaySettings({
@@ -70,6 +75,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
     notifications: theme.colors.palette.primary500,
     display: theme.colors.palette.secondary500,
     layout: theme.colors.palette.neutral800,
+    schoolBus: theme.colors.hydro, // Use existing hydro color for school bus section
     general: theme.colors.palette.angry500,
     about: theme.colors.palette.primary600,
   }
@@ -148,6 +154,31 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           containerStyle={themed($listItemContainer)}
         />
       </View>
+      
+      {/* School Bus Settings */}
+      <SectionHeader title="School Bus Settings" />
+      <View style={themed($section)}>
+        <ListItem 
+          text="School Bus Provider"
+          textStyle={themed($listItemText)}
+          LeftComponent={renderIcon(Bus, sectionColors.schoolBus)}
+          RightComponent={renderIcon(ChevronRight, sectionColors.schoolBus)}
+          onPress={() => navigation.navigate("SchoolBusProvider", { 
+            currentProvider: schoolBusProvider,
+            onSelect: (provider: string) => setSchoolBusProvider(provider)
+          })}
+          containerStyle={themed($listItemContainer)}
+          TextProps={{
+            style: themed($listItemText),
+            children: (
+              <View style={themed($providerContainer)}>
+                <Text text="School Bus Provider" style={themed($listItemText)} />
+                <Text text={schoolBusProvider} style={themed($providerText)} />
+              </View>
+            )
+          }}
+        />
+      </View>
 
       {/* Other Settings */}
       <SectionHeader title="General" />
@@ -185,6 +216,14 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           LeftComponent={renderIcon(Book, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
           onPress={() => {}}
+          containerStyle={themed($listItemContainer)}
+        />
+        <ListItem 
+          text="Feedback and Requests"
+          textStyle={themed($listItemText)}
+          LeftComponent={renderIcon(MessageSquare, sectionColors.about)}
+          RightComponent={renderIcon(ChevronRight, sectionColors.about)}
+          onPress={() => navigation.navigate("Feedback")}
           containerStyle={themed($listItemContainer)}
         />
         <ListItem 
@@ -246,4 +285,15 @@ const $switchContainer: ThemedStyle<ViewStyle> = () => ({
 
 const $bottomPadding: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingBottom: spacing.xl,
+})
+
+const $providerContainer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "column",
+  alignItems: "flex-start",
+})
+
+const $providerText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  fontSize: 14,
+  marginTop: 2,
 })

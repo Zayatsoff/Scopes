@@ -15,6 +15,7 @@ import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
+import { Filter, ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react-native"
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
@@ -28,15 +29,30 @@ export const NewsScreen = observer(function NewsScreen() {
     titleMode: "center"
   }, [themeContext]);
   
-  // Create a custom section header with sort button
+  // Create a custom section header with filter button and sort button
   const NewsFeedHeader = () => (
     <View style={themed($sectionHeaderContainer)}>
-      <SectionHeader title="News Feed" />
+      <View style={themed($filterContainer)}>
+        <Button
+          preset="default"
+          onPress={() => console.log("Filter pressed")} 
+          LeftAccessory={() => <Filter size={18} color={theme.colors.text} />}
+          text="Filter"
+          style={themed($filterButton)}
+          textStyle={themed($filterText)}
+        />
+        <View style={themed($filterIndicator)} />
+      </View>
       <Button
-        text={newsStore.sortNewestFirst ? "Newest First" : "Oldest First"}
         onPress={newsStore.toggleSortOrder}
         style={themed($sortButton)}
         textStyle={themed($sortButtonText)}
+        RightAccessory={() => (
+          newsStore.sortNewestFirst 
+            ? <ArrowDownWideNarrow size={18} color={theme.colors.text} />
+            : <ArrowUpNarrowWide size={18} color={theme.colors.text} />
+        )}
+        text={newsStore.sortNewestFirst ? "Newest" : "Oldest"}
       />
     </View>
   );
@@ -144,13 +160,40 @@ const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.xs,
 })
 
-const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $filterContainer: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+})
+
+const $filterText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: 16,
+  color: colors.text,
+  marginLeft: 4,
+})
+
+const $filterIndicator: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  height: 2,
+  backgroundColor: colors.text,
+  width: '100%',
+  // marginTop: 2,
+})
+
+const $filterButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.transparent,
-  paddingHorizontal: 12,
+  paddingHorizontal: 8,
   borderWidth: 0,
 })
 
+const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.transparent,
+  paddingHorizontal: 8,
+  borderWidth: 0,
+  flexDirection: "row",
+  alignItems: "center",
+})
+
 const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 14,
-  color: colors.tint,
+  fontSize: 16,
+  color: colors.text,
+  marginRight: 4,
 })

@@ -21,6 +21,7 @@ import { AlertListView } from "@/components/AlertListView"
 import { AlertCategoryHeader } from "@/components/AlertCategoryHeader"
 import { PoliceNewsItem } from "@/models/PoliceNews"
 import { WeatherAlertItem } from "@/models/WeatherAlert"
+import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react-native"
 
 interface AlertsScreenProps extends BottomTabScreenProps<MainTabParamList, "Alerts"> {}
 
@@ -166,7 +167,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     setRefreshing(true)
     
     try {
-      // Refresh weather alerts, police news, and traffic alerts when pulling down on Alerts screen
+      // Refresh ALL alerts when pulling down on Alerts screen, regardless of active tab
       const promises = []
       
       // Refresh weather alerts
@@ -178,13 +179,11 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       // Refresh traffic alerts
       promises.push(trafficAlertsStore.refreshTrafficAlerts(api))
       
-      // Refresh mock alerts
-      const hydroAlerts = generateMockAlerts("hydro")
-      
       // Wait for all refreshes to complete
       await Promise.all(promises)
       
-      // Update alerts
+      // Clear and refresh mock alerts
+      const hydroAlerts = generateMockAlerts("hydro")
       setAlerts({
         hydro: hydroAlerts
       })
@@ -211,15 +210,29 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   // Get sort button text based on active tab
   const getSortButtonText = () => {
     if (activeTab === "police") {
-      return policeNewsStore.sortNewestFirst ? "Newest First" : "Oldest First"
+      return policeNewsStore.sortNewestFirst ? "Newest" : "Oldest"
     } else if (activeTab === "weather") {
-      return weatherAlertStore.sortNewestFirst ? "Newest First" : "Oldest First"
+      return weatherAlertStore.sortNewestFirst ? "Newest" : "Oldest"
     } else if (activeTab === "traffic") {
-      return trafficAlertsStore.sortNewestFirst ? "Newest First" : "Oldest First"
+      return trafficAlertsStore.sortNewestFirst ? "Newest" : "Oldest"
     } else {
       // For mock data
-      return "Newest First"
+      return "Newest"
     }
+  }
+
+  // Get sort icon based on active tab
+  const getSortIcon = () => {
+    let isNewestFirst = true
+    if (activeTab === "police") {
+      isNewestFirst = policeNewsStore.sortNewestFirst
+    } else if (activeTab === "weather") {
+      isNewestFirst = weatherAlertStore.sortNewestFirst
+    } else if (activeTab === "traffic") {
+      isNewestFirst = trafficAlertsStore.sortNewestFirst
+    }
+    
+    return isNewestFirst ? ArrowDownWideNarrow : ArrowUpNarrowWide
   }
 
   // Handle sort button press
@@ -293,6 +306,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         onTabChange={handleTabChange}
         sortButtonText={getSortButtonText()}
         onSortPress={handleSortPress}
+        sortIcon={getSortIcon()}
       />
       
       <PullToRefreshIndicator 

@@ -12,11 +12,11 @@ const en = {
     exciting: "(ohh, this is exciting!)",
   },
   errorScreen: {
-    title: "Something went wrong!",
+    title: "Oops! Something went wrong",
     friendlySubtitle:
-      "This is the screen that your users will see in production when an error is thrown. You'll want to customize this message (located in `app/i18n/en.ts`) and probably the layout as well (`app/screens/ErrorScreen`). If you want to remove this entirely, check `app/app.tsx` for the <ErrorBoundary> component.",
-    reset: "RESET APP",
-    errorDetails: "Error Details",
+      "We've encountered an unexpected issue. Our team has been notified and is working on a fix.",
+    reset: "Restart App",
+    errorDetails: "Technical Details",
   },
   errorBoundary: {
     component: {
