@@ -29,6 +29,7 @@ import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { CompactSummaryCards } from "@/components/CompactSummaryCards"
 import { CityStatus } from "@/components/CityStatus"
+import { WeatherDisplay } from "@/components/WeatherDisplay"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
 
@@ -134,6 +135,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     }
   })
 
+  // Weather display refresh reference
+  const weatherDisplayRefresh = useRef<() => void>(() => {})
+
   // Fetch data when component mounts
   useEffect(() => {
     // Start animation when component mounts
@@ -221,6 +225,11 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         trafficSummaryStore.refreshTrafficSummaries(api),
         cityStatusStore.refreshCityStatus(api)
       ])
+      
+      // Also refresh weather display
+      if (weatherDisplayRefresh.current) {
+        weatherDisplayRefresh.current()
+      }
     } catch (error) {
       console.error("Error refreshing data:", error)
     } finally {
@@ -292,7 +301,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       </Animated.View>
       {/* City Status Section */}
       <View style={themed($updatesSection)}>
-        <SectionHeader title="City Status" />
+        <SectionHeader 
+          title="City Status" 
+          RightComponent={
+            <WeatherDisplay onRefresh={(refreshFn) => {
+              weatherDisplayRefresh.current = refreshFn
+            }} />
+          }
+        />
         <CityStatus 
           statusItems={[
             ...cityStatusStore.items,

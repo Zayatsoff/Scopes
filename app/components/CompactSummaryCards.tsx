@@ -1,5 +1,5 @@
-import React from "react"
-import { View, ViewStyle, TextStyle, ScrollView, Dimensions } from "react-native"
+import React, { useState, useRef } from "react"
+import { View, ViewStyle, TextStyle, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native"
 import { PoliceSummaryItem } from "@/models/PoliceSummary"
 import { TrafficSummaryItem } from "@/models/TrafficSummary"
 import { Text } from "./Text"
@@ -35,6 +35,17 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
   const cardWidth = screenWidth * 0.85 // Cards will be 85% of screen width
+  const [activeIndex, setActiveIndex] = useState(0)
+  const scrollViewRef = useRef<ScrollView>(null)
+  
+  // Function to handle scroll events
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x
+    const currentIndex = Math.round(contentOffsetX / (cardWidth + theme.spacing.xs))
+    if (currentIndex !== activeIndex) {
+      setActiveIndex(currentIndex)
+    }
+  }
   
   // Function to parse bullet points from a summary string
   const getBulletPoints = (summary?: string) => {
@@ -114,11 +125,14 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
   return (
     <View style={themed($container)}>
       <ScrollView 
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         decelerationRate="fast"
         snapToInterval={cardWidth + theme.spacing.xs}
         contentContainerStyle={themed($scrollContent)}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {renderSummaryCard(
           "Police Updates", 
@@ -145,11 +159,23 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
         )}
       </ScrollView>
       
-      {/* Optional indicator dots for which card is currently displayed */}
+      {/* Indicator dots that update as you slide */}
       <View style={themed($dotsContainer)}>
-        <View style={[themed($dot), { backgroundColor: theme.colors.police }]} />
-        <View style={[themed($dot), { backgroundColor: theme.colors.weather }]} />
-        <View style={[themed($dot), { backgroundColor: theme.colors.traffic }]} />
+        <View style={[
+          themed($dot), 
+          { backgroundColor: theme.colors.police },
+          activeIndex === 0 && themed($activeDot)
+        ]} />
+        <View style={[
+          themed($dot), 
+          { backgroundColor: theme.colors.weather },
+          activeIndex === 1 && themed($activeDot)
+        ]} />
+        <View style={[
+          themed($dot), 
+          { backgroundColor: theme.colors.traffic },
+          activeIndex === 2 && themed($activeDot)
+        ]} />
       </View>
     </View>
   )
@@ -256,4 +282,11 @@ const $dot: ThemedStyle<ViewStyle> = () => ({
   height: 5,
   borderRadius: 3,
   opacity: 0.5,
+})
+
+const $activeDot: ThemedStyle<ViewStyle> = () => ({
+  width: 8,
+  height: 8,
+  opacity: 1,
+  borderRadius: 4,
 }) 
