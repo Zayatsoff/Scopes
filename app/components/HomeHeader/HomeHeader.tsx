@@ -175,12 +175,12 @@ const $imageSection: ThemedStyle<ViewStyle> = () => ({
 
 const $image: ThemedStyle<ImageStyle> = () => ({})
 
-const $overlay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $overlay: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   position: "absolute",
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.3)', // Black overlay with 30% opacity
+  backgroundColor: colors.homeHeaderBackground, // Black overlay with 30% opacity
   paddingHorizontal: spacing.md,
   justifyContent: "flex-end",
 })

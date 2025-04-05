@@ -21,6 +21,8 @@ const palette = {
   secondary300: "#9196B9",
   secondary200: "#626894",
   secondary100: "#41476E",
+  homeHeaderBackground: "rgba(0, 0, 0, 0.3)",
+
 
   accent500: "#862729",
   accent400: "#A83133",
@@ -65,4 +67,5 @@ export const colors = {
   errorBackground: palette.angry100,
   navActive: palette.neutral900,
   navInactive: palette.neutral900,
+  homeHeaderBackground: palette.homeHeaderBackground,
 } as const

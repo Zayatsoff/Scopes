@@ -129,8 +129,10 @@ export const CityStatus = observer(function CityStatus({
 })
 
 // Styles
-const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $container: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   marginTop: spacing.xxs,
+  backgroundColor: colors.containerBackground,
+  width: '100%',
 })
 
 const $iconsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -138,6 +140,7 @@ const $iconsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "space-between",
   alignItems: "center",
   paddingVertical: spacing.xs,
+  width: '100%',
   paddingHorizontal: spacing.sm,
 })
 

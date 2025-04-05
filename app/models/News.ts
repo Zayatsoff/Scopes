@@ -55,6 +55,7 @@ export const NewsItemModel = types
     source: types.string,
     authors: types.optional(types.string, ""),
     formattedDate: types.optional(types.string, ""),
+    tags: types.optional(types.array(types.string), []),
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -90,11 +91,20 @@ export const NewsStoreModel = types
     error: types.maybeNull(types.string),
     sortNewestFirst: types.optional(types.boolean, true), // Default newest first
     compactView: types.optional(types.boolean, false), // Default to full view
+    selectedTags: types.optional(types.array(types.string), []), // Store selected tags
+    showTagFilter: types.optional(types.boolean, false), // Is the tag filter dropdown visible
   })
   .actions(withSetPropAction)
   .views((self) => ({
     get sortedItems() {
-      return [...self.items].sort((a, b) => {
+      // First filter by selected tags, then sort
+      const filtered = self.selectedTags.length === 0
+        ? self.items
+        : self.items.filter(item => 
+            item.tags && item.tags.some(tag => self.selectedTags.includes(tag))
+          )
+      
+      return [...filtered].sort((a, b) => {
         const dateA = new Date(a.date).getTime()
         const dateB = new Date(b.date).getTime()
         return self.sortNewestFirst ? dateB - dateA : dateA - dateB
@@ -110,6 +120,17 @@ export const NewsStoreModel = types
           return dateB - dateA // Always sort newest first, regardless of sortNewestFirst setting
         })
         .slice(0, 20) // Get latest 20 items for home screen
+    },
+
+    get availableTags() {
+      // Get all unique tags from news items
+      const tagSet = new Set<string>()
+      self.items.forEach(item => {
+        if (item.tags) {
+          item.tags.forEach(tag => tagSet.add(tag))
+        }
+      })
+      return Array.from(tagSet).sort()
     }
   }))
   .actions((self) => ({
@@ -119,6 +140,22 @@ export const NewsStoreModel = types
 
     toggleCompactView() {
       self.setProp("compactView", !self.compactView)
+    },
+
+    toggleTagFilter() {
+      self.setProp("showTagFilter", !self.showTagFilter)
+    },
+
+    toggleTag(tag: string) {
+      if (self.selectedTags.includes(tag)) {
+        self.setProp("selectedTags", self.selectedTags.filter(t => t !== tag))
+      } else {
+        self.setProp("selectedTags", [...self.selectedTags, tag])
+      }
+    },
+
+    clearTagFilters() {
+      self.setProp("selectedTags", [])
     },
     
     fetchNews: async (api: Api) => {

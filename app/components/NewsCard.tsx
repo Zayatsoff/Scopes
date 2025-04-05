@@ -56,6 +56,17 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
           )}
         </View>
       )}
+
+      {/* Tags section - only shown in non-compact mode */}
+      {!compact && item.tags && item.tags.length > 0 && (
+        <View style={themed($tagsContainer)}>
+          {item.tags.map((tag, index) => (
+            <View key={tag} style={themed($tagPill)}>
+              <Text text={tag} style={themed($tagText)} />
+            </View>
+          ))}
+        </View>
+      )}
     </Pressable>
   )
 })
@@ -152,4 +163,27 @@ const $author: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 
 const $compactAuthor: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: typography.sizes.xs,
+})
+
+// New styles for tags
+const $tagsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  flexWrap: "wrap",
+  marginTop: spacing.xs,
+  gap: spacing.xxs,
+})
+
+const $tagPill: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.containerBackground,
+  paddingHorizontal: spacing.xs,
+  paddingVertical: spacing.xxs,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: colors.textDim,
+})
+
+const $tagText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xxs,
+  color: colors.text,
+  textTransform: "capitalize",
 })

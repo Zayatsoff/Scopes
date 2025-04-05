@@ -154,15 +154,17 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       />
       
       {/* City Status Section */}
-      <View style={themed($section)}>
-        <SectionHeader 
-          title="City Status" 
-          RightComponent={
-            <WeatherDisplay onRefresh={(refreshFn) => {
-              weatherDisplayRefresh.current = refreshFn
-            }} />
-          }
-        />
+      <View style={themed($cityStatusSection)}>
+        <View style={themed($sectionHeaderContainer)}>
+          <SectionHeader 
+            title="City Status" 
+            RightComponent={
+              <WeatherDisplay onRefresh={(refreshFn) => {
+                weatherDisplayRefresh.current = refreshFn
+              }} />
+            }
+          />
+        </View>
         <CityStatus 
           statusItems={cityStatusStore.items}
           loading={cityStatusStore.isLoading}
@@ -210,6 +212,14 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
   paddingTop: spacing.sm,
+})
+
+const $cityStatusSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingTop: spacing.sm,
+})
+
+const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.md,
 })
 
 export default HomeScreen
