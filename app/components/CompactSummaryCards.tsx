@@ -34,18 +34,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
 }: CompactSummaryCardsProps) {
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
-  const cardWidth = screenWidth * 0.85 // Cards will be 85% of screen width
-  const [activeIndex, setActiveIndex] = useState(0)
-  const scrollViewRef = useRef<ScrollView>(null)
-  
-  // Function to handle scroll events
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x
-    const currentIndex = Math.round(contentOffsetX / (cardWidth + theme.spacing.xs))
-    if (currentIndex !== activeIndex) {
-      setActiveIndex(currentIndex)
-    }
-  }
+  const cardWidth = screenWidth - (theme.spacing.md * 2) // Cards will be full width minus padding
   
   // Function to parse bullet points from a summary string
   const getBulletPoints = (summary?: string) => {
@@ -124,16 +113,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
   
   return (
     <View style={themed($container)}>
-      <ScrollView 
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        decelerationRate="fast"
-        snapToInterval={cardWidth + theme.spacing.xs}
-        contentContainerStyle={themed($scrollContent)}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
+      <View style={themed($cardsContainer)}>
         {renderSummaryCard(
           "Police Updates", 
           policeBulletPoints, 
@@ -157,25 +137,6 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
           <BusFront size={16} color={theme.colors.traffic} />,
           trafficLoading
         )}
-      </ScrollView>
-      
-      {/* Indicator dots that update as you slide */}
-      <View style={themed($dotsContainer)}>
-        <View style={[
-          themed($dot), 
-          { backgroundColor: theme.colors.police },
-          activeIndex === 0 && themed($activeDot)
-        ]} />
-        <View style={[
-          themed($dot), 
-          { backgroundColor: theme.colors.weather },
-          activeIndex === 1 && themed($activeDot)
-        ]} />
-        <View style={[
-          themed($dot), 
-          { backgroundColor: theme.colors.traffic },
-          activeIndex === 2 && themed($activeDot)
-        ]} />
       </View>
     </View>
   )
@@ -186,16 +147,15 @@ const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xxs,
 })
 
-const $scrollContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingRight: spacing.xs,
-  paddingBottom: spacing.xs,
+const $cardsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.xs,
 })
 
 const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.containerBackground,
   borderRadius: 3,
   padding: spacing.sm,
-  marginRight: spacing.xs,
+  marginBottom: spacing.xs,
   borderWidth: 1,
   borderColor: colors.border,
   borderLeftWidth: 4,
@@ -267,26 +227,4 @@ const $emptyText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   opacity: 0.7,
   textAlign: "center",
   paddingVertical: typography.sizes.sm,
-})
-
-const $dotsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  justifyContent: "center",
-  gap: spacing.xs,
-  marginTop: spacing.xxs,
-  marginBottom: spacing.xs,
-})
-
-const $dot: ThemedStyle<ViewStyle> = () => ({
-  width: 5,
-  height: 5,
-  borderRadius: 3,
-  opacity: 0.5,
-})
-
-const $activeDot: ThemedStyle<ViewStyle> = () => ({
-  width: 8,
-  height: 8,
-  opacity: 1,
-  borderRadius: 4,
 }) 

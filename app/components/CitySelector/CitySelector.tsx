@@ -97,8 +97,8 @@ export const CitySelector: FC<CitySelectorProps> = ({
               {
                 position: 'absolute',
                 top: dropdownPosition.top,
-                left: Math.max(10, dropdownPosition.left - 10),
-                width: Math.max(200, dropdownPosition.width + 20),
+                left: dropdownPosition.left,
+                width: Math.max(200, dropdownPosition.width),
                 marginTop: 4,
                 maxHeight: 300,
               },

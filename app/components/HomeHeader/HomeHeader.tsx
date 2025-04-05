@@ -221,10 +221,12 @@ const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
   paddingVertical: 2,
   borderRadius: 8,
   justifyContent: 'center',
+  alignSelf: 'flex-start',
 })
 
 const $citySelector: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 8,
+  paddingVertical: 4,
 }) 

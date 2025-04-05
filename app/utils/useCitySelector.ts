@@ -16,7 +16,7 @@ export const useCitySelector = () => {
           setDropdownPosition({
             top: pageY + height,
             left: pageX,
-            width: Math.max(width, 200)
+            width: width
           });
           setDropdownVisible(true);
         }
