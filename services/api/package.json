@@ -4,7 +4,13 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "compile": "tsc --noEmit"
+    "compile": "tsc --noEmit",
+    "scrape:news": "ts-node scripts/scrape-news.ts",
+    "scrape:status": "ts-node scripts/scrape-ottawa.ts",
+    "scrape:police": "ts-node scripts/scrape-police.ts",
+    "scrape:traffic": "ts-node scripts/scrape-traffic.ts",
+    "scrape:weather": "ts-node scripts/scrape-weather-alerts.ts",
+    "generate:summaries": "ts-node scripts/generate-summaries.ts"
   },
   "devDependencies": {
     "@types/node": "^22.13.13",

@@ -1,0 +1,28 @@
+name: Traffic Alerts Scraper Workflow
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    if: vars.SCRAPERS_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run traffic alerts scraper
+        run: yarn workspace api run scrape:traffic
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

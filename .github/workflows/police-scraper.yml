@@ -1,0 +1,28 @@
+name: Ottawa Police Scraper Workflow
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape_police:
+    runs-on: ubuntu-latest
+    if: vars.SCRAPERS_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run Ottawa police scraper
+        run: yarn workspace api run scrape:police
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
