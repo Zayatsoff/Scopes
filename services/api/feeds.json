@@ -1,0 +1,110 @@
+[
+  {
+    "url": "https://www.cbc.ca/webfeed/rss/rss-canada-ottawa",
+    "title": "CBC | Ottawa News",
+    "description": "FOR PERSONAL USE ONLY",
+    "link": "https://www.cbc.ca/news/canada/ottawa/?cmp=rss",
+    "items": [
+      {
+        "title": "U.S. road trip destinations seeing signs of Canadians staying away",
+        "link": "https://www.cbc.ca/news/canada/ottawa/u-s-road-trip-destinations-seeing-signs-of-canadians-staying-away-1.7490169?cmp=rss",
+        "pubDate": "Tue, 25 Mar 2025 04:00:00 EDT",
+        "content": "<img src='https://i.cbc.ca/1.7490244.1742585752!/fileImage/httpImage/image.JPG_gen/derivatives/16x9_620/toll-bridge-to-u-s-a-road-sign-thousand-islands.JPG' alt='A green road side with yellow writing that reads:&quot;Toll Bridge to U.S.A.&quot;' width='620' height='349' title='A road sign directing drivers to the international toll bridge to the United States near Ganonoque, Ont.'/><p>Tourism destinations in New York’s North Country are an easy destination for road trippers for many central Canadians, but recent inflamed rhetoric has tourism operators fearing a potential loss of millions of dollars.</p>",
+        "contentSnippet": "Tourism destinations in New York’s North Country are an easy destination for road trippers for many central Canadians, but recent inflamed rhetoric has tourism operators fearing a potential loss of millions of dollars.",
+        "guid": "1.7490169",
+        "categories": [
+          "News/Canada/Ottawa"
+        ],
+        "isoDate": "2025-03-25T08:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "url": "https://ottawacitizen.com/feed",
+    "title": "Ottawa Citizen",
+    "description": "Ottawa Latest News, Breaking Headlines & Sports",
+    "link": "https://ottawacitizen.com",
+    "items": [
+      {
+        "creator": "Bruce Garrioch",
+        "title": "Ottawa Senators struggles with lowly Buffalo Sabres continue",
+        "link": "https://ottawacitizen.com/sports/hockey/nhl/senators-extra/ottawa-senators-struggles-with-lowly-buffalo-sabres-continue",
+        "pubDate": "Wed, 26 Mar 2025 02:12:36 +0000",
+        "content:encoded": "The Ottawa Senators let a pivotal two points slip away on Tuesday night. <a href=\"https://ottawacitizen.com/sports/hockey/nhl/senators-extra/ottawa-senators-struggles-with-lowly-buffalo-sabres-continue?utm_source=rss&#038;utm_medium=feed&#038;utm_campaign=truncated_content&#038;utm_content=sports_hockey_nhl_senators-extra&#038;utm_term=bruce_garrioch\">Read More</a>",
+        "content:encodedSnippet": "The Ottawa Senators let a pivotal two points slip away on Tuesday night. Read More",
+        "dc:creator": "Bruce Garrioch",
+        "comments": "https://ottawacitizen.com/sports/hockey/nhl/senators-extra/ottawa-senators-struggles-with-lowly-buffalo-sabres-continue#respond",
+        "content": "The Senators fell to 0-3-0 against Buffalo this season.",
+        "contentSnippet": "The Senators fell to 0-3-0 against Buffalo this season.",
+        "guid": "https://ottawacitizen.com/?p=2425695",
+        "categories": [
+          "Senators Extra",
+          "Hockey",
+          "NHL",
+          "Buffalo Sabres",
+          "Ottawa Senators"
+        ],
+        "isoDate": "2025-03-26T02:12:36.000Z"
+      }
+    ]
+  },
+  {
+    "url": "https://globalnews.ca/ottawa/feed/",
+    "title": " : Ottawa",
+    "description": "",
+    "link": "https://globalnews.ca",
+    "items": [
+      {
+        "creator": "Catherine McDonald",
+        "title": "Accused in fatal Lake Ontario boat crash denies driving when disaster struck",
+        "link": "https://globalnews.ca/news/11097858/toronto-lake-ontario-crash-accused-testifies/",
+        "pubDate": "Tue, 25 Mar 2025 23:08:46 +0000",
+        "content:encoded": "The 41-year-old Mississauga man is charged with eight alleged offences, including two counts of impaired operation and criminal negligence causing death.",
+        "content:encodedSnippet": "The 41-year-old Mississauga man is charged with eight alleged offences, including two counts of impaired operation and criminal negligence causing death.",
+        "enclosure": {
+          "url": "https://globalnews.ca/wp-content/uploads/2025/03/ONLINEFATALBOATTRIALFOLOMCDONALDMAR24STILL.jpg?quality=85&strip=all&w=720&h=480&crop=1",
+          "length": "98210000",
+          "type": "image/jpeg"
+        },
+        "dc:creator": "Catherine McDonald",
+        "content": "The 41-year-old Mississauga man is charged with eight alleged offences, including two counts of impaired operation and criminal negligence causing death.",
+        "contentSnippet": "The 41-year-old Mississauga man is charged with eight alleged offences, including two counts of impaired operation and criminal negligence causing death.",
+        "guid": "https://globalnews.ca/?p=11097858",
+        "categories": [
+          "Crime",
+          "Lake Ontario",
+          "Toronto trial"
+        ],
+        "isoDate": "2025-03-25T23:08:46.000Z"
+      }
+    ]
+  },
+  {
+    "url": "https://obj.ca/feed/",
+    "title": "Ottawa Business Journal",
+    "description": "",
+    "link": "https://obj.ca",
+    "items": [
+      {
+        "creator": "David Sali",
+        "title": "B.C. developer files plans for 177-unit apartment building near Canadian Tire Centre",
+        "link": "https://obj.ca/developer-files-plans-for-new-apartments-near-canadian-tire-centre/",
+        "pubDate": "Tue, 25 Mar 2025 20:06:07 +0000",
+        "dc:creator": "David Sali",
+        "content": "",
+        "contentSnippet": "",
+        "guid": "https://obj.ca/?p=180895",
+        "categories": [
+          "Insider Only",
+          "Ottawa",
+          "Residential",
+          "Top Stories",
+          "rental housing",
+          "residential real estate",
+          "Stittsville"
+        ],
+        "isoDate": "2025-03-25T20:06:07.000Z"
+      }
+    ]
+  }
+]

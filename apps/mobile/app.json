@@ -1,0 +1,78 @@
+{
+  "name": "Scopes",
+  "displayName": "Scopes",
+  "expo": {
+    "name": "Scopes",
+    "slug": "Scopes",
+    "scheme": "Scopes",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/app-icon-all.png",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "newArchEnabled": false,
+    "jsEngine": "hermes",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "icon": "./assets/images/app-icon-android-legacy.png",
+      "package": "com.liorrozin.Scopes",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
+        "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
+      },
+      "allowBackup": false,
+      "splash": {
+        "backgroundColor": "#fff"
+      }
+    },
+    "ios": {
+      "icon": "./assets/images/app-icon-ios.png",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.liorrozin.Scopes",
+      "splash": {
+        "backgroundColor": "#fff"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/app-icon-web-favicon.png",
+      "bundler": "metro",
+      "splash": {
+        "backgroundColor": "#fff"
+      }
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/app-icon-android-adaptive-foreground.png",
+          "imageWidth": 300,
+          "resizeMode": "contain",
+          "backgroundColor": "#fff"
+        }
+      ]
+    ],
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "splash": {
+      "backgroundColor": "#fff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "198f38cb-5bdc-46bc-8c71-a6f0a4f6d787"
+      }
+    }
+  },
+  "ignite": {
+    "version": "10.1.9"
+  }
+}

@@ -1,0 +1,24 @@
+name: Ottawa Police Scraper Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape_police:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Ottawa Police Scraper
+        run: npx ts-node scripts/scrape-police.ts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

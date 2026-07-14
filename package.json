@@ -1,0 +1,15 @@
+{
+  "name": "scopes-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "yarn@4.5.3",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "compile": "yarn workspaces foreach -Apt run compile",
+    "lint": "yarn workspace scopes lint"
+  }
+}

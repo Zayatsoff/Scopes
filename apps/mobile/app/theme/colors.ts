@@ -1,0 +1,72 @@
+const palette = {
+  neutral100: "#FFFFFF",
+  neutral200: "#F6F6F6",
+  neutral300: "#E5E0DC",
+  neutral400: "#C8BFB9",
+  neutral500: "#A89D97",
+  neutral600: "#818181",
+  neutral700: "#4A443F",
+  neutral800: "#2D2520",
+  neutral900: "#000000",
+  homeHeaderBackground: "rgba(255, 255, 255, 0.7)",
+
+  primary100: "#F6E9E2",
+  primary200: "#EACDBF",
+  primary300: "#E0AD96",
+  primary400: "#D68F72",
+  primary500: "#C76542",
+  primary600: "#A54F31",
+
+  secondary100: "#E2E3ED",
+  secondary200: "#C6C9DC",
+  secondary300: "#9CA1BE",
+  secondary400: "#7176A0",
+  secondary500: "#41476E",
+
+  accent100: "#862729",
+  accent200: "#A83133",
+  accent300: "#CA3B3D",
+  accent400: "#EC4547",
+  accent500: "#FF8688",
+
+  angry100: "#F2D6CD",
+  angry500: "#C03403",
+
+  police: "#7396FF",
+  hydro: "#E0BF00",
+  traffic: "#FF713D",
+  alert: "#F6484B",
+  weather: "#A89D97",
+
+  overlay20: "rgba(25, 16, 21, 0.2)",
+  overlay50: "rgba(25, 16, 21, 0.5)",
+} as const
+
+export const colors = {
+  palette,
+  police: palette.police,
+  hydro: palette.hydro,
+  traffic: palette.traffic,
+  alert: palette.alert,
+  weather: palette.weather,
+  transparent: "rgba(0, 0, 0, 0)",
+  cityName: palette.neutral800,
+  text: palette.neutral900,
+  textDim: palette.neutral600,
+  background: palette.neutral200,
+  containerBackground: palette.neutral100,
+  navForeground: palette.neutral900,
+  border: palette.neutral200,
+  tint: palette.primary500,
+  tintInactive: palette.neutral300,
+
+  accent: palette.accent500,
+  accentDim: palette.accent300,
+  separator: palette.neutral300,
+  error: palette.angry500,
+  errorBackground: palette.angry100,
+  navActive: palette.neutral900,
+  navInactive: palette.neutral900,
+
+  homeHeaderBackground: palette.homeHeaderBackground,
+} as const
