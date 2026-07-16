@@ -17,6 +17,7 @@ import { useTabHeader } from "@/components/TabHeader"
 import { WeatherDisplay } from "@/components/WeatherDisplay"
 import { CompactSummaryCards } from "@/components/CompactSummaryCards"
 import { CityStatus } from "@/components/CityStatus"
+import { CityAlertBanner } from "@/components/CityAlertBanner"
 import { HomeHeader } from "@/components/HomeHeader"
 import { CitySelector } from "@/components/CitySelector"
 import { HomeNewsSection } from "@/components/HomeNewsSection"
@@ -37,7 +38,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       policeSummaryStore,
       weatherSummaryStore,
       trafficSummaryStore,
-      cityStatusStore
+      cityStatusStore,
+      ottawaAlertStore
     },
     refreshing,
     fetchInitialData,
@@ -55,6 +57,10 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   } = useCitySelector()
   
   const { progress, onScroll: refreshProgress, resetProgress } = usePullToRefreshProgress()
+
+  // The city's featured/pinned notice, if the scraper found one
+  const latestAlert = ottawaAlertStore.latestAlert
+  const alertTitle = latestAlert?.title || latestAlert?.status
 
   // Animation values
   const opacityValue = useSharedValue(0)
@@ -153,6 +159,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         onClose={closeDropdown}
       />
       
+      {/* City Alert Banner - the city's featured/pinned notice, when there is one */}
+      {latestAlert && alertTitle && (
+        <CityAlertBanner
+          title={alertTitle}
+          onPress={() => handleNewsPress(latestAlert.sourceUrl)}
+        />
+      )}
+
       {/* City Status Section */}
       <View style={themed($cityStatusSection)}>
         <View style={themed($sectionHeaderContainer)}>

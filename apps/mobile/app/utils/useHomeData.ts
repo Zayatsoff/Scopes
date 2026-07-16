@@ -7,9 +7,10 @@ export const useHomeData = () => {
     policeSummaryStore, 
     weatherAlertStore, 
     weatherSummaryStore, 
-    trafficSummaryStore, 
-    cityStatusStore, 
-    api 
+    trafficSummaryStore,
+    cityStatusStore,
+    ottawaAlertStore,
+    api
   } = useStores()
   
   const [refreshing, setRefreshing] = useState(false)
@@ -35,6 +36,9 @@ export const useHomeData = () => {
     
     // Fetch city status information
     cityStatusFetch()
+
+    // Fetch the city banner alert
+    ottawaAlertFetch()
   }
 
   // Fetch police summaries
@@ -77,6 +81,13 @@ export const useHomeData = () => {
     }
   }
   
+  // Fetch the city banner alert
+  const ottawaAlertFetch = () => {
+    if (ottawaAlertStore.items.length === 0) {
+      ottawaAlertStore.fetchOttawaAlerts(api)
+    }
+  }
+
   // Execute data refreshing
   const refreshData = async (weatherDisplayRefresh?: () => void) => {
     try {
@@ -87,7 +98,8 @@ export const useHomeData = () => {
         policeSummaryStore.refreshPoliceSummaries(api),
         weatherSummaryStore.refreshWeatherSummaries(api),
         trafficSummaryStore.refreshTrafficSummaries(api),
-        cityStatusStore.refreshCityStatus(api)
+        cityStatusStore.refreshCityStatus(api),
+        ottawaAlertStore.fetchOttawaAlerts(api)
       ])
       
       // Also refresh weather display if provided
@@ -108,7 +120,8 @@ export const useHomeData = () => {
       weatherAlertStore,
       weatherSummaryStore,
       trafficSummaryStore,
-      cityStatusStore
+      cityStatusStore,
+      ottawaAlertStore
     },
     refreshing,
     fetchInitialData,

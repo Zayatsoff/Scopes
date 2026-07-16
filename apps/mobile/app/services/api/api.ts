@@ -13,6 +13,7 @@ import { PoliceNewsApi } from "./police-news-api"
 import { WeatherAlertsApi } from "./weather-alerts-api"
 import { TrafficAlertsApi } from "./traffic-alerts-api"
 import { CityStatusApi } from "./cityStatus-api"
+import { OttawaAlertApi } from "./ottawaAlert-api"
 
 /**
  * Configuring the apisauce instance.
@@ -34,6 +35,7 @@ export class Api {
   weatherAlerts: WeatherAlertsApi
   trafficAlerts: TrafficAlertsApi
   cityStatus: CityStatusApi
+  ottawaAlert: OttawaAlertApi
 
   /**
    * Set up our API instance. Keep this lightweight!
@@ -62,6 +64,9 @@ export class Api {
     
     // Initialize city status API
     this.cityStatus = new CityStatusApi(this)
+
+    // Initialize Ottawa banner alert API
+    this.ottawaAlert = new OttawaAlertApi(this)
   }
 }
 

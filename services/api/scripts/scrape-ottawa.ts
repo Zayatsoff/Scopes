@@ -1,8 +1,23 @@
-import * as puppeteer from "puppeteer";
+import axios from "axios";
+import * as cheerio from "cheerio";
 import admin from "firebase-admin";
 import OpenAI from "openai";
 import crypto from "crypto";
 import { CityStatusDTO, StatusStoryDTO } from "@scopes/shared-types";
+
+// ottawa.ca 403s requests with no/generic user-agent (curl, bare axios), but
+// serves normal server-rendered HTML to a real browser UA -> no headless
+// browser needed, just ask nicely
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+
+async function fetchHtml(url: string): Promise<string> {
+  const response = await axios.get<string>(url, {
+    headers: { "User-Agent": BROWSER_USER_AGENT },
+    timeout: 30000,
+  });
+  return response.data;
+}
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -95,25 +110,15 @@ async function processWithGPT(content: string, prompt: string): Promise<any> {
 
 async function scrapeOttawaStatus() {
   console.log("Starting Ottawa status scraper...");
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
 
   try {
-    const page = await browser.newPage();
     console.log("Loading Ottawa.ca main page...");
-    await page.goto("https://ottawa.ca/en", {
-      waitUntil: "networkidle2",
-      timeout: 60000,
-    });
+    const html = await fetchHtml("https://ottawa.ca/en");
+    const $ = cheerio.load(html);
 
     // Extract the status listing div
     console.log("Extracting status listings...");
-    const statusListingDiv = await page.evaluate(() => {
-      const div = document.querySelector(".view-status-listing");
-      return div ? div.outerHTML : "";
-    });
+    const statusListingDiv = $(".view-status-listing").first().prop("outerHTML") || ""
 
     if (!statusListingDiv) {
       throw new Error("Status listing div not found");
@@ -140,12 +145,11 @@ async function scrapeOttawaStatus() {
       console.log(`Saved status: ${status.title}`);
     }
 
-    // Get the main featured card link
+    // Get the main featured card link (the homepage banner, e.g. an active
+    // emergency notice)
     console.log("Finding main feature link...");
-    const featureLink = await page.evaluate(() => {
-      const linkElement = document.querySelector(".card-paragraph a");
-      return linkElement ? linkElement.getAttribute("href") : null;
-    });
+    const featureLinkEl = $(".card-paragraph a").first();
+    const featureLink = featureLinkEl.attr("href") || null;
 
     if (featureLink) {
       const fullUrl = featureLink.startsWith("http")
@@ -153,19 +157,14 @@ async function scrapeOttawaStatus() {
         : `https://ottawa.ca${featureLink}`;
       console.log(`Found feature link: ${fullUrl}`);
 
-      // Navigate to the detailed page
+      // Load the detailed page
       console.log("Loading detailed page...");
-      await page.goto(fullUrl, {
-        waitUntil: "networkidle2",
-        timeout: 60000,
-      });
+      const detailHtml = await fetchHtml(fullUrl);
+      const $detail = cheerio.load(detailHtml);
 
       // Extract the content of the detailed page
       console.log("Extracting detailed page content...");
-      const pageContent = await page.evaluate(() => {
-        const mainContent = document.querySelector(".region-content");
-        return mainContent ? mainContent.outerHTML : "";
-      });
+      const pageContent = $detail(".region-content").first().prop("outerHTML") || ""
 
       if (pageContent) {
         // Process detailed page with GPT
@@ -199,8 +198,6 @@ async function scrapeOttawaStatus() {
   } catch (error) {
     console.error("Error in Ottawa status scraper:", error);
     throw error;
-  } finally {
-    await browser.close();
   }
 }
 
