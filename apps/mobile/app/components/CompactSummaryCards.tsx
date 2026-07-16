@@ -7,6 +7,10 @@ import { type ThemedStyle } from "@/theme"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Siren, CloudSun, BusFront } from "lucide-react-native"
+import Animated, { FadeIn, FadeOut, FadeInDown } from "react-native-reanimated"
+
+// stagger the 3 cards in on first reveal, cards-in-a-row is legitimate list rhythm
+const CARD_STAGGER_MS = 70
 
 export interface CompactSummaryCardsProps {
   policeSummary?: PoliceSummaryItem
@@ -46,50 +50,23 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
   const weatherBulletPoints = weatherSummary ? getBulletPoints(weatherSummary.summary) : []
   const trafficBulletPoints = trafficSummary ? getBulletPoints(trafficSummary.summary) : []
   
-  // Render a single summary card
+  // Render a single summary card. Content (loading/empty/list) crossfades on change;
+  // the card itself staggers in on first reveal.
   const renderSummaryCard = (
-    title: string, 
-    bulletPoints: string[], 
-    color: string, 
+    title: string,
+    bulletPoints: string[],
+    color: string,
     icon: React.ReactNode,
-    loading: boolean = false
+    loading: boolean = false,
+    index: number = 0,
   ) => {
-    if (loading) {
-      return (
-        <View style={[themed($card), { width: cardWidth }]}>
-          <View style={themed($cardHeader)}>
-            <View style={themed($titleContainer)}>
-              {icon}
-              <Text style={[themed($title), { color }]}>{title}</Text>
-            </View>
-            <Text style={themed($date)}>Today</Text>
-          </View>
-          <View style={themed($cardContent)}>
-            <Text style={themed($loadingText)}>Loading...</Text>
-          </View>
-        </View>
-      )
-    }
-    
-    if (bulletPoints.length === 0) {
-      return (
-        <View style={[themed($card), { width: cardWidth }]}>
-          <View style={themed($cardHeader)}>
-            <View style={themed($titleContainer)}>
-              {icon}
-              <Text style={[themed($title), { color }]}>{title}</Text>
-            </View>
-            <Text style={themed($date)}>Today</Text>
-          </View>
-          <View style={themed($cardContent)}>
-            <Text style={themed($emptyText)}>No updates available</Text>
-          </View>
-        </View>
-      )
-    }
-    
+    const contentKey = loading ? "loading" : bulletPoints.length === 0 ? "empty" : "content"
+
     return (
-      <View style={[themed($card), { width: cardWidth }]}>
+      <Animated.View
+        style={[themed($card), { width: cardWidth }]}
+        entering={FadeInDown.delay(index * CARD_STAGGER_MS).duration(220)}
+      >
         <View style={themed($cardHeader)}>
           <View style={themed($titleContainer)}>
             {icon}
@@ -97,45 +74,59 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
           </View>
           <Text style={themed($date)}>Today</Text>
         </View>
-        <View style={themed($cardContent)}>
-          {bulletPoints.map((point, index) => (
-            <View key={index} style={themed($bulletContainer)}>
-              <Text style={[themed($bullet), { color }]}>•</Text>
-              <Text style={themed($bulletText)}>
-                {point.replace("- ", "").trim()}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
+        <Animated.View
+          key={contentKey}
+          style={themed($cardContent)}
+          entering={FadeIn.duration(180)}
+          exiting={FadeOut.duration(140)}
+        >
+          {loading ? (
+            <Text style={themed($loadingText)}>Loading...</Text>
+          ) : bulletPoints.length === 0 ? (
+            <Text style={themed($emptyText)}>No updates available</Text>
+          ) : (
+            bulletPoints.map((point, i) => (
+              <View key={i} style={themed($bulletContainer)}>
+                <Text style={[themed($bullet), { color }]}>•</Text>
+                <Text style={themed($bulletText)}>
+                  {point.replace("- ", "").trim()}
+                </Text>
+              </View>
+            ))
+          )}
+        </Animated.View>
+      </Animated.View>
     )
   }
-  
+
   return (
     <View style={themed($container)}>
       <View style={themed($cardsContainer)}>
         {renderSummaryCard(
-          "Police Updates", 
-          policeBulletPoints, 
-          theme.colors.police, 
+          "Police Updates",
+          policeBulletPoints,
+          theme.colors.police,
           <Siren size={16} color={theme.colors.police} />,
-          policeLoading
+          policeLoading,
+          0,
         )}
-        
+
         {renderSummaryCard(
-          "Weather Updates", 
-          weatherBulletPoints, 
-          theme.colors.weather, 
+          "Weather Updates",
+          weatherBulletPoints,
+          theme.colors.weather,
           <CloudSun size={16} color={theme.colors.weather} />,
-          weatherLoading
+          weatherLoading,
+          1,
         )}
-        
+
         {renderSummaryCard(
-          "Traffic Updates", 
-          trafficBulletPoints, 
-          theme.colors.traffic, 
+          "Traffic Updates",
+          trafficBulletPoints,
+          theme.colors.traffic,
           <BusFront size={16} color={theme.colors.traffic} />,
-          trafficLoading
+          trafficLoading,
+          2,
         )}
       </View>
     </View>

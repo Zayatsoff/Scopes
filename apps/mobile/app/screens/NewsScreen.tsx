@@ -16,6 +16,7 @@ import { useTabHeader } from "@/components/TabHeader"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { Filter, ArrowDownWideNarrow, ArrowUpNarrowWide, Check, X } from "lucide-react-native"
+import Animated, { FadeInDown, FadeOutUp, FadeIn, FadeOut } from "react-native-reanimated"
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
@@ -66,7 +67,11 @@ export const NewsScreen = observer(function NewsScreen() {
     ];
     
     return (
-      <View style={themed($dropdownContainer)}>
+      <Animated.View
+        style={themed($dropdownContainer)}
+        entering={FadeInDown.duration(220)}
+        exiting={FadeOutUp.duration(160)}
+      >
         <View style={themed($dropdownHeader)}>
           <Text text="Select Tags" style={themed($dropdownTitle)} />
           <Button
@@ -111,7 +116,7 @@ export const NewsScreen = observer(function NewsScreen() {
             onPress={newsStore.clearTagFilters}
           />
         )}
-      </View>
+      </Animated.View>
     );
   });
   
@@ -165,7 +170,11 @@ export const NewsScreen = observer(function NewsScreen() {
     if (newsStore.selectedTags.length === 0) return null;
     
     return (
-      <View style={themed($activeFiltersContainer)}>
+      <Animated.View
+        style={themed($activeFiltersContainer)}
+        entering={FadeIn.duration(180)}
+        exiting={FadeOut.duration(140)}
+      >
         <Text style={themed($activeFiltersText)}>
           Filtering by: {newsStore.selectedTags.join(', ')}
         </Text>
@@ -177,7 +186,7 @@ export const NewsScreen = observer(function NewsScreen() {
         >
           <X size={16} color={theme.colors.text} />
         </Pressable>
-      </View>
+      </Animated.View>
     );
   };
   

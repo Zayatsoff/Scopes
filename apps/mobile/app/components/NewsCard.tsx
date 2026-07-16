@@ -6,6 +6,9 @@ import { NewsItem } from "@/models/News"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { SourceFavicon } from "./SourceFavicon"
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 export interface NewsCardProps {
   item: NewsItem
@@ -15,11 +18,19 @@ export interface NewsCardProps {
 
 export const NewsCard = observer(function NewsCard({ item, onPress, compact }: NewsCardProps) {
   const { themed } = useAppTheme()
+  const scale = useSharedValue(1)
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   return (
-    <Pressable
-      style={[themed($container), compact && themed($compactContainer)]}
+    <AnimatedPressable
+      style={[themed($container), compact && themed($compactContainer), pressStyle]}
       onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.97, { duration: 100 })
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 150 })
+      }}
       accessibilityRole="link"
       accessibilityLabel={`${item.sourceDisplay}: ${item.title}`}
       accessibilityHint="Opens the full article in your browser"
@@ -73,7 +84,7 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
           ))}
         </View>
       )}
-    </Pressable>
+    </AnimatedPressable>
   )
 })
 

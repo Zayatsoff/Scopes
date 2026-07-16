@@ -5,9 +5,54 @@ import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { ThemedStyle } from "@/theme"
 import { Flame, Car, Snowflake, Bus } from "lucide-react-native"
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated"
 import Tooltip from "react-native-walkthrough-tooltip"
 import type { StatusItem } from "./types"
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+
+// list rhythm: cap the stagger so many status items don't drag the reveal out
+const ICON_STAGGER_MS = 50
+const ICON_STAGGER_CAP_MS = 250
+
+const StatusIcon = ({
+  children,
+  onPress,
+  accessibilityLabel,
+}: {
+  children: React.ReactNode
+  onPress: () => void
+  accessibilityLabel: string
+}) => {
+  const { themed } = useAppTheme()
+  const scale = useSharedValue(1)
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
+
+  return (
+    <AnimatedPressable
+      style={[themed($iconContainer), pressStyle]}
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.9, { duration: 100 })
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 150 })
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint="Shows details"
+      hitSlop={8}
+    >
+      {children}
+    </AnimatedPressable>
+  )
+}
 
 export interface CityStatusProps {
   /**
@@ -72,32 +117,41 @@ export const CityStatus = observer(function CityStatus({
 
   if (loading) {
     return (
-      <View style={themed($container)}>
+      <Animated.View
+        style={themed($container)}
+        entering={FadeIn.duration(150)}
+        exiting={FadeOut.duration(120)}
+      >
         <Text style={themed($loadingText)}>Loading status...</Text>
-      </View>
+      </Animated.View>
     )
   }
 
   if (statusItems.length === 0) {
     return (
-      <View style={themed($container)}>
+      <Animated.View
+        style={themed($container)}
+        entering={FadeIn.duration(150)}
+        exiting={FadeOut.duration(120)}
+      >
         <Text style={themed($emptyText)}>No status available</Text>
-      </View>
+      </Animated.View>
     )
   }
 
   return (
-    <View 
+    <Animated.View
       style={themed($container)}
+      entering={FadeIn.duration(150)}
       onLayout={(event) => {
         setContainerLayout(event.nativeEvent.layout)
       }}
     >
-      <View 
+      <View
         ref={iconsContainerRef}
         style={themed($iconsContainer)}
       >
-        {statusItems.map((item) => (
+        {statusItems.map((item, index) => (
           <Tooltip
             key={item.id}
             isVisible={activeTooltip === item.id}
@@ -115,20 +169,22 @@ export const CityStatus = observer(function CityStatus({
             allowChildInteraction={false}
             childContentSpacing={4}
           >
-            <Pressable
-              style={themed($iconContainer)}
-              onPress={() => setActiveTooltip(activeTooltip === item.id ? null : item.id)}
-              accessibilityRole="button"
-              accessibilityLabel={`${item.title}: ${item.bool ? "active" : "inactive"}`}
-              accessibilityHint="Shows details"
-              hitSlop={8}
+            <Animated.View
+              entering={FadeIn.duration(200).delay(
+                Math.min(index * ICON_STAGGER_MS, ICON_STAGGER_CAP_MS),
+              )}
             >
-              {renderStatusIcon(item)}
-            </Pressable>
+              <StatusIcon
+                onPress={() => setActiveTooltip(activeTooltip === item.id ? null : item.id)}
+                accessibilityLabel={`${item.title}: ${item.bool ? "active" : "inactive"}`}
+              >
+                {renderStatusIcon(item)}
+              </StatusIcon>
+            </Animated.View>
           </Tooltip>
         ))}
       </View>
-    </View>
+    </Animated.View>
   )
 })
 

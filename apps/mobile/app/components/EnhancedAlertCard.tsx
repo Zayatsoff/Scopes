@@ -8,6 +8,9 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { AlertItem } from "./AlertCard"
 import { CloudSun, Zap, BusFront, Calendar } from "lucide-react-native"
 import { TrafficAlertItem } from "@/models/TrafficAlert"
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 export interface EnhancedAlertCardProps {
   item: PoliceNewsItem | AlertItem | TrafficAlertItem
@@ -15,12 +18,14 @@ export interface EnhancedAlertCardProps {
   categoryColor?: string
 }
 
-export const EnhancedAlertCard = observer(function EnhancedAlertCard({ 
-  item, 
-  onPress, 
-  categoryColor 
+export const EnhancedAlertCard = observer(function EnhancedAlertCard({
+  item,
+  onPress,
+  categoryColor,
 }: EnhancedAlertCardProps) {
   const { themed, theme } = useAppTheme()
+  const scale = useSharedValue(1)
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
   
   // Get the item's category (if it's an AlertItem) or default to "police" for PoliceNewsItem
   const category = 'category' in item ? item.category : 
@@ -162,9 +167,15 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
   };
 
   return (
-    <Pressable
-      style={themed($container)}
+    <AnimatedPressable
+      style={[themed($container), pressStyle]}
       onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.97, { duration: 100 })
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 150 })
+      }}
       accessibilityRole="link"
       accessibilityLabel={getTitle()}
       accessibilityHint="Opens the full details in your browser"
@@ -218,7 +229,7 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
           numberOfLines={1} 
         />
       </View>
-    </Pressable>
+    </AnimatedPressable>
   )
 })
 
