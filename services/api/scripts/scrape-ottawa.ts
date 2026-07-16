@@ -67,14 +67,16 @@ Return the results as a valid JSON array of objects with these properties.
 `;
 
 // Define the detailed page prompt
+// note: title is intentionally NOT extracted here -> it comes verbatim from
+// the homepage card link text instead, so the banner shows citizens exactly
+// what ottawa.ca itself is calling it, not an LLM paraphrase of the article
 const detailedPagePrompt = `
 Extract the key information from this Ottawa city status page. Create a structured JSON with:
-1. title: The main title of the page
-2. status: Summarize the page for a citizen of Ottawa. What do they need to know in one title
-3. lastUpdated: The date when this information was last updated
-4. description: A concise summary of the main content for a citizen of Ottawa
-6. affectedAreas: Any specific areas mentioned (as an array)
-7. recommendations: Any recommendations for citizens (as an array)
+1. status: Summarize the page for a citizen of Ottawa. What do they need to know in one title
+2. lastUpdated: The date when this information was last updated
+3. description: A concise summary of the main content for a citizen of Ottawa
+4. affectedAreas: Any specific areas mentioned (as an array)
+5. recommendations: Any recommendations for citizens (as an array)
 
 Return as a single valid JSON object with these fields.
 `;
@@ -150,6 +152,7 @@ async function scrapeOttawaStatus() {
     console.log("Finding main feature link...");
     const featureLinkEl = $(".card-paragraph a").first();
     const featureLink = featureLinkEl.attr("href") || null;
+    const featureLinkText = featureLinkEl.text().trim();
 
     if (featureLink) {
       const fullUrl = featureLink.startsWith("http")
@@ -172,21 +175,21 @@ async function scrapeOttawaStatus() {
         const detailedInfo = (await processWithGPT(
           pageContent,
           detailedPagePrompt
-        )) as Omit<StatusStoryDTO, "id" | "sourceUrl" | "scrapedAt">;
+        )) as Omit<StatusStoryDTO, "id" | "sourceUrl" | "scrapedAt" | "title">;
 
-        // Save detailed info to Firestore
+        // Save detailed info to Firestore. title is the verbatim homepage
+        // link text, not GPT's summary of the article
         const detailDocId = createDocId(fullUrl);
         await firestore
           .collection("ottawa_story")
           .doc(detailDocId)
           .set({
             ...detailedInfo,
+            title: featureLinkText,
             sourceUrl: fullUrl,
             scrapedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
-        console.log(
-          `Saved detailed information for: ${detailedInfo.title || "Unknown"}`
-        );
+        console.log(`Saved detailed information for: ${featureLinkText || "Unknown"}`);
       } else {
         console.log("No content found on detailed page");
       }
