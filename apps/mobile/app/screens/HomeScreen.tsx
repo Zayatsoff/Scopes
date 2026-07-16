@@ -211,7 +211,8 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 
 const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
-  paddingTop: spacing.sm,
+  // more air between distinct sections (rhythm), density stays tight inside each
+  paddingTop: spacing.md,
 })
 
 const $cityStatusSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({

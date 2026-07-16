@@ -162,13 +162,7 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
   };
 
   return (
-    <Pressable 
-      style={[
-        themed($container), 
-        { borderLeftColor: getColor() }
-      ]} 
-      onPress={onPress}
-    >
+    <Pressable style={themed($container)} onPress={onPress}>
       <View style={themed($header)}>
         <View style={themed($sourceContainer)}>
           {getIcon()}
@@ -223,16 +217,15 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
 })
 
 // Styles
-const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
   backgroundColor: colors.containerBackground,
-  borderRadius: 3,
+  borderRadius: radius.md,
   padding: spacing.sm,
   marginVertical: spacing.xs,
   marginHorizontal: 0,
   borderWidth: 1,
   borderColor: colors.border,
-  borderLeftWidth: 4,
-  borderLeftColor: colors.tint, // Will be overridden in component
+  // category is carried by the colored icon + source label, not a side-stripe
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 1 },
   shadowOpacity: 0.1,
@@ -276,12 +269,12 @@ const $tagText: ThemedStyle<TextStyle> = ({ typography }) => ({
 
 const $source: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: typography.sizes.xs,
-  fontWeight: "bold",
+  fontWeight: typography.weights.semiBold,
 })
 
 const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.md,
-  fontWeight: "bold",
+  fontWeight: typography.weights.semiBold,
   color: colors.text,
   marginBottom: 8,
 })

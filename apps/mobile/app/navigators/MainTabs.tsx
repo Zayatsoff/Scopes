@@ -107,11 +107,12 @@ const $iconContainer: ThemedStyle<any> = () => ({
   justifyContent: "center",
 })
 
-const $activeIconContainer: ThemedStyle<any> = ({ colors }) => ({
+const $activeIconContainer: ThemedStyle<any> = ({ colors, radius }) => ({
   width: 60,
   height: 28,
-  borderRadius: 6,
-  backgroundColor: colors.accent,
+  borderRadius: radius.sm,
+  // brand terracotta for "you are here"; red is reserved for real alerts
+  backgroundColor: colors.tint,
   alignItems: "center",
   justifyContent: "center",
 })

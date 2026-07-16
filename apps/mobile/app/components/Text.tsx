@@ -56,7 +56,7 @@ export interface TextProps extends RNTextProps {
  */
 export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef<RNText>) {
   const { weight, size, tx, txOptions, text, children, style: $styleOverride, ...rest } = props
-  const { themed, theme } = useAppTheme()
+  const { themed } = useAppTheme()
 
   const i18nText = tx && translate(tx, txOptions)
   const content = i18nText || text || children
@@ -70,14 +70,8 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
     $styleOverride,
   ]
 
-  // Apply Instrument Sans font family to all text
-  const fontFamilyStyle = { fontFamily: theme.typography.customFontFamily }
-  const finalStyle = Array.isArray($styles) 
-    ? [fontFamilyStyle, ...$styles] 
-    : [fontFamilyStyle, $styles]
-
   return (
-    <RNText {...rest} style={finalStyle} ref={ref}>
+    <RNText {...rest} style={$styles} ref={ref}>
       {content}
     </RNText>
   )
@@ -93,8 +87,9 @@ const $sizeStyles = {
   xxs: { fontSize: typography.sizes.xs * 0.9, lineHeight: typography.sizes.xs * 1.5 } satisfies TextStyle,
 }
 
-const $fontWeightStyles = Object.entries(typography.primary).reduce((acc, [weight, fontFamily]) => {
-  return { ...acc, [weight]: { fontFamily } }
+// system-font weights: real fontWeight values, keyed by semantic name
+const $fontWeightStyles = Object.entries(typography.primary).reduce((acc, [weight, value]) => {
+  return { ...acc, [weight]: { fontWeight: value } }
 }, {}) as Record<Weights, TextStyle>
 
 const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
@@ -106,14 +101,10 @@ const $baseStyle: ThemedStyle<TextStyle> = (theme) => ({
 const $presets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseStyle],
   bold: [$baseStyle, { ...$fontWeightStyles.bold }],
-  heading: [
-    $baseStyle,
-    {
-      ...$sizeStyles.xxl,
-      ...$fontWeightStyles.bold,
-    },
-  ],
-  subheading: [$baseStyle, { ...$sizeStyles.lg, ...$fontWeightStyles.medium }],
+  // headings use the brand display face (Space Grotesk); weight comes from the
+  // family, so no fontWeight needed
+  heading: [$baseStyle, { ...$sizeStyles.xxl, fontFamily: typography.display.semiBold }],
+  subheading: [$baseStyle, { ...$sizeStyles.lg, fontFamily: typography.display.medium }],
   formLabel: [$baseStyle, { ...$fontWeightStyles.medium }],
   formHelper: [$baseStyle, { ...$sizeStyles.sm, ...$fontWeightStyles.normal }],
 }

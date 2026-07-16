@@ -1,13 +1,15 @@
+// warm-tinted dark ramp (hue ~42, the brand terracotta). depth comes from
+// surface lightness, not shadow: bg (darkest) -> surface -> elevated -> border
 const palette = {
-  neutral900: "#FFFFFF",
-  neutral800: "#F4F2F1",
-  neutral700: "#D7CEC9",
-  neutral600: "#B6ACA6",
-  neutral500: "#978F8A",
-  neutral400: "#4B4B4B",
-  neutral300: "#292929",
-  neutral200: "#191015",
-  neutral100: "#000000",
+  neutral900: "#F4F1F0", // primary text
+  neutral800: "#B2A8A5", // secondary / dim text
+  neutral700: "#93867F",
+  neutral600: "#6E635E", // muted / inactive
+  neutral500: "#48403D", // hairline border
+  neutral400: "#322C2A", // elevated surface / subtle divider
+  neutral300: "#221D1B", // card surface
+  neutral200: "#13100E", // app background
+  neutral100: "#0C0A09", // deepest
 
   primary600: "#F4E0D9",
   primary500: "#E8C1B4",
@@ -23,6 +25,8 @@ const palette = {
   secondary100: "#41476E",
   homeHeaderBackground: "rgba(0, 0, 0, 0.3)",
 
+  // brand terracotta reserved for interaction (buttons, active nav, links)
+  tint: "#C66843",
 
   accent500: "#862729",
   accent400: "#A83133",
@@ -33,14 +37,16 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
-  police: "#7396FF",
-  hydro: "#FFE241",
-  traffic: "#FF713D",
-  alert: "#F6484B",
-  weather: "#FFFFFF",
+  // category colors: one consistent muted, accessible set on the dark surface
+  // (each always paired w/ an icon + label, never color alone)
+  police: "#7EB1F3",
+  hydro: "#C6AD4C",
+  traffic: "#E19D63",
+  alert: "#DF695C",
+  weather: "#54BCE2",
 
-  overlay20: "rgba(25, 16, 21, 0.2)",
-  overlay50: "rgba(25, 16, 21, 0.5)",
+  overlay20: "rgba(12, 10, 9, 0.2)",
+  overlay50: "rgba(12, 10, 9, 0.5)",
 } as const
 
 export const colors = {
@@ -53,19 +59,19 @@ export const colors = {
   transparent: "rgba(0, 0, 0, 0)",
   cityName: palette.neutral900,
   text: palette.neutral900,
-  textDim: palette.neutral600,
-  background: palette.neutral300,
-  containerBackground: palette.neutral400,
+  textDim: palette.neutral800,
+  background: palette.neutral200,
+  containerBackground: palette.neutral300,
   navForeground: palette.neutral900,
-  border: palette.neutral400,
-  tint: palette.primary500,
-  tintInactive: palette.neutral200,
+  border: palette.neutral500,
+  tint: palette.tint,
+  tintInactive: palette.neutral600,
   accent: palette.accent100,
   accentDim: palette.accent300,
-  separator: palette.neutral200,
+  separator: palette.neutral400,
   error: palette.angry500,
   errorBackground: palette.angry100,
   navActive: palette.neutral900,
-  navInactive: palette.neutral900,
+  navInactive: palette.neutral700, // dim but still >=3:1 on the tab-bar surface
   homeHeaderBackground: palette.homeHeaderBackground,
 } as const

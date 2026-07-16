@@ -38,6 +38,8 @@ const $container: ThemedStyle<ViewStyle> = () => ({
 
 const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
-  fontSize: typography.sizes.md,
-  fontWeight: "600",
+  // display face comes from preset="heading"; set a matching size + line-height
+  // (the preset's xxl line-height is too tall for a section label)
+  fontSize: typography.sizes.lg,
+  lineHeight: typography.sizes.lg * 1.2,
 }) 

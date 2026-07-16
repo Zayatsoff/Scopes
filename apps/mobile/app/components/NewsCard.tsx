@@ -72,9 +72,9 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
 })
 
 // Styles
-const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
   backgroundColor: colors.containerBackground,
-  borderRadius: 3,
+  borderRadius: radius.md,
   padding: spacing.sm,
   marginVertical: spacing.xs,
 })
@@ -110,7 +110,7 @@ const $source: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 
 const $title: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.md,
-  // fontWeight: "bold",
+  fontWeight: typography.weights.semiBold,
   color: colors.text,
   marginBottom: 8,
 })

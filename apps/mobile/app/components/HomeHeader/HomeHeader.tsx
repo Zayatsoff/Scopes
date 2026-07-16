@@ -198,11 +198,12 @@ const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
   justifyContent: "flex-start",
 })
 
-const $headerText: ThemedStyle<TextStyle> = ({ colors, spacing, typography }) => ({
+const $headerText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.cityName,
-  fontFamily: typography.customFontFamily,
-  fontWeight: "700",
+  // brand display face for the hero city name
+  fontFamily: typography.display.bold,
   fontSize: 36,
+  letterSpacing: -0.5,
   textAlignVertical: 'center',
 })
 
@@ -213,7 +214,8 @@ const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
 
 const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
-  fontFamily: typography.primary.semiBold,
+  // quiet system weight under the display city name -> hierarchy by contrast
+  fontWeight: typography.weights.medium,
   fontSize: 18,
 })
 

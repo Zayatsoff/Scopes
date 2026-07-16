@@ -1,6 +1,3 @@
-// TODO: write documentation about fonts and typography along with guides on how to add custom fonts in own
-// markdown file and add links from here
-
 import { Platform } from "react-native"
 import {
   SpaceGrotesk_300Light as spaceGroteskLight,
@@ -20,21 +17,14 @@ export const customFontsToLoad = {
 
 const fonts = {
   spaceGrotesk: {
-    // Cross-platform Google font.
+    // brand display face. each weight is its own loaded family (RN wont
+    // synthesize weight from a named family), so drive weight by picking the
+    // family, not fontWeight
     light: "spaceGroteskLight",
     normal: "spaceGroteskRegular",
     medium: "spaceGroteskMedium",
     semiBold: "spaceGroteskSemiBold",
     bold: "spaceGroteskBold",
-  },
-  instrumentSans: {
-    // Web-safe Instrument Sans font
-    light: "400",
-    normal: "400", 
-    medium: "500",
-    semiBold: "600",
-    bold: "700",
-    italic: "italic",
   },
   helveticaNeue: {
     // iOS only font.
@@ -60,27 +50,43 @@ const fonts = {
   },
 }
 
+// body / UI runs on the platform system font (SF on iOS): reliable weight
+// synthesis + a native feel. these are real fontWeight values, not families
+const weights = {
+  light: "300",
+  normal: "400",
+  medium: "500",
+  semiBold: "600",
+  bold: "700",
+} as const
+
 export const typography = {
   /**
-   * The fonts are available to use, but prefer using the semantic name.
+   * The raw font families. Prefer the semantic names below.
    */
   fonts,
   /**
-   * The primary font. Used in most places.
+   * System-font weight values, keyed by semantic weight name.
    */
-  primary: fonts.instrumentSans,
+  weights,
   /**
-   * An alternate font used for perhaps titles and stuff.
+   * The primary UI type: system font, weight-driven. Used across body, labels,
+   * and controls.
+   */
+  primary: weights,
+  /**
+   * The brand display face (Space Grotesk). Reserved for expressive moments:
+   * the home hero, screen titles, section headers.
+   */
+  display: fonts.spaceGrotesk,
+  /**
+   * An alternate system font used in a few places.
    */
   secondary: Platform.select({ ios: fonts.helveticaNeue, android: fonts.sansSerif }),
   /**
    * Lets get fancy with a monospace font!
    */
   code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
-  /**
-   * Custom font family to use throughout the app
-   */
-  customFontFamily: "Instrument Sans, sans-serif",
   /**
    * Font sizes
    */
@@ -92,5 +98,5 @@ export const typography = {
     lg: 20,
     xl: 24,
     xxl: 32,
-  }
+  },
 }

@@ -3,6 +3,7 @@ import { colors as colorsLight } from "./colors"
 import { colors as colorsDark } from "./colorsDark"
 import { spacing as spacingLight } from "./spacing"
 import { spacing as spacingDark } from "./spacingDark"
+import { radius } from "./radius"
 import { timing } from "./timing"
 import { typography } from "./typography"
 
@@ -15,14 +16,16 @@ export type Colors = typeof colorsLight | typeof colorsDark
 // The spacing type needs to take into account the different spacing values for light and dark themes.
 export type Spacing = typeof spacingLight | typeof spacingDark
 
-// These two are consistent across themes.
+// These are consistent across themes.
 export type Timing = typeof timing
 export type Typography = typeof typography
+export type Radius = typeof radius
 
 // The overall Theme object should contain all of the data you need to style your app.
 export interface Theme {
   colors: Colors
   spacing: Spacing
+  radius: Radius
   typography: Typography
   timing: Timing
   isDark: boolean
@@ -32,6 +35,7 @@ export interface Theme {
 export const lightTheme: Theme = {
   colors: colorsLight,
   spacing: spacingLight,
+  radius,
   typography,
   timing,
   isDark: false,
@@ -39,6 +43,7 @@ export const lightTheme: Theme = {
 export const darkTheme: Theme = {
   colors: colorsDark,
   spacing: spacingDark,
+  radius,
   typography,
   timing,
   isDark: true,
@@ -74,6 +79,7 @@ export type ThemedStyleArray<T> = (
 export { colorsLight as colors }
 export { colorsDark }
 export { spacingLight as spacing }
+export { radius }
 
 export * from "./styles"
 export * from "./typography"

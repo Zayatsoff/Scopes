@@ -27,10 +27,11 @@ export function useTabHeader({
     title,
     titleMode,
     backgroundColor: backgroundColor || theme.colors.background,
-    titleStyle: { 
+    titleStyle: {
       color: titleColor || theme.colors.text,
       fontSize: theme.typography.sizes.xl,
-      fontWeight: "600"
+      // brand display face for screen titles (weight carried by the family)
+      fontFamily: theme.typography.display.semiBold,
     },
     RightActionComponent
   }, deps)

@@ -44,5 +44,6 @@ const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.md,
   flexDirection: "column",
   gap: spacing.xs,
+  paddingTop: spacing.md,
   marginBottom: spacing.md,
 }) 

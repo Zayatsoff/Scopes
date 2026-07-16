@@ -1,13 +1,15 @@
+// warm-tinted light ramp (hue ~42, the brand terracotta). warmth lives in the
+// neutrals + accent, not a heavy tint on the body bg
 const palette = {
-  neutral100: "#FFFFFF",
-  neutral200: "#F6F6F6",
-  neutral300: "#E5E0DC",
-  neutral400: "#C8BFB9",
-  neutral500: "#A89D97",
-  neutral600: "#818181",
-  neutral700: "#4A443F",
-  neutral800: "#2D2520",
-  neutral900: "#000000",
+  neutral100: "#FFFFFF", // card surface
+  neutral200: "#F9F6F5", // app background
+  neutral300: "#EFE9E6",
+  neutral400: "#E3DCDA", // hairline border
+  neutral500: "#C9BFBA",
+  neutral600: "#9B8E88", // muted / inactive
+  neutral700: "#685A55", // secondary / dim text
+  neutral800: "#3A2F2A",
+  neutral900: "#1E130F", // primary text
   homeHeaderBackground: "rgba(255, 255, 255, 0.7)",
 
   primary100: "#F6E9E2",
@@ -23,6 +25,9 @@ const palette = {
   secondary400: "#7176A0",
   secondary500: "#41476E",
 
+  // brand terracotta reserved for interaction (buttons, active nav, links)
+  tint: "#B64C1B",
+
   accent100: "#862729",
   accent200: "#A83133",
   accent300: "#CA3B3D",
@@ -32,11 +37,13 @@ const palette = {
   angry100: "#F2D6CD",
   angry500: "#C03403",
 
-  police: "#7396FF",
-  hydro: "#E0BF00",
-  traffic: "#FF713D",
-  alert: "#F6484B",
-  weather: "#A89D97",
+  // category colors: consistent, accessible set on white (each always paired
+  // w/ an icon + label, never color alone)
+  police: "#1F68BC",
+  hydro: "#846500",
+  traffic: "#A44D00",
+  alert: "#AF3D34",
+  weather: "#0077A9",
 
   overlay20: "rgba(25, 16, 21, 0.2)",
   overlay50: "rgba(25, 16, 21, 0.5)",
@@ -52,21 +59,22 @@ export const colors = {
   transparent: "rgba(0, 0, 0, 0)",
   cityName: palette.neutral800,
   text: palette.neutral900,
-  textDim: palette.neutral600,
+  textDim: palette.neutral700,
   background: palette.neutral200,
   containerBackground: palette.neutral100,
   navForeground: palette.neutral900,
-  border: palette.neutral200,
-  tint: palette.primary500,
-  tintInactive: palette.neutral300,
+  border: palette.neutral400,
+  tint: palette.tint,
+  tintInactive: palette.neutral400,
 
   accent: palette.accent500,
   accentDim: palette.accent300,
-  separator: palette.neutral300,
+  separator: palette.neutral400,
   error: palette.angry500,
   errorBackground: palette.angry100,
-  navActive: palette.neutral900,
-  navInactive: palette.neutral900,
+  // active tab icon sits on a terracotta pill -> light on-tint, muted when inactive
+  navActive: palette.neutral100,
+  navInactive: palette.neutral600,
 
   homeHeaderBackground: palette.homeHeaderBackground,
 } as const

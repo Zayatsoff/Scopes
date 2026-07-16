@@ -56,7 +56,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
   ) => {
     if (loading) {
       return (
-        <View style={[themed($card), { width: cardWidth, borderLeftColor: color }]}>
+        <View style={[themed($card), { width: cardWidth }]}>
           <View style={themed($cardHeader)}>
             <View style={themed($titleContainer)}>
               {icon}
@@ -73,7 +73,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
     
     if (bulletPoints.length === 0) {
       return (
-        <View style={[themed($card), { width: cardWidth, borderLeftColor: color }]}>
+        <View style={[themed($card), { width: cardWidth }]}>
           <View style={themed($cardHeader)}>
             <View style={themed($titleContainer)}>
               {icon}
@@ -89,7 +89,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
     }
     
     return (
-      <View style={[themed($card), { width: cardWidth, borderLeftColor: color }]}>
+      <View style={[themed($card), { width: cardWidth }]}>
         <View style={themed($cardHeader)}>
           <View style={themed($titleContainer)}>
             {icon}
@@ -151,14 +151,14 @@ const $cardsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.xs,
 })
 
-const $card: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $card: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
   backgroundColor: colors.containerBackground,
-  borderRadius: 3,
+  borderRadius: radius.md,
   padding: spacing.sm,
   marginBottom: spacing.xs,
   borderWidth: 1,
   borderColor: colors.border,
-  borderLeftWidth: 4,
+  // category is carried by the colored icon + title, not a side-stripe
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 1 },
   shadowOpacity: 0.1,
@@ -182,7 +182,7 @@ const $titleContainer: ThemedStyle<ViewStyle> = () => ({
 
 const $title: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: typography.sizes.xs,
-  fontWeight: "bold",
+  fontWeight: typography.weights.semiBold,
 })
 
 const $cardContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({

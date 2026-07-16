@@ -183,7 +183,7 @@ const $cityImage: ThemedStyle<ImageStyle> = () => ({
 const $cityItemText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   fontSize: 16,
-  fontFamily: typography.primary.medium,
+  fontWeight: typography.weights.medium,
 })
 
 const $checkIconWrapper: ThemedStyle<ViewStyle> = () => ({
@@ -202,8 +202,8 @@ const $addCityButton: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
 
 const $addCityText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
-  fontSize: 16, 
-  fontFamily: typography.primary.medium,
+  fontSize: 16,
+  fontWeight: typography.weights.medium,
 })
 
 const $modalOverlay: ThemedStyle<ViewStyle> = () => ({
