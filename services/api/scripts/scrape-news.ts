@@ -2,6 +2,7 @@ import Parser from "rss-parser";
 import admin from "firebase-admin";
 import crypto from "crypto";
 import OpenAI from "openai";
+import { NewsDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -151,7 +152,7 @@ async function scrapeFeeds() {
       for (const item of feed.items) {
         try {
           // Create a clean data object with only string values
-          const data: Record<string, any> = {};
+          const data: Partial<Omit<NewsDTO, "id">> = {};
 
           // Determine the source using the organization mapping.
           try {
@@ -250,7 +251,10 @@ async function scrapeFeeds() {
           );
 
           // Save to Firestore
-          await firestore.collection("news").doc(docId).set(data);
+          await firestore
+            .collection("news")
+            .doc(docId)
+            .set(data as Omit<NewsDTO, "id">);
           console.log("✓ Item saved successfully");
         } catch (itemError) {
           console.error("Error processing feed item:", itemError);

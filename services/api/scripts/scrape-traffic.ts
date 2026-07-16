@@ -2,6 +2,7 @@ import axios from "axios";
 import admin from "firebase-admin";
 import OpenAI from "openai";
 import { formatInTimeZone } from "date-fns-tz";
+import { TrafficAlertsDocDTO, TrafficEventDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -66,28 +67,10 @@ const ROADS_TO_CHECK = [
   "Wellington",
 ];
 
-interface TrafficEvent {
-  id: number;
-  message: string;
-  headline?: string;
-  status?: string;
-  eventType?: string;
-  cause?: string;
-  schedule?: Array<{
-    startDateTime?: string;
-    endDateTime?: string;
-  }>;
-  geodata?: {
-    coordinates?: string;
-    type?: string;
-  };
-  [key: string]: any;
-}
-
 // Function to generate improved headlines for traffic events
 async function generateImprovedHeadlines(
-  events: TrafficEvent[]
-): Promise<TrafficEvent[]> {
+  events: TrafficEventDTO[]
+): Promise<TrafficEventDTO[]> {
   if (events.length === 0) return events;
 
   console.log("Generating improved headlines for traffic events...");
@@ -194,7 +177,7 @@ async function scrapeTrafficAlerts() {
     console.log(`Received ${trafficData.events.length} traffic events`);
 
     // Extract messages and IDs for OpenAI to process
-    const eventMessages = trafficData.events.map((event: TrafficEvent) => ({
+    const eventMessages = trafficData.events.map((event: TrafficEventDTO) => ({
       id: event.id,
       message: event.message || "",
     }));
@@ -253,7 +236,7 @@ async function scrapeTrafficAlerts() {
     }
 
     // Filter events based on IDs returned by GPT
-    const relevantEvents = trafficData.events.filter((event: TrafficEvent) =>
+    const relevantEvents = trafficData.events.filter((event: TrafficEventDTO) =>
       relevantIds.includes(event.id)
     );
 
@@ -280,11 +263,12 @@ async function scrapeTrafficAlerts() {
     const docId = `traffic_${easternDate}`;
 
     // Save to Firestore (will replace if document already exists)
-    await firestore.collection("trafficAlerts").doc(docId).set({
+    const docBody: TrafficAlertsDocDTO = {
       events: eventsWithImprovedHeadlines,
       scrapedAt: easternTime,
       date: easternDate,
-    });
+    };
+    await firestore.collection("trafficAlerts").doc(docId).set(docBody);
 
     console.log(
       `Successfully saved ${eventsWithImprovedHeadlines.length} traffic alerts to Firestore with ID: ${docId}`

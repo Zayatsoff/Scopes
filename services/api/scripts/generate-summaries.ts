@@ -2,6 +2,11 @@ import admin from "firebase-admin";
 import OpenAI from "openai";
 import { format, isToday } from "date-fns";
 import { toZonedTime, formatInTimeZone } from "date-fns-tz";
+import { SummaryDTO } from "@scopes/shared-types";
+
+type SummaryWrite = Omit<SummaryDTO, "id" | "generatedAt"> & {
+  generatedAt: FirebaseFirestore.FieldValue;
+};
 
 // Eastern Time Zone identifier
 const EASTERN_TIMEZONE = "America/New_York"; // Covers both EST and EDT with automatic switching
@@ -111,12 +116,13 @@ async function generatePoliceSummary() {
     const docId = `Police_${summaryDate}`;
 
     // Save to Firestore (set will replace if document exists)
-    await firestore.collection("summaries").doc(docId).set({
+    const summaryWrite: SummaryWrite = {
       section: "Police",
       date: summaryDate,
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+    await firestore.collection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved police summary to Firestore with ID: ${docId}`
@@ -207,12 +213,13 @@ async function generateWeatherSummary() {
     const docId = `Weather_${summaryDate}`;
 
     // Save to Firestore (set will replace if document exists)
-    await firestore.collection("summaries").doc(docId).set({
+    const summaryWrite: SummaryWrite = {
       section: "Weather",
       date: summaryDate,
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+    await firestore.collection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved weather summary to Firestore with ID: ${docId}`
@@ -318,12 +325,13 @@ async function generateTrafficSummary() {
     const docId = `Traffic_${summaryDate}`;
 
     // Save to Firestore (set will replace if document exists)
-    await firestore.collection("summaries").doc(docId).set({
+    const summaryWrite: SummaryWrite = {
       section: "Traffic",
       date: summaryDate,
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+    await firestore.collection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved traffic summary to Firestore with ID: ${docId}`

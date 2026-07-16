@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, TrafficEventDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
@@ -43,6 +44,14 @@ export const TrafficAlertItemModel = types
 export interface TrafficAlertItem extends Instance<typeof TrafficAlertItemModel> {}
 export interface TrafficAlertItemSnapshotOut extends SnapshotOut<typeof TrafficAlertItemModel> {}
 export interface TrafficAlertItemSnapshotIn extends SnapshotIn<typeof TrafficAlertItemModel> {}
+
+// `id` is excluded: MST forces types.identifier to be a string, but the DTO's id is the
+// real numeric id from the traffic API (converted via String(item.id) on fetch, see below)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _TrafficAlertItemDriftCheck = AssertExtends<
+  Omit<TrafficAlertItemSnapshotOut, "id">,
+  Omit<TrafficEventDTO, "id">
+>
 
 /**
  * Traffic alerts store model

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import admin from "firebase-admin";
 import { formatInTimeZone } from "date-fns-tz";
+import { GetTrafficAlertsResponseDTO, TrafficAlertsDocDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -47,13 +48,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const latestDoc = snapshot.docs[0];
       return res.status(200).json({
-        trafficAlerts: latestDoc.data(),
+        trafficAlerts: latestDoc.data() as TrafficAlertsDocDTO,
         note: "Showing most recent traffic alerts, not from today.",
-      });
+      } satisfies GetTrafficAlertsResponseDTO);
     }
 
     // Return today's traffic alerts
-    res.status(200).json({ trafficAlerts: doc.data() });
+    res.status(200).json({
+      trafficAlerts: doc.data() as TrafficAlertsDocDTO,
+    } satisfies GetTrafficAlertsResponseDTO);
   } catch (error) {
     console.error("Error fetching traffic alerts:", error);
     res.status(500).json({ error: "Error fetching traffic alerts data." });

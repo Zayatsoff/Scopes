@@ -21,15 +21,6 @@ export interface EpisodeItem {
   categories: string[]
 }
 
-export interface NewsItem {
-  title: string
-  description: string
-  link: string
-  date: string
-  source: string
-  authors?: string
-}
-
 export interface ApiFeedResponse {
   status: string
   feed: {

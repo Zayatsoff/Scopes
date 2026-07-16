@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import admin from "firebase-admin";
+import { GetOttawaAlertsResponseDTO, StatusStoryDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -23,12 +24,11 @@ export default async function handler(
       .orderBy("scrapedAt", "desc")
       .get();
     
-    const alertItems = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    
-    res.status(200).json({ alerts: alertItems });
+    const alertItems: StatusStoryDTO[] = snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as StatusStoryDTO)
+    );
+
+    res.status(200).json({ alerts: alertItems } satisfies GetOttawaAlertsResponseDTO);
   } catch (error) {
     console.error("Error fetching Ottawa alerts:", error);
     res.status(500).json({ error: "Error fetching Ottawa alerts data." });

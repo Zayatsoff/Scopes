@@ -1,4 +1,5 @@
-import { Instance, SnapshotOut, types } from "mobx-state-tree"
+import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, CityStatusDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { StatusItem } from "@/components/CityStatus"
 import { Api } from "@/services/api"
@@ -18,6 +19,13 @@ export const CityStatusItemModel = types.model("CityStatusItem").props({
     _nanoseconds: 0
   }),
 })
+
+export interface CityStatusItem extends Instance<typeof CityStatusItemModel> {}
+export interface CityStatusItemSnapshotOut extends SnapshotOut<typeof CityStatusItemModel> {}
+export interface CityStatusItemSnapshotIn extends SnapshotIn<typeof CityStatusItemModel> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _CityStatusItemDriftCheck = AssertExtends<CityStatusItemSnapshotOut, CityStatusDTO>
 
 // Define the store model
 export const CityStatusStoreModel = types

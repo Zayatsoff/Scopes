@@ -4107,7 +4107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scopes/shared-types@workspace:packages/shared-types":
+"@scopes/shared-types@workspace:*, @scopes/shared-types@workspace:packages/shared-types":
   version: 0.0.0-use.local
   resolution: "@scopes/shared-types@workspace:packages/shared-types"
   dependencies:
@@ -5224,6 +5224,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "api@workspace:services/api"
   dependencies:
+    "@scopes/shared-types": "workspace:*"
     "@types/node": "npm:^22.13.13"
     "@vercel/node": "npm:^2.3.0"
     axios: "npm:^1.8.4"
@@ -14384,6 +14385,7 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:6.5.11"
     "@react-navigation/native": "npm:6.1.9"
     "@react-navigation/native-stack": "npm:6.9.17"
+    "@scopes/shared-types": "workspace:*"
     "@shopify/flash-list": "npm:1.7.3"
     "@testing-library/react-native": "npm:^12.5.2"
     "@types/firebase": "npm:^2.4.32"

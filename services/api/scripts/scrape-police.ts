@@ -2,6 +2,11 @@ import admin from "firebase-admin";
 import puppeteer from "puppeteer";
 import crypto from "crypto";
 import OpenAI from "openai";
+import { PoliceNewsDTO } from "@scopes/shared-types";
+
+type PoliceNewsWrite = Omit<PoliceNewsDTO, "id" | "scrapedAt"> & {
+  scrapedAt: FirebaseFirestore.FieldValue;
+};
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -111,7 +116,7 @@ ${blogContentHtml}`;
       .replace(/\*+/g, "")
       .trim();
 
-    let posts: Array<any>;
+    let posts: Array<Omit<PoliceNewsDTO, "id" | "scrapedAt">>;
     try {
       posts = JSON.parse(openaiResponse);
     } catch (error) {
@@ -138,10 +143,11 @@ ${blogContentHtml}`;
         continue;
       }
       // Save the post data to Firestore.
-      await docRef.set({
+      const postWrite: PoliceNewsWrite = {
         ...post,
         scrapedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      };
+      await docRef.set(postWrite);
       console.log(`Saved post "${post.title}" with ID: ${docId}`);
     }
     console.log("Ottawa Police news scraping completed.");

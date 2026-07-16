@@ -1,11 +1,8 @@
 import { ApiResponse } from "apisauce"
+import type { GetOttawaStatusResponseDTO } from "@scopes/shared-types"
 import { Api } from "./api"
 import { StatusItem } from "@/components/CityStatus"
 import { getGeneralApiProblem } from "./apiProblem"
-
-interface OttawaStatusResponse {
-  status: StatusItem[]
-}
 
 export class CityStatusApi {
   private api: Api
@@ -20,7 +17,7 @@ export class CityStatusApi {
   async getOttawaStatus(): Promise<{ kind: string; status?: StatusItem[] }> {
     try {
       // Make the API call
-      const response: ApiResponse<OttawaStatusResponse> = await this.api.apisauce.get(
+      const response: ApiResponse<GetOttawaStatusResponseDTO> = await this.api.apisauce.get(
         "https://local-government-app-backend.vercel.app/api/getOttawaStatus"
       )
 

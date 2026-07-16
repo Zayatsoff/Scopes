@@ -3,6 +3,18 @@ import puppeteer from "puppeteer";
 import admin from "firebase-admin";
 import OpenAI from "openai";
 import crypto from "crypto";
+import { WeatherAlertDTO } from "@scopes/shared-types";
+
+type WeatherAlertWrite = Omit<WeatherAlertDTO, "id" | "scrapedAt"> & {
+  scrapedAt: FirebaseFirestore.FieldValue;
+};
+
+type WeatherAlertGptFields = Partial<
+  Pick<
+    WeatherAlertDTO,
+    "title" | "summary" | "locationsAffected" | "effectiveTime" | "alertTime"
+  >
+>;
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -154,7 +166,7 @@ async function scrapeWeatherAlerts() {
             (item.title || "") + (item.link || "") + (item.pubDate || "")
           );
 
-          const alertItem = {
+          const alertItem: WeatherAlertWrite = {
             title: item.title,
             link: item.link,
             pubDate: item.pubDate,
@@ -207,10 +219,10 @@ async function scrapeWeatherAlerts() {
         }
 
         console.log("Processing HTML with GPT...");
-        const alertData = await processWithGPT(content);
+        const alertData = (await processWithGPT(content)) as WeatherAlertGptFields;
 
         // Combine the RSS data with the GPT-extracted data.
-        const alertItem = {
+        const alertItem: WeatherAlertWrite = {
           title: alertData.title || item.title,
           link: item.link,
           pubDate: item.pubDate,

@@ -1,6 +1,7 @@
 // api/getPoliceNews.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import admin from "firebase-admin";
+import { GetPoliceNewsResponseDTO, PoliceNewsDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -24,12 +25,11 @@ export default async function handler(
       .orderBy("date", "desc")
       .get();
 
-    const policeNewsItems = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const policeNewsItems: PoliceNewsDTO[] = snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as PoliceNewsDTO)
+    );
 
-    res.status(200).json({ policeNews: policeNewsItems });
+    res.status(200).json({ policeNews: policeNewsItems } satisfies GetPoliceNewsResponseDTO);
   } catch (error) {
     console.error("Error fetching police news:", error);
     res.status(500).json({ error: "Error fetching police news data." });

@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import admin from "firebase-admin";
+import { GetSummariesResponseDTO, SummaryDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -31,12 +32,11 @@ export default async function handler(
     // Execute the query
     const snapshot = await query.get();
     
-    const summaries = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    
-    res.status(200).json({ summaries });
+    const summaries: SummaryDTO[] = snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as SummaryDTO)
+    );
+
+    res.status(200).json({ summaries } satisfies GetSummariesResponseDTO);
   } catch (error) {
     console.error("Error fetching summaries:", error);
     res.status(500).json({ error: "Error fetching summaries data." });

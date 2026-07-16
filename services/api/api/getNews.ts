@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import admin from "firebase-admin";
+import { GetNewsResponseDTO, NewsDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -19,11 +20,10 @@ export default async function handler(
   try {
     // Fetch all news documents (consider pagination for large datasets)
     const snapshot = await firestore.collection("news").get();
-    const newsItems = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    res.status(200).json({ news: newsItems });
+    const newsItems: NewsDTO[] = snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as NewsDTO)
+    );
+    res.status(200).json({ news: newsItems } satisfies GetNewsResponseDTO);
   } catch (error) {
     console.error("Error fetching news:", error);
     res.status(500).json({ error: "Error fetching news data." });

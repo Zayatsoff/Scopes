@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, WeatherAlertDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
@@ -18,7 +19,7 @@ export const WeatherAlertItemModel = types
     locationsAffected: types.optional(types.array(types.string), []),
     effectiveTime: types.optional(types.string, ""),
     alertTime: types.optional(types.string, ""),
-    type: types.optional(types.string, "weatherAlert"),
+    type: types.optional(types.enumeration(["weatherAlert"] as const), "weatherAlert"),
     scrapedAt: types.frozen(),
     formattedDate: types.optional(types.string, ""),
   })
@@ -27,6 +28,9 @@ export const WeatherAlertItemModel = types
 export interface WeatherAlertItem extends Instance<typeof WeatherAlertItemModel> {}
 export interface WeatherAlertItemSnapshotOut extends SnapshotOut<typeof WeatherAlertItemModel> {}
 export interface WeatherAlertItemSnapshotIn extends SnapshotIn<typeof WeatherAlertItemModel> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _WeatherAlertItemDriftCheck = AssertExtends<WeatherAlertItemSnapshotOut, WeatherAlertDTO>
 
 /**
  * Weather alerts store model

@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, PoliceNewsDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatDate } from "@/utils/formatDate"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
@@ -17,12 +18,16 @@ export const PoliceNewsItemModel = types
     categories: types.optional(types.array(types.string), []),
     excerpt: types.optional(types.string, ""),
     formattedDate: types.optional(types.string, ""),
+    scrapedAt: types.frozen(),
   })
   .actions(withSetPropAction)
 
 export interface PoliceNewsItem extends Instance<typeof PoliceNewsItemModel> {}
 export interface PoliceNewsItemSnapshotOut extends SnapshotOut<typeof PoliceNewsItemModel> {}
 export interface PoliceNewsItemSnapshotIn extends SnapshotIn<typeof PoliceNewsItemModel> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _PoliceNewsItemDriftCheck = AssertExtends<PoliceNewsItemSnapshotOut, PoliceNewsDTO>
 
 /**
  * Police news store model

@@ -1,4 +1,5 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, NewsDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatDate } from "@/utils/formatDate"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
@@ -79,6 +80,9 @@ export const NewsItemModel = types
 export interface NewsItem extends Instance<typeof NewsItemModel> {}
 export interface NewsItemSnapshotOut extends SnapshotOut<typeof NewsItemModel> {}
 export interface NewsItemSnapshotIn extends SnapshotIn<typeof NewsItemModel> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _NewsItemDriftCheck = AssertExtends<NewsItemSnapshotOut, NewsDTO>
 
 /**
  * News store model

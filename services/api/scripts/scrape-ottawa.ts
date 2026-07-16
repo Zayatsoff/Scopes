@@ -2,6 +2,7 @@ import * as puppeteer from "puppeteer";
 import admin from "firebase-admin";
 import OpenAI from "openai";
 import crypto from "crypto";
+import { CityStatusDTO, StatusStoryDTO } from "@scopes/shared-types";
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -114,10 +115,10 @@ async function scrapeOttawaStatus() {
 
     // Process status listings with GPT
     console.log("Processing status listings with GPT...");
-    const statusListings = await processWithGPT(
+    const statusListings = (await processWithGPT(
       statusListingDiv,
       statusListingPrompt
-    );
+    )) as Array<Omit<CityStatusDTO, "id" | "scrapedAt">>;
 
     // Save status listings to Firestore
     console.log(`Found ${statusListings.length} status items to save`);
@@ -163,10 +164,10 @@ async function scrapeOttawaStatus() {
       if (pageContent) {
         // Process detailed page with GPT
         console.log("Processing detailed page with GPT...");
-        const detailedInfo = await processWithGPT(
+        const detailedInfo = (await processWithGPT(
           pageContent,
           detailedPagePrompt
-        );
+        )) as Omit<StatusStoryDTO, "id" | "sourceUrl" | "scrapedAt">;
 
         // Save detailed info to Firestore
         const detailDocId = createDocId(fullUrl);

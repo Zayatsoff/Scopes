@@ -1,21 +1,8 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
+import type { AssertExtends, GetSummariesResponseDTO, SummaryDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
-
-// Define interface for the API response
-interface SummariesResponse {
-  summaries: {
-    id: string
-    section: string
-    date: string
-    summary: string
-    generatedAt: {
-      _seconds: number
-      _nanoseconds: number
-    }
-  }[]
-}
 
 /**
  * Weather summary item model
@@ -24,7 +11,7 @@ export const WeatherSummaryItemModel = types
   .model("WeatherSummaryItem")
   .props({
     id: types.identifier,
-    section: types.string,
+    section: types.enumeration(["Police", "Weather", "Traffic"] as const),
     date: types.string,
     summary: types.string,
     generatedAt: types.frozen(), // Complex object with _seconds and _nanoseconds
@@ -35,6 +22,9 @@ export const WeatherSummaryItemModel = types
 export interface WeatherSummaryItem extends Instance<typeof WeatherSummaryItemModel> {}
 export interface WeatherSummaryItemSnapshotOut extends SnapshotOut<typeof WeatherSummaryItemModel> {}
 export interface WeatherSummaryItemSnapshotIn extends SnapshotIn<typeof WeatherSummaryItemModel> {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _WeatherSummaryItemDriftCheck = AssertExtends<WeatherSummaryItemSnapshotOut, SummaryDTO>
 
 /**
  * Weather summaries store model
@@ -62,7 +52,7 @@ export const WeatherSummaryStoreModel = types
       
       try {
         // Call the getSummaries endpoint
-        const response = await api.apisauce.get<SummariesResponse>("https://local-government-app-backend.vercel.app/api/getSummaries")
+        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
         
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
@@ -90,7 +80,7 @@ export const WeatherSummaryStoreModel = types
       self.setProp("error", null)
       
       try {
-        const response = await api.apisauce.get<SummariesResponse>("https://local-government-app-backend.vercel.app/api/getSummaries")
+        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
         
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
