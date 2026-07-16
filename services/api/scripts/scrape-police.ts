@@ -1,8 +1,11 @@
 import admin from "firebase-admin";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import crypto from "crypto";
 import OpenAI from "openai";
 import { PoliceNewsDTO } from "@scopes/shared-types";
+
+puppeteer.use(StealthPlugin());
 
 type PoliceNewsWrite = Omit<PoliceNewsDTO, "id" | "scrapedAt"> & {
   scrapedAt: FirebaseFirestore.FieldValue;
@@ -42,7 +45,7 @@ async function scrapePoliceNews() {
     // Set a realistic User-Agent to mimic a real browser
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     );
 
     console.log(`Navigating to ${url}`);
@@ -51,9 +54,21 @@ async function scrapePoliceNews() {
       timeout: 60000,
     });
 
+    // cloudflare runs its bot-management JS challenge after the initial
+    // navigation and only swaps in the real page once it resolves -> wait
+    // for the clearance cookie instead of racing straight to the selector
+    console.log("Waiting for Cloudflare challenge to resolve...");
+    await page
+      .waitForFunction(() => document.cookie.includes("cf_clearance="), {
+        timeout: 20000,
+      })
+      .catch(() =>
+        console.log("No cf_clearance cookie observed, proceeding anyway.")
+      );
+
     // Wait for the blog content container to be present on the page.
     console.log("Waiting for blog content container to load...");
-    await page.waitForSelector("#blogContentContainer", { timeout: 30000 });
+    await page.waitForSelector("#blogContentContainer", { timeout: 45000 });
 
     // Now extract the HTML from the container.
     const blogContentHtml = await page.$eval(
