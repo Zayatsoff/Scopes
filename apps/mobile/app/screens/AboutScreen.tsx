@@ -1,17 +1,9 @@
 import { FC } from "react"
 import { observer } from "mobx-react-lite"
-import { StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import { TextStyle, View, ViewStyle } from "react-native"
 import { Screen, ListItem, Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { 
-  Info,
-  ChevronLeft,
-  Heart,
-  Code,
-  Palette,
-  Calendar,
-  Package
-} from "lucide-react-native"
+import { ChevronLeft, Heart, Code, Palette, Package } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
 import { useNavigation } from "@react-navigation/native"
 import { TouchableOpacity } from "react-native"
@@ -37,10 +29,7 @@ export const AboutScreen: FC = observer(function AboutScreen() {
     <Screen style={themed($root(theme))} preset="scroll" safeAreaEdges={[]}>
       {/* Header with back button */}
       <View style={[themed($header(theme)), { paddingTop: insets.top }]}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={themed($backButton(theme))}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={themed($backButton(theme))}>
           <ChevronLeft size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text text="About" style={themed($headerText(theme))} />
@@ -48,53 +37,32 @@ export const AboutScreen: FC = observer(function AboutScreen() {
 
       {/* App Info Section */}
       <View style={themed($section(theme))}>
-        <ListItem 
+        <ListItem
           text="Version"
           textStyle={themed($listItemText(theme))}
           LeftComponent={renderIcon(Package, theme.colors.palette.primary500)}
-          bottomSeparator
           containerStyle={themed($listItemContainer(theme))}
-          RightComponent={
-            <Text text="1.0.0" style={themed($listItemText(theme))} />
-          }
-        />
-        <ListItem 
-          text="Last Updated"
-          textStyle={themed($listItemText(theme))}
-          LeftComponent={renderIcon(Calendar, theme.colors.palette.primary500)}
-          containerStyle={themed($listItemContainer(theme))}
-          RightComponent={
-            <Text text="March 2024" style={themed($listItemText(theme))} />
-          }
+          RightComponent={<Text text="1.0.0" style={themed($listItemText(theme))} />}
         />
       </View>
 
       {/* Team Section */}
       <View style={themed($section(theme))}>
-        <ListItem 
+        <ListItem
           text="Software Developer"
           textStyle={themed($listItemText(theme))}
           LeftComponent={renderIcon(Code, theme.colors.palette.secondary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer(theme))}
-          RightComponent={
-            <Text text="Lior Rozin" style={themed($listItemText(theme))} />
-          }
+          RightComponent={<Text text="Lior Rozin" style={themed($listItemText(theme))} />}
         />
-        <ListItem 
+        <ListItem
           text="UX/UI Designer"
           textStyle={themed($listItemText(theme))}
           LeftComponent={renderIcon(Palette, theme.colors.palette.secondary500)}
           containerStyle={themed($listItemContainer(theme))}
-          RightComponent={
-            <Text text="Tim Rozin" style={themed($listItemText(theme))} />
-          }
+          RightComponent={<Text text="Tim Rozin" style={themed($listItemText(theme))} />}
         />
-      </View>
-
-      {/* Additional Info Section */}
-      <View style={themed($section(theme))}>
-        
       </View>
 
       {/* Footer Message */}
@@ -158,7 +126,7 @@ const $footer: ThemedStyle<ViewStyle> = (theme) => ({
   paddingBottom: theme.spacing.xl,
 })
 
-const $footerContent: ThemedStyle<ViewStyle> = (theme) => ({
+const $footerContent: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
@@ -173,4 +141,4 @@ const $footerText: ThemedStyle<TextStyle> = (theme) => ({
 const $footerIconContainer: ThemedStyle<ViewStyle> = (theme) => ({
   marginLeft: theme.spacing.xxs,
   justifyContent: "center",
-}) 
+})

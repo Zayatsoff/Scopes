@@ -1,36 +1,34 @@
 import { FC, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import { TextStyle, View, ViewStyle } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { ListItem, Screen, Text, Switch } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useStores } from "@/models"
-import { 
-  Bell, 
-  MoonIcon, 
-  Type, 
-  CloudSun, 
-  LayoutDashboard, 
-  Settings, 
-  MapPin, 
-  History, 
+import {
+  Bell,
+  MoonIcon,
+  CloudSun,
+  LayoutDashboard,
+  MapPin,
+  History,
   BarChart,
-  Book, 
+  Book,
   ShieldCheck,
   FileText,
   Info,
   ChevronRight,
   Bus,
-  MessageSquare
+  MessageSquare,
 } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
-import { StyleProp } from "react-native"
 import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
 import { useNavigation } from "@react-navigation/native"
 import type { SettingsStackParamList } from "@/navigators/SettingsStack"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { navigate } from "@/navigators/navigationUtilities"
 
 interface SettingsScreenProps extends BottomTabScreenProps<MainTabParamList, "Settings"> {}
 
@@ -38,10 +36,10 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   const { themed, theme, themeContext, setThemeContextOverride } = useAppTheme()
   const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>()
   const { newsStore } = useStores()
-  
+
   // Set up the tab header
-  useTabHeader({ title: "Settings" }, [themeContext]);
-  
+  useTabHeader({ title: "Settings" }, [themeContext])
+
   // State for toggle settings
   const [displaySettings, setDisplaySettings] = useState({
     showWeather: true,
@@ -52,7 +50,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
     autoLocation: true,
     sendAnalytics: false,
   })
-  
+
   // State for school bus provider selection
   const [schoolBusProvider, setSchoolBusProvider] = useState("OSTA")
 
@@ -93,10 +91,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
   const renderSwitch = (value: boolean, onValueChange: () => void) => {
     return (
       <View style={themed($switchContainer)}>
-        <Switch 
-          value={value} 
-          onValueChange={onValueChange} 
-        />
+        <Switch value={value} onValueChange={onValueChange} />
       </View>
     )
   }
@@ -106,7 +101,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       {/* Notification Settings */}
       <SectionHeader title="Notifications" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Notification Settings"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Bell, sectionColors.notifications)}
@@ -119,25 +114,31 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       {/* Display Settings */}
       <SectionHeader title="Display" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Dark Mode"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(MoonIcon, sectionColors.display)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            themeContext === "dark",
-            () => setThemeContextOverride(themeContext === "dark" ? "light" : "dark")
+          RightComponent={renderSwitch(themeContext === "dark", () =>
+            setThemeContextOverride(themeContext === "dark" ? "light" : "dark"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Compact News View"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(LayoutDashboard, sectionColors.display)}
+          bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            newsStore.compactView,
-            () => newsStore.toggleCompactView()
+          RightComponent={renderSwitch(newsStore.compactView, () => newsStore.toggleCompactView())}
+        />
+        <ListItem
+          text="Show Weather"
+          textStyle={themed($listItemText)}
+          LeftComponent={renderIcon(CloudSun, sectionColors.display)}
+          containerStyle={themed($listItemContainer)}
+          RightComponent={renderSwitch(displaySettings.showWeather, () =>
+            toggleDisplaySetting("showWeather"),
           )}
         />
       </View>
@@ -145,28 +146,31 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       {/* Home Layout Settings */}
       <SectionHeader title="Home Layout" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Customize Home Layout"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(LayoutDashboard, sectionColors.layout)}
-          RightComponent={renderIcon(ChevronRight, sectionColors.layout)}
-          onPress={() => {}}
+          RightComponent={<Text text="Soon" style={themed($comingSoonText)} />}
+          disabled
+          style={themed($disabledRow)}
           containerStyle={themed($listItemContainer)}
         />
       </View>
-      
+
       {/* School Bus Settings */}
       <SectionHeader title="School Bus Settings" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="School Bus Provider"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Bus, sectionColors.schoolBus)}
           RightComponent={renderIcon(ChevronRight, sectionColors.schoolBus)}
-          onPress={() => navigation.navigate("SchoolBusProvider", { 
-            currentProvider: schoolBusProvider,
-            onSelect: (provider: string) => setSchoolBusProvider(provider)
-          })}
+          onPress={() =>
+            navigation.navigate("SchoolBusProvider", {
+              currentProvider: schoolBusProvider,
+              onSelect: (provider: string) => setSchoolBusProvider(provider),
+            })
+          }
           containerStyle={themed($listItemContainer)}
           TextProps={{
             style: themed($listItemText),
@@ -175,7 +179,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
                 <Text text="School Bus Provider" style={themed($listItemText)} />
                 <Text text={schoolBusProvider} style={themed($providerText)} />
               </View>
-            )
+            ),
           }}
         />
       </View>
@@ -183,26 +187,35 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       {/* Other Settings */}
       <SectionHeader title="General" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Auto-detect Location"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(MapPin, sectionColors.general)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            otherSettings.autoLocation,
-            () => toggleOtherSetting("autoLocation")
+          RightComponent={renderSwitch(otherSettings.autoLocation, () =>
+            toggleOtherSetting("autoLocation"),
           )}
         />
-        
-        <ListItem 
+
+        <ListItem
+          text="Save Browsing History"
+          textStyle={themed($listItemText)}
+          LeftComponent={renderIcon(History, sectionColors.general)}
+          bottomSeparator
+          containerStyle={themed($listItemContainer)}
+          RightComponent={renderSwitch(otherSettings.saveHistory, () =>
+            toggleOtherSetting("saveHistory"),
+          )}
+        />
+
+        <ListItem
           text="Send Anonymous Analytics"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(BarChart, sectionColors.general)}
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            otherSettings.sendAnalytics,
-            () => toggleOtherSetting("sendAnalytics")
+          RightComponent={renderSwitch(otherSettings.sendAnalytics, () =>
+            toggleOtherSetting("sendAnalytics"),
           )}
         />
       </View>
@@ -210,15 +223,15 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
       {/* About & Help */}
       <SectionHeader title="About & Help" />
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Tutorial"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Book, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          onPress={() => {}}
+          onPress={() => navigate("Intro")}
           containerStyle={themed($listItemContainer)}
         />
-        <ListItem 
+        <ListItem
           text="Feedback and Requests"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(MessageSquare, sectionColors.about)}
@@ -226,23 +239,23 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
           onPress={() => navigation.navigate("Feedback")}
           containerStyle={themed($listItemContainer)}
         />
-        <ListItem 
+        <ListItem
           text="Privacy Policy"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(ShieldCheck, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("PrivacyPolicy")}
           containerStyle={themed($listItemContainer)}
         />
-        <ListItem 
+        <ListItem
           text="Terms of Service"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(FileText, sectionColors.about)}
           RightComponent={renderIcon(ChevronRight, sectionColors.about)}
-          onPress={() => {}}
+          onPress={() => navigation.navigate("TermsOfService")}
           containerStyle={themed($listItemContainer)}
         />
-        <ListItem 
+        <ListItem
           text="About"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Info, sectionColors.about)}
@@ -258,7 +271,7 @@ export const SettingsScreen: FC<SettingsScreenProps> = observer(function Setting
 const $root: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 1,
   backgroundColor: colors.background,
-  paddingHorizontal: spacing.md, 
+  paddingHorizontal: spacing.md,
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -283,8 +296,13 @@ const $switchContainer: ThemedStyle<ViewStyle> = () => ({
   justifyContent: "center",
 })
 
-const $bottomPadding: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingBottom: spacing.xl,
+const $comingSoonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  color: colors.textDim,
+  fontSize: typography.sizes.sm,
+})
+
+const $disabledRow: ThemedStyle<ViewStyle> = () => ({
+  opacity: 0.5,
 })
 
 const $providerContainer: ThemedStyle<ViewStyle> = () => ({

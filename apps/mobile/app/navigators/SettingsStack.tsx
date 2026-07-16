@@ -5,6 +5,8 @@ import { NotificationSettingsScreen } from "@/screens/NotificationSettingsScreen
 import { AboutScreen } from "@/screens/AboutScreen"
 import { SchoolBusProviderScreen } from "@/screens/SchoolBusProviderScreen"
 import { FeedbackScreen } from "@/screens/FeedbackScreen"
+import { PrivacyPolicyScreen } from "@/screens/PrivacyPolicyScreen"
+import { TermsOfServiceScreen } from "@/screens/TermsOfServiceScreen"
 import { useAppTheme } from "@/utils/useAppTheme"
 
 export type SettingsStackParamList = {
@@ -16,6 +18,8 @@ export type SettingsStackParamList = {
     onSelect: (provider: string) => void
   }
   Feedback: undefined
+  PrivacyPolicy: undefined
+  TermsOfService: undefined
 }
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>()
@@ -36,6 +40,8 @@ export function SettingsStack() {
       <Stack.Screen name="About" component={AboutScreen} />
       <Stack.Screen name="SchoolBusProvider" component={SchoolBusProviderScreen} />
       <Stack.Screen name="Feedback" component={FeedbackScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
     </Stack.Navigator>
   )
 } 

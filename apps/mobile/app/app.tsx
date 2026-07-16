@@ -43,7 +43,6 @@ const config = {
   screens: {
     Splash: "splash",
     Intro: "intro",
-    Welcome: "welcome",
     MainTabs: {
       screens: {
         Home: "home",

@@ -5,12 +5,6 @@ const en = {
     back: "Back",
     retry: "Try Again",
   },
-  welcomeScreen: {
-    postscript:
-      "psst  — This probably isn't what your app looks like. (Unless your designer handed you these screens, and in that case, ship it!)",
-    readyForLaunch: "Your app, almost ready for launch!",
-    exciting: "(ohh, this is exciting!)",
-  },
   errorScreen: {
     title: "Oops! Something went wrong",
     friendlySubtitle:

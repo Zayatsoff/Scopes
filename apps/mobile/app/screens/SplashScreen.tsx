@@ -53,7 +53,7 @@ export function SplashScreen() {
     <View style={themed($container)}>
       <Animated.View style={[{ opacity: fadeAnim }, themed($logoContainer)]}>
         <Image
-          source={require("../../assets/images/logo.png")}
+          source={require("../../assets/images/app-icon-android-adaptive-foreground.png")}
           style={themed($logo)}
           resizeMode="contain"
         />
@@ -78,10 +78,10 @@ const $logoContainer: ThemedStyle<any> = () => ({
   alignItems: "center",
 })
 
-const $logo: ThemedStyle<any> = () => ({
-  width: 150,
-  height: 150,
-  marginBottom: 40,
+const $logo: ThemedStyle<any> = ({ spacing }) => ({
+  width: 160,
+  height: 160,
+  marginBottom: spacing.xl,
 })
 
 const $spinner: ThemedStyle<any> = ({ spacing }) => ({

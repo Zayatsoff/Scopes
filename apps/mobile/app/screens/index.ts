@@ -1,4 +1,3 @@
-export * from "./WelcomeScreen"
 export * from "./SplashScreen"
 export * from "./IntroScreen"
 export * from "./AlertsScreen"

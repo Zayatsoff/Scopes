@@ -11,7 +11,6 @@ import { MainTabs } from "./MainTabs"
 export type AppStackParamList = {
   Splash: undefined
   Intro: undefined
-  Welcome: undefined
   MainTabs: undefined
 }
 
@@ -38,7 +37,6 @@ const AppStack = observer(function AppStack() {
     >
       <Stack.Screen name="Splash" component={Screens.SplashScreen} />
       <Stack.Screen name="Intro" component={Screens.IntroScreen} />
-      <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
       <Stack.Screen name="MainTabs" component={MainTabs} />
     </Stack.Navigator>
   )
