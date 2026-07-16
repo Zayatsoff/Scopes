@@ -67,6 +67,7 @@ const availableTags = [
   "community",
   "health",
   "sports",
+  "culture",
 ];
 
 // Sanitize a string for use as a document ID
@@ -84,7 +85,7 @@ async function generateTags(
     console.log("Generating tags for article...");
 
     const prompt = `
-    Categorize the following news article into one or more of these categories: politics, science, business, community, health, sports.
+    Categorize the following news article into one or more of these categories: politics, science, business, community, health, sports, culture.
     
     Return only the most relevant tags separated by commas (at least one tag, maximum two tags).
     

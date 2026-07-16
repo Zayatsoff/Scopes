@@ -96,7 +96,6 @@ export const NewsStoreModel = types
     sortNewestFirst: types.optional(types.boolean, true), // Default newest first
     compactView: types.optional(types.boolean, false), // Default to full view
     selectedTags: types.optional(types.array(types.string), []), // Store selected tags
-    showTagFilter: types.optional(types.boolean, false), // Is the tag filter dropdown visible
   })
   .actions(withSetPropAction)
   .views((self) => ({
@@ -144,10 +143,6 @@ export const NewsStoreModel = types
 
     toggleCompactView() {
       self.setProp("compactView", !self.compactView)
-    },
-
-    toggleTagFilter() {
-      self.setProp("showTagFilter", !self.showTagFilter)
     },
 
     toggleTag(tag: string) {

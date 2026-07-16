@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="apps/mobile/assets/images/logo.png" alt="Scopes logo" width="120" />
+  <img src="apps/mobile/assets/images/app-icon-all.png" alt="Scopes logo" width="120" />
 </p>
 
 <h1 align="center">Scopes</h1>

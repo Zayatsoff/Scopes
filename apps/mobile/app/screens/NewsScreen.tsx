@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { ViewStyle, TextStyle, View, RefreshControl, Pressable } from "react-native"
+import { ViewStyle, TextStyle, View, RefreshControl, Pressable, ScrollView } from "react-native"
 import { Screen } from "@/components/Screen"
 import { NewsCard } from "@/components/NewsCard"
 import { useStores } from "@/models"
@@ -7,7 +7,6 @@ import { observer } from "mobx-react-lite"
 import { FlashList } from "@shopify/flash-list"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { ThemedStyle } from "@/theme"
-import { Button } from "@/components/Button"
 import { Linking } from "react-native"
 import { Text } from "@/components/Text"
 import { NewsItem } from "@/models/News"
@@ -15,8 +14,49 @@ import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
-import { Filter, ArrowDownWideNarrow, ArrowUpNarrowWide, Check, X } from "lucide-react-native"
-import Animated, { FadeInDown, FadeOutUp, FadeIn, FadeOut } from "react-native-reanimated"
+import { ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react-native"
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
+
+const TAG_OPTIONS = ["politics", "science", "business", "community", "health", "sports", "culture"]
+
+// a single filter pill: press-scale feedback matches NewsCard's touch feel
+const FilterChip = ({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string
+  selected: boolean
+  onPress: () => void
+}) => {
+  const { themed } = useAppTheme()
+  const scale = useSharedValue(1)
+  const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.94, { duration: 100 })
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 150 })
+      }}
+      hitSlop={6}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label === "All" ? "Show all topics" : `Filter by ${label}`}
+      style={[themed($chip), selected && themed($chipSelected), pressStyle]}
+    >
+      <Text
+        text={label}
+        style={[themed($chipText), selected && themed($chipTextSelected)]}
+      />
+    </AnimatedPressable>
+  )
+}
 
 export const NewsScreen = observer(function NewsScreen() {
   const { newsStore, api } = useStores()
@@ -30,96 +70,54 @@ export const NewsScreen = observer(function NewsScreen() {
     titleMode: "center"
   }, [themeContext]);
   
-  // Create a custom section header with filter button and sort button
-  const NewsFeedHeader = () => (
-    <View style={themed($sectionHeaderContainer)}>
-      <View style={themed($filterContainer)}>
-        <Button
-          preset="default"
-          onPress={newsStore.toggleTagFilter} 
-          LeftAccessory={() => <Filter size={18} color={theme.colors.text} />}
-          text="Filter"
-          style={themed($filterButton)}
-          textStyle={themed($filterText)}
+  // persistent, always-visible topic filter bar (Nextdoor-style tag filtering)
+  // + a fixed sort pill, replacing the old filter-button + dropdown + active-filters label
+  const NewsFilterBar = () => (
+    <View style={themed($filterBarRow)}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={themed($chipsScroll)}
+        contentContainerStyle={themed($chipsScrollContent)}
+        accessibilityRole="tablist"
+      >
+        <FilterChip
+          label="All"
+          selected={newsStore.selectedTags.length === 0}
+          onPress={newsStore.clearTagFilters}
         />
-        <View style={themed($filterIndicator)} />
-      </View>
-      <Button
+        {TAG_OPTIONS.map((tag) => (
+          <FilterChip
+            key={tag}
+            label={tag}
+            selected={newsStore.selectedTags.includes(tag)}
+            onPress={() => newsStore.toggleTag(tag)}
+          />
+        ))}
+      </ScrollView>
+
+      <Pressable
         onPress={newsStore.toggleSortOrder}
-        style={themed($sortButton)}
-        textStyle={themed($sortButtonText)}
-        RightAccessory={() => (
-          newsStore.sortNewestFirst 
-            ? <ArrowDownWideNarrow size={18} color={theme.colors.text} />
-            : <ArrowUpNarrowWide size={18} color={theme.colors.text} />
+        hitSlop={8}
+        style={themed($sortChip)}
+        accessibilityRole="button"
+        accessibilityLabel={`Sorted ${
+          newsStore.sortNewestFirst ? "newest first" : "oldest first"
+        }. Tap to reverse.`}
+      >
+        {newsStore.sortNewestFirst ? (
+          <ArrowDownWideNarrow size={15} color={theme.colors.text} />
+        ) : (
+          <ArrowUpNarrowWide size={15} color={theme.colors.text} />
         )}
-        text={newsStore.sortNewestFirst ? "Newest" : "Oldest"}
-      />
+        <Text
+          text={newsStore.sortNewestFirst ? "Newest" : "Oldest"}
+          style={themed($sortChipText)}
+        />
+      </Pressable>
     </View>
   );
 
-  // Tag filter dropdown component
-  const TagFilterDropdown = observer(() => {
-    if (!newsStore.showTagFilter) return null;
-    
-    const availableTags = [
-      "politics", "science", "business", "community", "health", "sports"
-    ];
-    
-    return (
-      <Animated.View
-        style={themed($dropdownContainer)}
-        entering={FadeInDown.duration(220)}
-        exiting={FadeOutUp.duration(160)}
-      >
-        <View style={themed($dropdownHeader)}>
-          <Text text="Select Tags" style={themed($dropdownTitle)} />
-          <Button
-            preset="default"
-            style={themed($closeButton)}
-            onPress={newsStore.toggleTagFilter}
-            accessibilityLabel="Close tag filter"
-            LeftAccessory={() => <X size={16} color={theme.colors.text} />}
-          />
-        </View>
-        
-        <View style={themed($tagsContainer)}>
-          {availableTags.map(tag => (
-            <Pressable
-              key={tag}
-              style={[
-                themed($tagButton),
-                newsStore.selectedTags.includes(tag) && themed($tagButtonSelected)
-              ]}
-              onPress={() => newsStore.toggleTag(tag)}
-            >
-              <Text 
-                text={tag} 
-                style={[
-                  themed($tagButtonText),
-                  newsStore.selectedTags.includes(tag) && themed($tagButtonTextSelected)
-                ]} 
-              />
-              {newsStore.selectedTags.includes(tag) && (
-                <Check size={14} color={theme.colors.tint} />
-              )}
-            </Pressable>
-          ))}
-        </View>
-        
-        {newsStore.selectedTags.length > 0 && (
-          <Button
-            text="Clear Filters"
-            preset="default"
-            style={[themed($clearButton), { minHeight: 36 }]}
-            textStyle={themed($clearButtonText)}
-            onPress={newsStore.clearTagFilters}
-          />
-        )}
-      </Animated.View>
-    );
-  });
-  
   useEffect(() => {
     // Fetch news when component mounts
     newsStore.fetchNews(api)
@@ -165,40 +163,13 @@ export const NewsScreen = observer(function NewsScreen() {
     />
   )
   
-  // Show a label with the active filters if any
-  const renderActiveFiltersLabel = () => {
-    if (newsStore.selectedTags.length === 0) return null;
-    
-    return (
-      <Animated.View
-        style={themed($activeFiltersContainer)}
-        entering={FadeIn.duration(180)}
-        exiting={FadeOut.duration(140)}
-      >
-        <Text style={themed($activeFiltersText)}>
-          Filtering by: {newsStore.selectedTags.join(', ')}
-        </Text>
-        <Pressable
-          onPress={newsStore.clearTagFilters}
-          accessibilityRole="button"
-          accessibilityLabel="Clear filters"
-          hitSlop={12}
-        >
-          <X size={16} color={theme.colors.text} />
-        </Pressable>
-      </Animated.View>
-    );
-  };
-  
   return (
     <Screen
       preset="fixed"
       contentContainerStyle={themed($screenContainer)}
       safeAreaEdges={[]}
     >
-      <NewsFeedHeader />
-      <TagFilterDropdown />
-      {renderActiveFiltersLabel()}
+      <NewsFilterBar />
       
       <PullToRefreshIndicator visible={refreshing} progress={progress} />
       
@@ -240,153 +211,69 @@ const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
   textAlign: "center",
 })
 
-// New styles for the section header with sort button
-const $sectionHeaderContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+// persistent topic filter bar: scrollable chips + a fixed sort pill
+const $filterBarRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  justifyContent: "space-between",
   alignItems: "center",
   paddingHorizontal: spacing.md,
   marginTop: spacing.sm,
   marginBottom: spacing.xs,
-})
-
-const $filterContainer: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-})
-
-const $filterText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 16,
-  color: colors.text,
-  marginLeft: 4,
-})
-
-const $filterIndicator: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  height: 2,
-  backgroundColor: colors.text,
-  width: '100%',
-  // marginTop: 2,
-})
-
-const $filterButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.transparent,
-  paddingHorizontal: 8,
-  borderWidth: 0,
-})
-
-const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.transparent,
-  paddingHorizontal: 8,
-  borderWidth: 0,
-  flexDirection: "row",
-  alignItems: "center",
-})
-
-const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: 16,
-  color: colors.text,
-  marginRight: 4,
-})
-
-// New styles for tag filter dropdown
-const $dropdownContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.background,
-  borderRadius: 8,
-  marginHorizontal: spacing.md,
-  marginTop: spacing.xs,
-  marginBottom: spacing.sm,
-  paddingHorizontal: spacing.sm,
-  paddingVertical: spacing.xs,
-  elevation: 4,
-  borderWidth: 1,
-  borderColor: colors.border,
-})
-
-const $dropdownHeader: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: 8,
-})
-
-const $dropdownTitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.md,
-  fontWeight: "bold",
-  color: colors.text,
-})
-
-const $closeButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.transparent,
-  padding: 4,
-  borderWidth: 0,
-})
-
-const $tagsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  flexDirection: "row",
-  flexWrap: "wrap",
   gap: spacing.xs,
-  justifyContent: "flex-start",
-  alignItems: "flex-start",
 })
 
-const $tagButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $chipsScroll: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+})
+
+const $chipsScrollContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-  backgroundColor: colors.background,
+  gap: spacing.xs,
+  paddingRight: spacing.xs,
+})
+
+const $chip: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: colors.containerBackground,
   borderWidth: 1,
   borderColor: colors.border,
-  borderRadius: 16,
+  borderRadius: radius.pill,
   paddingHorizontal: spacing.sm,
-  paddingVertical: spacing.xxs,
-  marginBottom: spacing.xs,
-  minWidth: 80,
-  maxWidth: '45%',
-  flexGrow: 0,
-  flexShrink: 1,
+  paddingVertical: spacing.xxs + 2,
 })
 
-const $tagButtonSelected: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.containerBackground,
-  borderColor: colors.text,
+const $chipSelected: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.tint,
+  borderColor: colors.tint,
 })
 
-const $tagButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+const $chipText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.sm,
+  fontWeight: typography.weights.medium,
   color: colors.text,
   textTransform: "capitalize",
-  marginRight: 4,
 })
 
-const $tagButtonTextSelected: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  fontWeight: "bold",
+const $chipTextSelected: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  color: colors.navActive,
+  fontWeight: typography.weights.semiBold,
 })
 
-const $clearButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.transparent,
-  marginTop: spacing.sm,
-  alignSelf: "center",
-  paddingVertical: spacing.xxs,
-})
-
-const $clearButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
-  fontSize: typography.sizes.sm,
-  color: colors.accent,
-})
-
-const $activeFiltersContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $sortChip: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
   flexDirection: "row",
-  justifyContent: "space-between",
   alignItems: "center",
+  gap: spacing.xxs,
   backgroundColor: colors.containerBackground,
-  marginHorizontal: spacing.md,
-  marginBottom: spacing.xs,
-  padding: spacing.xs,
-  borderRadius: 4,
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderRadius: radius.pill,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xxs + 2,
 })
 
-const $activeFiltersText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+const $sortChipText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: typography.sizes.sm,
+  fontWeight: typography.weights.medium,
   color: colors.text,
-  flex: 1,
 })
