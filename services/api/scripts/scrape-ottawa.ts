@@ -40,7 +40,13 @@ Extract the status listings from the provided HTML. For each listing, I need:
 3. icon: A description of the icon used (e.g. "skating not permitted")
 4. description: A short description of the status, i.e. "Skating is not permitted at the Rink of Dreams"
 5. date: Today's date from the header
-6. bool: A boolean indicating if the status is active (true) or inactive (false)
+6. bool: true only if this listing represents a restriction, ban, or closure currently in effect
+   that citizens need to know about (e.g. skating/sledding NOT permitted, open-air fires banned or
+   NOT permitted, a winter parking ban in effect, school buses cancelled). false if the activity is
+   permitted/operating normally, even if conditional (e.g. "fires are permitted with a burn permit"
+   is a normal condition, not a ban, so bool is false). Base this strictly on the description's own
+   wording ("not permitted", "banned", "cancelled" -> true; "permitted", "in effect as usual",
+   "running normally" -> false), not on the presence or color of an icon.
 
 Return the results as a valid JSON array of objects with these properties.
 `;

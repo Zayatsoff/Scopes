@@ -23,10 +23,12 @@ const ICON_STAGGER_CAP_MS = 250
 
 const StatusIcon = ({
   children,
+  label,
   onPress,
   accessibilityLabel,
 }: {
   children: React.ReactNode
+  label: string
   onPress: () => void
   accessibilityLabel: string
 }) => {
@@ -50,6 +52,9 @@ const StatusIcon = ({
       hitSlop={8}
     >
       {children}
+      <Text style={themed($iconLabel)} numberOfLines={1}>
+        {label}
+      </Text>
     </AnimatedPressable>
   )
 }
@@ -115,6 +120,16 @@ export const CityStatus = observer(function CityStatus({
     }
   }
 
+  // short caption under each icon, same category matching as renderStatusIcon
+  const getStatusLabel = (item: StatusItem) => {
+    const title = item.title.toLowerCase()
+    if (title.includes("fire")) return "Fire Ban"
+    if (title.includes("parking")) return "Parking"
+    if (title.includes("sledding")) return "Sledding"
+    if (title.includes("school bus")) return "School Bus"
+    return item.title
+  }
+
   if (loading) {
     return (
       <Animated.View
@@ -175,6 +190,7 @@ export const CityStatus = observer(function CityStatus({
               )}
             >
               <StatusIcon
+                label={getStatusLabel(item)}
                 onPress={() => setActiveTooltip(activeTooltip === item.id ? null : item.id)}
                 accessibilityLabel={`${item.title}: ${item.bool ? "active" : "inactive"}`}
               >
@@ -207,6 +223,14 @@ const $iconsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 const $iconContainer: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
   padding: 8,
+  alignItems: "center",
+  gap: 4,
+})
+
+const $iconLabel: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+  fontSize: typography.sizes.xxs,
+  color: colors.textDim,
+  textAlign: "center",
 })
 
 const $tooltipStyle: ThemedStyle<ViewStyle> = () => ({

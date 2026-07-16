@@ -187,14 +187,14 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       {/* Recent News Section */}
       <HomeNewsSection
         title="Local News"
-        newsItems={newsStore.latestItems.slice(4, 8)}
+        newsItems={newsStore.latestItems.slice(0, 4)}
         onNewsPress={handleNewsPress}
       />
 
       {/* More News Section */}
       <HomeNewsSection
         title="More News"
-        newsItems={newsStore.latestItems.slice(8, 16)}
+        newsItems={newsStore.latestItems.slice(4, 12)}
         onNewsPress={handleNewsPress}
       />
     </Screen>

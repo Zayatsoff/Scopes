@@ -65,7 +65,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     { id: "weather", label: "Weather", color: categoryColors.weather },
     { id: "police", label: "Police", color: categoryColors.police },
     { id: "hydro", label: "Hydro", color: categoryColors.hydro },
-    { id: "traffic", label: "Road & Traffic", color: categoryColors.traffic },
+    { id: "traffic", label: "Traffic", color: categoryColors.traffic },
   ]
 
   // Get info about the active category
