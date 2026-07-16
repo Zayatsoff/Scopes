@@ -162,7 +162,13 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
   };
 
   return (
-    <Pressable style={themed($container)} onPress={onPress}>
+    <Pressable
+      style={themed($container)}
+      onPress={onPress}
+      accessibilityRole="link"
+      accessibilityLabel={getTitle()}
+      accessibilityHint="Opens the full details in your browser"
+    >
       <View style={themed($header)}>
         <View style={themed($sourceContainer)}>
           {getIcon()}

@@ -71,7 +71,15 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
   ]
 
   return (
-    <RNText {...rest} style={$styles} ref={ref}>
+    <RNText
+      // honor the OS text-size setting (Dynamic Type) but bound it so dense
+      // layouts degrade gracefully instead of shattering. callers can override
+      allowFontScaling
+      maxFontSizeMultiplier={2}
+      {...rest}
+      style={$styles}
+      ref={ref}
+    >
       {content}
     </RNText>
   )

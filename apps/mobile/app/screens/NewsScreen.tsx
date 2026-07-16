@@ -73,6 +73,7 @@ export const NewsScreen = observer(function NewsScreen() {
             preset="default"
             style={themed($closeButton)}
             onPress={newsStore.toggleTagFilter}
+            accessibilityLabel="Close tag filter"
             LeftAccessory={() => <X size={16} color={theme.colors.text} />}
           />
         </View>
@@ -168,7 +169,12 @@ export const NewsScreen = observer(function NewsScreen() {
         <Text style={themed($activeFiltersText)}>
           Filtering by: {newsStore.selectedTags.join(', ')}
         </Text>
-        <Pressable onPress={newsStore.clearTagFilters}>
+        <Pressable
+          onPress={newsStore.clearTagFilters}
+          accessibilityRole="button"
+          accessibilityLabel="Clear filters"
+          hitSlop={12}
+        >
           <X size={16} color={theme.colors.text} />
         </Pressable>
       </View>

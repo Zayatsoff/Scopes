@@ -118,6 +118,10 @@ export const CityStatus = observer(function CityStatus({
             <Pressable
               style={themed($iconContainer)}
               onPress={() => setActiveTooltip(activeTooltip === item.id ? null : item.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.title}: ${item.bool ? "active" : "inactive"}`}
+              accessibilityHint="Shows details"
+              hitSlop={8}
             >
               {renderStatusIcon(item)}
             </Pressable>

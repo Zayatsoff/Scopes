@@ -17,7 +17,13 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
   const { themed } = useAppTheme()
 
   return (
-    <Pressable style={[themed($container), compact && themed($compactContainer)]} onPress={onPress}>
+    <Pressable
+      style={[themed($container), compact && themed($compactContainer)]}
+      onPress={onPress}
+      accessibilityRole="link"
+      accessibilityLabel={`${item.sourceDisplay}: ${item.title}`}
+      accessibilityHint="Opens the full article in your browser"
+    >
       <View style={themed($header)}>
         <View style={themed($sourceContainer)}>
           <SourceFavicon source={item.source} size={16} />
