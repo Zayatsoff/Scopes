@@ -31,7 +31,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .get();
 
       if (snapshot.empty) {
-        return res.status(404).json({ error: "No traffic alerts found." });
+        return res.status(200).json({
+          trafficAlerts: { events: [], scrapedAt: "", date: todayFormatted },
+        } satisfies GetTrafficAlertsResponseDTO);
       }
 
       const latestDoc = snapshot.docs[0];

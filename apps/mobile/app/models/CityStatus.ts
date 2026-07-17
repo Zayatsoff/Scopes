@@ -112,25 +112,6 @@ export const CityStatusStoreModel = types
       await fetchCityStatus(api)
     }
 
-    // Debug function to manually add a school bus item
-    const addSchoolBusItem = () => {
-      console.log("Adding school bus item directly to store")
-      const schoolBusItem = CityStatusItemModel.create({
-        id: "school-bus-status-direct",
-        title: "School Bus Service",
-        link: "https://ottawaschoolbus.ca/",
-        icon: "bus",
-        description: "School buses are currently operating normally across the city.",
-        date: new Date().toISOString(),
-        bool: true,
-        scrapedAt: { _seconds: Math.floor(Date.now() / 1000), _nanoseconds: 0 }
-      })
-
-      // Add item to existing items
-      const newItems = [...store.items, schoolBusItem]
-      store.setProp("items", newItems)
-    }
-
     return {
       setLoading,
       setError,
@@ -138,7 +119,6 @@ export const CityStatusStoreModel = types
       clearItems,
       fetchCityStatus,
       refreshCityStatus,
-      addSchoolBusItem,
     }
   })
   .views((store) => ({

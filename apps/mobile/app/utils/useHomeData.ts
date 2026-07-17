@@ -73,11 +73,6 @@ export const useHomeData = () => {
   const cityStatusFetch = () => {
     if (cityStatusStore.items.length === 0) {
       cityStatusStore.fetchCityStatus(api)
-      
-      // Add school bus item directly for testing (you may want to remove this in production)
-      setTimeout(() => {
-        cityStatusStore.addSchoolBusItem()
-      }, 2000)
     }
   }
   
