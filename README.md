@@ -52,14 +52,14 @@ Each scraper lives in `services/api/scripts` and runs on its own schedule via Gi
 | `scrape:weather` | `weather-alerts-scraper.yml` | every 30 min |
 | `generate:summaries` | `summaries-generator.yml` | hourly |
 
-To run one locally:
+To run one locally, copy `services/api/.env.example` to `services/api/.env.local` and fill in your values, then:
 
 ```bash
 yarn install
 yarn workspace api run scrape:news
 ```
 
-Requires `FIREBASE_SERVICE_ACCOUNT` and `OPENAI_API_KEY` in your environment.
+Each `scrape:*`/`generate:*` script loads `services/api/.env.local` automatically (via `dotenv`). It's gitignored, so your credentials never get committed. Required vars: `FIREBASE_SERVICE_ACCOUNT`, `OPENAI_API_KEY`, and `FIRESTORE_ENV` (see below — defaults to `dev` if omitted).
 
 ## Firestore environments (dev vs. production)
 
