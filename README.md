@@ -8,6 +8,9 @@
   One glance, everything local — weather, traffic, police, city status, and news for Ottawa.
 </p>
 
+> [!IMPORTANT]
+> **Not launched yet.** The app is still pre-production. Everything currently reads/writes the `*_dev` Firestore collections — `FIRESTORE_ENV` is unset in both Vercel and the GitHub repo variables, and `SCRAPERS_ENABLED` is unset, so scheduled scraper runs are paused. Nothing writes to the production (unsuffixed) collections. See [Firestore environments](#firestore-environments-dev-vs-production) and [Before launch](#before-launch) before flipping anything to production. To seed dev data, run the [Populate Dev Collections](#seed-dev-in-one-click) workflow.
+
 ## Run all scrapers on GitHub (manual test trigger)
 
 Every scraper workflow supports `workflow_dispatch`, so you can kick them all off by hand instead of waiting for the cron schedule. Requires the [GitHub CLI](https://cli.github.com/) (`gh`), authenticated (`gh auth login`).
@@ -23,6 +26,16 @@ Check progress with:
 ```bash
 gh run list -R Zayatsoff/Scopes -L 10
 ```
+
+### Seed dev in one click
+
+While pre-launch, use the dedicated **Populate Dev Collections** workflow to seed every `*_dev` collection in a single run. It runs all scrapers and then the summaries generator (which depends on the scraped data), hardcoded to `FIRESTORE_ENV=dev`, so it can never touch production:
+
+```bash
+gh workflow run populate-dev.yml -R Zayatsoff/Scopes
+```
+
+The police scraper step is allowed to fail (see #19) so it doesn't block the rest of the seed. Prefer this over the loop above when you just want dev populated correctly and in the right order.
 
 ## What is this
 

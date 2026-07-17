@@ -1,0 +1,50 @@
+name: Populate Dev Collections
+
+# One-shot manual workflow to seed every *_dev Firestore collection, for use
+# before launch while the app reads dev data. Runs all scrapers and then the
+# summaries generator (which depends on the scraped data), all hardcoded to
+# FIRESTORE_ENV=dev so it can never touch production. No schedule + no gate:
+# it only ever runs when dispatched manually.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  populate:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      FIRESTORE_ENV: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Scrape news
+        run: yarn workspace api run scrape:news
+
+      - name: Scrape Ottawa status
+        run: yarn workspace api run scrape:status
+
+      # police scraper is currently broken (#19) -> dont fail the whole seed run
+      - name: Scrape Ottawa police
+        continue-on-error: true
+        run: yarn workspace api run scrape:police
+
+      - name: Scrape traffic alerts
+        run: yarn workspace api run scrape:traffic
+
+      - name: Scrape weather alerts
+        run: yarn workspace api run scrape:weather
+
+      # runs last: reads the scraped collections above to generate summaries
+      - name: Generate summaries
+        run: yarn workspace api run generate:summaries
