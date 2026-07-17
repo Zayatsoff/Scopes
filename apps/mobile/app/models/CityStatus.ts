@@ -16,7 +16,7 @@ export const CityStatusItemModel = types.model("CityStatusItem").props({
   status: types.maybe(types.string),
   scrapedAt: types.frozen({
     _seconds: 0,
-    _nanoseconds: 0
+    _nanoseconds: 0,
   }),
 })
 
@@ -47,36 +47,24 @@ export const CityStatusStoreModel = types
     }
 
     const addItems = (items: StatusItem[]) => {
-      // Log incoming items
-      console.log("CityStatus: Incoming items:", items.map(item => item.title));
-      
-      // Filter to include only items with titles matching our criteria
-      const filteredItems = items.filter(
-        (item) => {
-          // Keep all items that match any of our criteria
-          return item.title.toLowerCase().includes("fire") ||
-                 item.title.toLowerCase().includes("parking") ||
-                 item.title.toLowerCase().includes("sledding") ||
-                 item.title.toLowerCase().includes("school bus");
-        }
+      // ottawa.ca's indicator set is seasonal (2 items in summer, 5+ in
+      // winter) -> render everything the API returns rather than dropping
+      // anything outside a fixed allow-list. Unrecognized titles still get
+      // an icon/label via statusTypes' default entry
+      const models = items.map((item) =>
+        CityStatusItemModel.create({
+          id: item.id,
+          title: item.title,
+          link: item.link,
+          icon: item.icon,
+          description: item.description,
+          date: item.date,
+          bool: item.bool,
+          status: item.status,
+          scrapedAt: item.scrapedAt || { _seconds: 0, _nanoseconds: 0 },
+        }),
       )
-      
-      // Log filtered items
-      console.log("CityStatus: Filtered items:", filteredItems.map(item => item.title));
-      
-      // Convert to proper model instances and add to store
-      const models = filteredItems.map((item) => CityStatusItemModel.create({
-        id: item.id,
-        title: item.title,
-        link: item.link,
-        icon: item.icon,
-        description: item.description,
-        date: item.date,
-        bool: item.bool,
-        status: item.status,
-        scrapedAt: item.scrapedAt || { _seconds: 0, _nanoseconds: 0 },
-      }))
-      
+
       store.setProp("items", models)
     }
 
@@ -89,10 +77,10 @@ export const CityStatusStoreModel = types
       try {
         setLoading(true)
         setError(undefined)
-        
+
         const cityStatusApi = api.cityStatus
         const result = await cityStatusApi.getOttawaStatus()
-        
+
         if (result.kind === "ok" && result.status) {
           addItems(result.status)
         } else {
@@ -129,4 +117,4 @@ export const CityStatusStoreModel = types
   }))
 
 export interface CityStatusStore extends Instance<typeof CityStatusStoreModel> {}
-export interface CityStatusStoreSnapshot extends SnapshotOut<typeof CityStatusStoreModel> {} 
+export interface CityStatusStoreSnapshot extends SnapshotOut<typeof CityStatusStoreModel> {}
