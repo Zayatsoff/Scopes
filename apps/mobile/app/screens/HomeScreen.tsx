@@ -19,10 +19,8 @@ import { CompactSummaryCards } from "@/components/CompactSummaryCards"
 import { CityStatus } from "@/components/CityStatus"
 import { CityAlertBanner } from "@/components/CityAlertBanner"
 import { HomeHeader } from "@/components/HomeHeader"
-import { CitySelector } from "@/components/CitySelector"
 import { HomeNewsSection } from "@/components/HomeNewsSection"
 import { useHomeData } from "@/utils/useHomeData"
-import { useCitySelector } from "@/utils/useCitySelector"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 
 interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home"> {}
@@ -45,16 +43,6 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     fetchInitialData,
     refreshData
   } = useHomeData()
-  
-  const {
-    cityTextRef,
-    selectedCity,
-    dropdownVisible,
-    dropdownPosition,
-    measureAndShowDropdown,
-    handleCitySelect,
-    closeDropdown
-  } = useCitySelector()
   
   const { progress, onScroll: refreshProgress, resetProgress } = usePullToRefreshProgress()
 
@@ -144,21 +132,10 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         scrollY={scrollY}
         opacityValue={opacityValue}
         translateYValue={translateYValue}
-        selectedCity={selectedCity}
         refreshing={refreshing}
         progress={progress}
-        onCitySelectorPress={measureAndShowDropdown}
       />
-      
-      {/* City Selector Dropdown */}
-      <CitySelector
-        visible={dropdownVisible}
-        dropdownPosition={dropdownPosition}
-        selectedCity={selectedCity}
-        onCitySelect={handleCitySelect}
-        onClose={closeDropdown}
-      />
-      
+
       {/* City Alert Banner - the city's featured/pinned notice, when there is one */}
       {latestAlert && alertTitle && (
         <CityAlertBanner

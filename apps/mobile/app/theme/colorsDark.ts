@@ -23,7 +23,10 @@ const palette = {
   secondary300: "#9196B9",
   secondary200: "#626894",
   secondary100: "#41476E",
-  homeHeaderBackground: "rgba(0, 0, 0, 0.3)",
+  // hero photo scrim: transparent at the top so the photo reads, opaque black
+  // toward the bottom so the city label/greeting stay legible over any image
+  homeHeaderScrimStart: "rgba(0, 0, 0, 0)",
+  homeHeaderScrimEnd: "rgba(0, 0, 0, 0.6)",
 
   // brand terracotta reserved for interaction (buttons, active nav, links)
   tint: "#C66843",
@@ -73,5 +76,6 @@ export const colors = {
   errorBackground: palette.angry100,
   navActive: palette.neutral900,
   navInactive: palette.neutral700, // dim but still >=3:1 on the tab-bar surface
-  homeHeaderBackground: palette.homeHeaderBackground,
+  homeHeaderScrimStart: palette.homeHeaderScrimStart,
+  homeHeaderScrimEnd: palette.homeHeaderScrimEnd,
 } as const

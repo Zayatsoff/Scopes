@@ -10,7 +10,10 @@ const palette = {
   neutral700: "#685A55", // secondary / dim text
   neutral800: "#3A2F2A",
   neutral900: "#1E130F", // primary text
-  homeHeaderBackground: "rgba(255, 255, 255, 0.7)",
+  // hero photo scrim: transparent at the top so the photo reads, opaque white
+  // toward the bottom so the city label/greeting stay legible over any image
+  homeHeaderScrimStart: "rgba(255, 255, 255, 0)",
+  homeHeaderScrimEnd: "rgba(255, 255, 255, 0.88)",
 
   primary100: "#F6E9E2",
   primary200: "#EACDBF",
@@ -76,5 +79,6 @@ export const colors = {
   navActive: palette.neutral100,
   navInactive: palette.neutral600,
 
-  homeHeaderBackground: palette.homeHeaderBackground,
+  homeHeaderScrimStart: palette.homeHeaderScrimStart,
+  homeHeaderScrimEnd: palette.homeHeaderScrimEnd,
 } as const

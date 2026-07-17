@@ -1,50 +1,37 @@
-import { FC, useRef, useState } from "react"
-import { Dimensions, Image, ImageStyle, View, ViewStyle, TouchableOpacity, TextStyle, TouchableWithoutFeedback } from "react-native"
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-  interpolate,
-  Extrapolate,
-  withTiming,
-} from "react-native-reanimated"
+import { FC } from "react"
+import { Dimensions, ImageStyle, View, ViewStyle, TextStyle } from "react-native"
+import Animated, { useAnimatedStyle, interpolate, Extrapolate } from "react-native-reanimated"
+import { LinearGradient } from "expo-linear-gradient"
 import { Text } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
-import { ChevronDown } from "lucide-react-native"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
+
+// ottawa-only by design, no city selection (see PRODUCT.md)
+const CITY_NAME = "Ottawa"
 
 interface HomeHeaderProps {
   scrollY: Animated.SharedValue<number>
   opacityValue: Animated.SharedValue<number>
   translateYValue: Animated.SharedValue<number>
-  selectedCity: string
   refreshing: boolean
   progress: number
-  onCitySelectorPress: () => void
 }
 
 export const HomeHeader: FC<HomeHeaderProps> = ({
   scrollY,
   opacityValue,
   translateYValue,
-  selectedCity,
   refreshing,
   progress,
-  onCitySelectorPress,
 }) => {
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
-  const cityTextRef = useRef<any>(null)
-  
+
   // Set up image dimensions
   const IMAGE_HEIGHT = screenWidth * 0.5
   const MIN_IMAGE_HEIGHT = 120
 
-  // Add animation for dropdown icon
-  const dropdownIconRotation = useSharedValue(0)
-  
   // Get greeting based on time of day
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -57,60 +44,45 @@ export const HomeHeader: FC<HomeHeaderProps> = ({
       return "Good evening"
     }
   }
-  
+
   // Header image animation style
   const imageAnimatedStyle = useAnimatedStyle(() => {
     const height = interpolate(
       scrollY.value,
       [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
       [IMAGE_HEIGHT, MIN_IMAGE_HEIGHT],
-      Extrapolate.CLAMP
+      Extrapolate.CLAMP,
     )
 
     const translateY = interpolate(
       scrollY.value,
       [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
       [0, -(IMAGE_HEIGHT - MIN_IMAGE_HEIGHT) / 2],
-      Extrapolate.CLAMP
+      Extrapolate.CLAMP,
     )
 
     const scale = interpolate(
       scrollY.value,
       [0, IMAGE_HEIGHT - MIN_IMAGE_HEIGHT],
       [1, 1.1],
-      Extrapolate.CLAMP
+      Extrapolate.CLAMP,
     )
 
     return {
       height,
-      transform: [
-        { translateY },
-        { scale },
-      ],
+      transform: [{ translateY }, { scale }],
     }
   }, [scrollY.value])
 
   // Header container animation style
   const headerContainerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      scrollY.value,
-      [0, 100],
-      [1, 0.85],
-      Extrapolate.CLAMP
-    )
+    const opacity = interpolate(scrollY.value, [0, 100], [1, 0.85], Extrapolate.CLAMP)
 
     return {
       opacity,
     }
   })
-  
-  // Create animated style for icon rotation
-  const dropdownIconStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotate: `${dropdownIconRotation.value}deg` }],
-    }
-  })
-  
+
   // Greeting animation styles
   const greetingAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -124,34 +96,19 @@ export const HomeHeader: FC<HomeHeaderProps> = ({
       <PullToRefreshIndicator visible={refreshing} progress={progress} />
       <Animated.Image
         source={require("../../../assets/images/ottawa_cover.jpg")}
-        style={[
-          { width: screenWidth, height: IMAGE_HEIGHT },
-          themed($image),
-          imageAnimatedStyle,
-        ]}
+        style={[{ width: screenWidth, height: IMAGE_HEIGHT }, themed($image), imageAnimatedStyle]}
         resizeMode="cover"
       />
-      <View
-        style={[{ width: screenWidth, height: IMAGE_HEIGHT }, themed($overlay)]}
-      >
+      <View style={[{ width: screenWidth, height: IMAGE_HEIGHT }, themed($overlay)]}>
+        <LinearGradient
+          colors={[theme.colors.homeHeaderScrimStart, theme.colors.homeHeaderScrimEnd]}
+          style={$scrim}
+          pointerEvents="none"
+        />
         <View style={themed($headerOverlay)}>
-          <View style={themed($headerTextContainer)}>
-            <View style={themed($cityTextWrapper)}>
-              <TouchableOpacity 
-                ref={cityTextRef}
-                onPress={onCitySelectorPress} 
-                style={themed($citySelector)}
-                activeOpacity={0.7}
-              >
-                <Text preset="heading" style={themed($headerText)}>
-                  {selectedCity}
-                </Text>
-                <Animated.View style={dropdownIconStyle}>
-                  <ChevronDown size={24} color={theme.colors.text} />
-                </Animated.View>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Text preset="heading" style={themed($headerText)}>
+            {CITY_NAME}
+          </Text>
           {/* Time-based greeting inside header overlay */}
           <Animated.View style={[themed($greetingContainer), greetingAnimatedStyle]}>
             <Text preset="subheading" style={themed($greetingText)}>
@@ -170,17 +127,24 @@ export const HomeHeader: FC<HomeHeaderProps> = ({
 
 const $imageSection: ThemedStyle<ViewStyle> = () => ({
   position: "relative",
-  overflow: 'hidden',
+  overflow: "hidden",
 })
 
 const $image: ThemedStyle<ImageStyle> = () => ({})
 
-const $overlay: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+const $scrim: ViewStyle = {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: 0,
+  bottom: 0,
+}
+
+const $overlay: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: colors.homeHeaderBackground, // Black overlay with 30% opacity
   paddingHorizontal: spacing.md,
   justifyContent: "flex-end",
 })
@@ -192,19 +156,12 @@ const $headerOverlay: ThemedStyle<ViewStyle> = () => ({
   paddingBottom: 10,
 })
 
-const $headerTextContainer: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "flex-start",
-})
-
 const $headerText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.cityName,
   // brand display face for the hero city name
   fontFamily: typography.display.bold,
   fontSize: 36,
   letterSpacing: -0.5,
-  textAlignVertical: 'center',
 })
 
 const $greetingContainer: ThemedStyle<ViewStyle> = () => ({
@@ -218,17 +175,3 @@ const $greetingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontWeight: typography.weights.medium,
   fontSize: 18,
 })
-
-const $cityTextWrapper: ThemedStyle<ViewStyle> = () => ({
-  paddingVertical: 2,
-  borderRadius: 8,
-  justifyContent: 'center',
-  alignSelf: 'flex-start',
-})
-
-const $citySelector: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 8,
-  paddingVertical: 4,
-}) 
