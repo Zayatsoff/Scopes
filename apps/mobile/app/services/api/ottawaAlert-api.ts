@@ -16,7 +16,7 @@ export class OttawaAlertApi {
   async getOttawaAlerts(): Promise<{ kind: string; alerts?: StatusStoryDTO[] }> {
     try {
       const response: ApiResponse<GetOttawaAlertsResponseDTO> = await this.api.apisauce.get(
-        "https://local-government-app-backend.vercel.app/api/getOttawaAlerts"
+        "/api/getOttawaAlerts"
       )
 
       if (!response.ok) {

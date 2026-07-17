@@ -13,9 +13,9 @@ export class NewsApi {
    */
   async getNews() {
     try {
-      console.log("Fetching news from:", this.apisauce.getBaseURL() + "/api/getNews")
+      if (__DEV__) console.log("Fetching news from:", this.apisauce.getBaseURL() + "/api/getNews")
       const response = await this.apisauce.get<{ news: NewsItem[] }>("/api/getNews")
-      console.log("News API Response:", response)
+      if (__DEV__) console.log("News API Response:", response)
       return response
     } catch (error) {
       console.error("News API Error:", error)
@@ -28,9 +28,9 @@ export class NewsApi {
    */
   async getNewsBySource(source: string) {
     try {
-      console.log("Fetching news from source:", source)
+      if (__DEV__) console.log("Fetching news from source:", source)
       const response = await this.apisauce.get<{ news: NewsItem[] }>("/api/getNews", { source })
-      console.log("News API Response:", response)
+      if (__DEV__) console.log("News API Response:", response)
       return response
     } catch (error) {
       console.error("News API Error:", error)

@@ -18,7 +18,7 @@ export class CityStatusApi {
     try {
       // Make the API call
       const response: ApiResponse<GetOttawaStatusResponseDTO> = await this.api.apisauce.get(
-        "https://local-government-app-backend.vercel.app/api/getOttawaStatus"
+        "/api/getOttawaStatus"
       )
 
       // Handle the problem or return the result
