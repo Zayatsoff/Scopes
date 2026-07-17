@@ -1,18 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import admin from "firebase-admin";
 import { formatInTimeZone } from "date-fns-tz";
 import { GetTrafficAlertsResponseDTO, TrafficAlertsDocDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-    ),
-  });
-}
-
-const firestore = admin.firestore();
+import { getCollection } from "../lib/firestore-repo";
 
 // Eastern Time Zone identifier
 const EASTERN_TIMEZONE = "America/New_York"; // Covers both EST and EDT
@@ -32,12 +21,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const docId = `traffic_${todayFormatted}`;
 
     // Get the document for today's date
-    const doc = await firestore.collection("trafficAlerts").doc(docId).get();
+    const doc = await getCollection("trafficAlerts").doc(docId).get();
 
     if (!doc.exists) {
       // If today's document doesn't exist, try to get the most recent one
-      const snapshot = await firestore
-        .collection("trafficAlerts")
+      const snapshot = await getCollection("trafficAlerts")
         .orderBy("scrapedAt", "desc")
         .limit(1)
         .get();

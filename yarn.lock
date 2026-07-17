@@ -5234,6 +5234,7 @@ __metadata:
   resolution: "api@workspace:services/api"
   dependencies:
     "@scopes/shared-types": "workspace:*"
+    "@types/jest": "npm:^29.2.1"
     "@types/node": "npm:^22.13.13"
     "@vercel/node": "npm:^2.3.0"
     axios: "npm:^1.8.4"
@@ -5241,11 +5242,13 @@ __metadata:
     date-fns: "npm:^4.1.0"
     date-fns-tz: "npm:^3.2.0"
     firebase-admin: "npm:^13.2.0"
+    jest: "npm:^29.2.1"
     openai: "npm:^4.90.0"
     puppeteer: "npm:^24.4.0"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"
     rss-parser: "npm:^3.13.0"
+    ts-jest: "npm:^29.1.1"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.2"
   languageName: unknown

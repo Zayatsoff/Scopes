@@ -4,6 +4,7 @@ import admin from "firebase-admin";
 import OpenAI from "openai";
 import crypto from "crypto";
 import { CityStatusDTO, StatusStoryDTO } from "@scopes/shared-types";
+import { getCollection } from "../lib/firestore-repo";
 
 // ottawa.ca 403s requests with no/generic user-agent (curl, bare axios), but
 // serves normal server-rendered HTML to a real browser UA -> no headless
@@ -18,24 +19,6 @@ async function fetchHtml(url: string): Promise<string> {
   });
   return response.data;
 }
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -137,8 +120,7 @@ async function scrapeOttawaStatus() {
     console.log(`Found ${statusListings.length} status items to save`);
     for (const status of statusListings) {
       const docId = createDocId(status.title + status.link);
-      await firestore
-        .collection("ottawa_status")
+      await getCollection("ottawa_status")
         .doc(docId)
         .set({
           ...status,
@@ -180,8 +162,7 @@ async function scrapeOttawaStatus() {
         // Save detailed info to Firestore. title is the verbatim homepage
         // link text, not GPT's summary of the article
         const detailDocId = createDocId(fullUrl);
-        await firestore
-          .collection("ottawa_story")
+        await getCollection("ottawa_story")
           .doc(detailDocId)
           .set({
             ...detailedInfo,

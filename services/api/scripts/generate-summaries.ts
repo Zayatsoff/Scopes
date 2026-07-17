@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { format, isToday } from "date-fns";
 import { toZonedTime, formatInTimeZone } from "date-fns-tz";
 import { SummaryDTO } from "@scopes/shared-types";
+import { getCollection } from "../lib/firestore-repo";
 
 type SummaryWrite = Omit<SummaryDTO, "id" | "generatedAt"> & {
   generatedAt: FirebaseFirestore.FieldValue;
@@ -10,24 +11,6 @@ type SummaryWrite = Omit<SummaryDTO, "id" | "generatedAt"> & {
 
 // Eastern Time Zone identifier
 const EASTERN_TIMEZONE = "America/New_York"; // Covers both EST and EDT with automatic switching
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -48,8 +31,7 @@ async function generatePoliceSummary() {
 
   try {
     // Get the most recent police news items (limited to 10)
-    const snapshot = await firestore
-      .collection("policeNews")
+    const snapshot = await getCollection("policeNews")
       .orderBy("date", "desc")
       .limit(10)
       .get();
@@ -122,7 +104,7 @@ async function generatePoliceSummary() {
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    await firestore.collection("summaries").doc(docId).set(summaryWrite);
+    await getCollection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved police summary to Firestore with ID: ${docId}`
@@ -138,8 +120,7 @@ async function generateWeatherSummary() {
 
   try {
     // Query all weather alerts from the collection without a date filter
-    const snapshot = await firestore
-      .collection("weatherAlerts")
+    const snapshot = await getCollection("weatherAlerts")
       .orderBy("alertTime", "desc")
       .get();
 
@@ -219,7 +200,7 @@ async function generateWeatherSummary() {
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    await firestore.collection("summaries").doc(docId).set(summaryWrite);
+    await getCollection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved weather summary to Firestore with ID: ${docId}`
@@ -235,8 +216,7 @@ async function generateTrafficSummary() {
 
   try {
     // Get the most recent traffic alerts document
-    const snapshot = await firestore
-      .collection("trafficAlerts")
+    const snapshot = await getCollection("trafficAlerts")
       .orderBy("scrapedAt", "desc")
       .limit(1)
       .get();
@@ -331,7 +311,7 @@ async function generateTrafficSummary() {
       summary: summary,
       generatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    await firestore.collection("summaries").doc(docId).set(summaryWrite);
+    await getCollection("summaries").doc(docId).set(summaryWrite);
 
     console.log(
       `Successfully saved traffic summary to Firestore with ID: ${docId}`

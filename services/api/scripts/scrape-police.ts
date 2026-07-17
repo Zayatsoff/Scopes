@@ -4,30 +4,13 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import crypto from "crypto";
 import OpenAI from "openai";
 import { PoliceNewsDTO } from "@scopes/shared-types";
+import { getCollection } from "../lib/firestore-repo";
 
 puppeteer.use(StealthPlugin());
 
 type PoliceNewsWrite = Omit<PoliceNewsDTO, "id" | "scrapedAt"> & {
   scrapedAt: FirebaseFirestore.FieldValue;
 };
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 async function scrapePoliceNews() {
   const url = "https://www.ottawapolice.ca/modules/news/en";
@@ -151,7 +134,7 @@ ${blogContentHtml}`;
       const docId = crypto.createHash("md5").update(uniqueStr).digest("hex");
 
       // Check for duplicates in Firestore (collection "policeNews")
-      const docRef = firestore.collection("policeNews").doc(docId);
+      const docRef = getCollection("policeNews").doc(docId);
       const docSnap = await docRef.get();
       if (docSnap.exists) {
         console.log(`Post "${post.title}" already exists. Skipping.`);

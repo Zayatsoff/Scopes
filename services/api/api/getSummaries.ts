@@ -1,17 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import admin from "firebase-admin";
 import { GetSummariesResponseDTO, SummaryDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-    )
-  });
-}
-
-const firestore = admin.firestore();
+import { getCollection } from "../lib/firestore-repo";
 
 export default async function handler(
   req: VercelRequest,
@@ -20,9 +9,9 @@ export default async function handler(
   try {
     // Extract query parameters
     const { section } = req.query;
-    
+
     // Build query based on parameters
-    let query = firestore.collection("summaries").orderBy("date", "desc");
+    let query = getCollection("summaries").orderBy("date", "desc");
     
     // If section is specified, filter by it
     if (section && typeof section === "string") {

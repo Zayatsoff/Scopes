@@ -4,6 +4,7 @@ import admin from "firebase-admin";
 import OpenAI from "openai";
 import crypto from "crypto";
 import { WeatherAlertDTO } from "@scopes/shared-types";
+import { getCollection } from "../lib/firestore-repo";
 
 type WeatherAlertWrite = Omit<WeatherAlertDTO, "id" | "scrapedAt"> & {
   scrapedAt: FirebaseFirestore.FieldValue;
@@ -15,24 +16,6 @@ type WeatherAlertGptFields = Partial<
     "title" | "summary" | "locationsAffected" | "effectiveTime" | "alertTime"
   >
 >;
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -64,7 +47,7 @@ function createDocId(content: string): string {
 // Function to clear the "weatherAlerts" collection.
 async function clearWeatherAlertsCollection() {
   console.log("Clearing weatherAlerts collection...");
-  const collectionRef = firestore.collection("weatherAlerts");
+  const collectionRef = getCollection("weatherAlerts");
   const snapshot = await collectionRef.get();
   const deletePromises = snapshot.docs.map((doc) => doc.ref.delete());
   await Promise.all(deletePromises);
@@ -179,7 +162,7 @@ async function scrapeWeatherAlerts() {
             scrapedAt: admin.firestore.FieldValue.serverTimestamp(),
           };
 
-          await firestore.collection("weatherAlerts").doc(docId).set(alertItem);
+          await getCollection("weatherAlerts").doc(docId).set(alertItem);
           console.log(`Successfully saved special alert: ${alertItem.title}`);
           continue;
         }
@@ -235,7 +218,7 @@ async function scrapeWeatherAlerts() {
           scrapedAt: admin.firestore.FieldValue.serverTimestamp(),
         };
 
-        await firestore.collection("weatherAlerts").doc(docId).set(alertItem);
+        await getCollection("weatherAlerts").doc(docId).set(alertItem);
         console.log(`Successfully saved alert: ${alertItem.title}`);
       } catch (alertError) {
         console.error(`Error processing alert: ${item.title}`, alertError);

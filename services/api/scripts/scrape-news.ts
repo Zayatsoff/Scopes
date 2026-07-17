@@ -1,28 +1,8 @@
 import Parser from "rss-parser";
-import admin from "firebase-admin";
 import crypto from "crypto";
 import OpenAI from "openai";
 import { NewsDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-// Set Firestore configuration BEFORE any operations
-firestore.settings({ ignoreUndefinedProperties: true });
-console.log("Firestore configuration set with ignoreUndefinedProperties: true");
+import { getCollection } from "../lib/firestore-repo";
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -252,8 +232,7 @@ async function scrapeFeeds() {
           );
 
           // Save to Firestore
-          await firestore
-            .collection("news")
+          await getCollection("news")
             .doc(docId)
             .set(data as Omit<NewsDTO, "id">);
           console.log("✓ Item saved successfully");

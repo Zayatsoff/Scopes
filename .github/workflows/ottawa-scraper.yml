@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
+    inputs:
+      firestore_env:
+        description: "Firestore env to target"
+        type: choice
+        options: [dev, production]
+        default: dev
 
 jobs:
   scrape:
@@ -26,3 +32,4 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          FIRESTORE_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.firestore_env || vars.FIRESTORE_ENV || 'dev' }}

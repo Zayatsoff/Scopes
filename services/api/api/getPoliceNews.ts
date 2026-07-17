@@ -1,18 +1,7 @@
 // api/getPoliceNews.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import admin from "firebase-admin";
 import { GetPoliceNewsResponseDTO, PoliceNewsDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-    )
-  });
-}
-
-const firestore = admin.firestore();
+import { getCollection } from "../lib/firestore-repo";
 
 export default async function handler(
   req: VercelRequest,
@@ -20,8 +9,7 @@ export default async function handler(
 ) {
   try {
     // Query the policeNews collection, ordering by date descending
-    const snapshot = await firestore
-      .collection("policeNews")
+    const snapshot = await getCollection("policeNews")
       .orderBy("date", "desc")
       .get();
 

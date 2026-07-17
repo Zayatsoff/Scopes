@@ -1,26 +1,8 @@
 import axios from "axios";
-import admin from "firebase-admin";
 import OpenAI from "openai";
 import { formatInTimeZone } from "date-fns-tz";
 import { TrafficAlertsDocDTO, TrafficEventDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert(
-        JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-      ),
-    });
-    console.log("Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-    process.exit(1);
-  }
-}
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
+import { getCollection } from "../lib/firestore-repo";
 
 // Initialize OpenAI API
 const openai = new OpenAI({
@@ -268,7 +250,7 @@ async function scrapeTrafficAlerts() {
       scrapedAt: easternTime,
       date: easternDate,
     };
-    await firestore.collection("trafficAlerts").doc(docId).set(docBody);
+    await getCollection("trafficAlerts").doc(docId).set(docBody);
 
     console.log(
       `Successfully saved ${eventsWithImprovedHeadlines.length} traffic alerts to Firestore with ID: ${docId}`

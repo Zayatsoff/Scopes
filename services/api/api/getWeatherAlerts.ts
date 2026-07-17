@@ -1,17 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import admin from "firebase-admin";
 import { GetWeatherAlertsResponseDTO, WeatherAlertDTO } from "@scopes/shared-types";
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(
-      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string)
-    )
-  });
-}
-
-const firestore = admin.firestore();
+import { getCollection } from "../lib/firestore-repo";
 
 export default async function handler(
   req: VercelRequest,
@@ -19,8 +8,7 @@ export default async function handler(
 ) {
   try {
     // Get the most recent weather alerts
-    const snapshot = await firestore
-      .collection("weatherAlerts")
+    const snapshot = await getCollection("weatherAlerts")
       .orderBy("scrapedAt", "desc")
       .get();
     
