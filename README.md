@@ -8,6 +8,12 @@
   One glance, everything local — weather, traffic, police, city status, and news for Ottawa.
 </p>
 
+<p align="center">
+  <img src="apps/mobile/screenshots/scopes_ss_1.png" alt="Home screen" width="30%" />
+  <img src="apps/mobile/screenshots/scopes_ss_2.png" alt="Alerts screen" width="30%" />
+  <img src="apps/mobile/screenshots/scopes_ss_3.png" alt="News screen" width="30%" />
+</p>
+
 > [!IMPORTANT]
 > **Not launched yet.** The app is still pre-production. Everything currently reads/writes the `*_dev` Firestore collections — `FIRESTORE_ENV` is unset in both Vercel and the GitHub repo variables, and `SCRAPERS_ENABLED` is unset, so scheduled scraper runs are paused. Nothing writes to the production (unsuffixed) collections. See [Firestore environments](#firestore-environments-dev-vs-production) and [Before launch](#before-launch) before flipping anything to production. To seed dev data, run the [Populate Dev Collections](#seed-dev-in-one-click) workflow.
 
