@@ -3,7 +3,7 @@
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "types": [],
+    "types": ["jest", "node"],
     "jsx": "react-native",
     "module": "es2015",
     "moduleResolution": "node",
@@ -26,6 +26,7 @@
     },
     "typeRoots": [
       "./node_modules/@types",
+      "../../node_modules/@types",
       "./types"
     ]
   },

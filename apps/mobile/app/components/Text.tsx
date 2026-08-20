@@ -1,4 +1,3 @@
-import React from "react"
 import { TOptions } from "i18next"
 import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from "react-native"
 import { isRTL, translate, TxKeyPath } from "@/i18n"
@@ -86,13 +85,19 @@ export const Text = forwardRef(function Text(props: TextProps, ref: ForwardedRef
 })
 
 const $sizeStyles = {
-  xxl: { fontSize: typography.sizes.xxl, lineHeight: typography.sizes.xxl * 1.25 } satisfies TextStyle,
+  xxl: {
+    fontSize: typography.sizes.xxl,
+    lineHeight: typography.sizes.xxl * 1.25,
+  } satisfies TextStyle,
   xl: { fontSize: typography.sizes.xl, lineHeight: typography.sizes.xl * 1.4 } satisfies TextStyle,
   lg: { fontSize: typography.sizes.lg, lineHeight: typography.sizes.lg * 1.6 } satisfies TextStyle,
   md: { fontSize: typography.sizes.md, lineHeight: typography.sizes.md * 1.65 } satisfies TextStyle,
   sm: { fontSize: typography.sizes.sm, lineHeight: typography.sizes.sm * 1.5 } satisfies TextStyle,
   xs: { fontSize: typography.sizes.xs, lineHeight: typography.sizes.xs * 1.5 } satisfies TextStyle,
-  xxs: { fontSize: typography.sizes.xs * 0.9, lineHeight: typography.sizes.xs * 1.5 } satisfies TextStyle,
+  xxs: {
+    fontSize: typography.sizes.xs * 0.9,
+    lineHeight: typography.sizes.xs * 1.5,
+  } satisfies TextStyle,
 }
 
 // system-font weights: real fontWeight values, keyed by semantic name

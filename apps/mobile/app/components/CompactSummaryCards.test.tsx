@@ -15,12 +15,14 @@ describe("CompactSummaryCards", () => {
   it("renders bullet points once a summary is available", () => {
     render(
       <CompactSummaryCards
-        policeSummary={{
-          id: "1",
-          title: "Police Update",
-          date: "2026-07-16",
-          summary: "- Incident on Bank St\n- Road closure downtown",
-        } as any}
+        policeSummary={
+          {
+            id: "1",
+            title: "Police Update",
+            date: "2026-07-16",
+            summary: "- Incident on Bank St\n- Road closure downtown",
+          } as any
+        }
       />,
     )
     expect(screen.getByText("Incident on Bank St")).toBeDefined()

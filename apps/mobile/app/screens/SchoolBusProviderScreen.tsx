@@ -1,4 +1,4 @@
-import React, { FC } from "react"
+import { FC, useLayoutEffect } from "react"
 import { observer } from "mobx-react-lite"
 import { View, ViewStyle, TextStyle, TouchableOpacity } from "react-native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -9,94 +9,86 @@ import type { ThemedStyle } from "@/theme"
 import { Check, Bus, ChevronLeft } from "lucide-react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-interface SchoolBusProviderScreenProps extends NativeStackScreenProps<SettingsStackParamList, "SchoolBusProvider"> {}
+interface SchoolBusProviderScreenProps extends NativeStackScreenProps<
+  SettingsStackParamList,
+  "SchoolBusProvider"
+> {}
 
 // Define the available providers
 const PROVIDERS = [
   { id: "OSTA", name: "OSTA: Ottawa Student Transportation" },
   { id: "DriveYellow", name: "DriveYellow" },
   { id: "SwitzerCarty", name: "Switzer-Carty Transportation" },
-  { id: "STEO", name: "STEO" }
+  { id: "STEO", name: "STEO" },
 ]
 
-export const SchoolBusProviderScreen: FC<SchoolBusProviderScreenProps> = observer(function SchoolBusProviderScreen({ 
-  navigation, 
-  route 
-}) {
-  const { themed, theme } = useAppTheme()
-  const { currentProvider, onSelect } = route.params
-  const insets = useSafeAreaInsets()
+export const SchoolBusProviderScreen: FC<SchoolBusProviderScreenProps> = observer(
+  function SchoolBusProviderScreen({ navigation, route }) {
+    const { themed, theme } = useAppTheme()
+    const { currentProvider, onSelect } = route.params
+    const insets = useSafeAreaInsets()
 
-  // Setup the header
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false, // We'll add our own header
-    })
-  }, [navigation])
+    // Setup the header
+    useLayoutEffect(() => {
+      navigation.setOptions({
+        headerShown: false, // We'll add our own header
+      })
+    }, [navigation])
 
-  const handleProviderSelect = (providerId: string) => {
-    onSelect(providerId)
-    navigation.goBack()
-  }
+    const handleProviderSelect = (providerId: string) => {
+      onSelect(providerId)
+      navigation.goBack()
+    }
 
-  // Helper function to render radio button
-  const renderRadioButton = (isSelected: boolean) => {
+    // Helper function to render radio button
+    const renderRadioButton = (isSelected: boolean) => {
+      return (
+        <View style={themed($iconContainer)}>
+          <View style={[themed($radioOuter), isSelected && themed($radioOuterSelected)]}>
+            {isSelected && (
+              <View style={themed($radioInner)}>
+                <Check size={14} color={theme.colors.background} strokeWidth={3} />
+              </View>
+            )}
+          </View>
+        </View>
+      )
+    }
+
     return (
-      <View style={themed($iconContainer)}>
-        <View style={[
-          themed($radioOuter),
-          isSelected && themed($radioOuterSelected)
-        ]}>
-          {isSelected && (
-            <View style={themed($radioInner)}>
-              <Check size={14} color={theme.colors.background} strokeWidth={3} />
-            </View>
-          )}
+      <Screen style={themed($root)} preset="scroll" safeAreaEdges={[]}>
+        {/* Header with back button */}
+        <View style={[themed($header), { paddingTop: insets.top }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={themed($backButton)}>
+            <ChevronLeft size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text text="School Bus Provider" style={themed($headerText)} />
         </View>
-      </View>
+
+        {/* Provider description */}
+        <View style={themed($section)}>
+          <View style={themed($descriptionHeader)}>
+            <Bus size={22} color={theme.colors.palette.primary500} strokeWidth={2} />
+            <Text text="Select Your School Bus Provider" style={themed($descriptionText)} />
+          </View>
+
+          {/* Provider options */}
+          {PROVIDERS.map((provider, index) => (
+            <ListItem
+              key={provider.id}
+              text={provider.name}
+              textStyle={themed($listItemText)}
+              bottomSeparator={index < PROVIDERS.length - 1}
+              containerStyle={themed($listItemContainer)}
+              onPress={() => handleProviderSelect(provider.id)}
+              RightComponent={renderRadioButton(currentProvider === provider.id)}
+            />
+          ))}
+        </View>
+      </Screen>
     )
-  }
-
-  return (
-    <Screen 
-      style={themed($root)} 
-      preset="scroll" 
-      safeAreaEdges={[]}
-    >
-      {/* Header with back button */}
-      <View style={[themed($header), { paddingTop: insets.top }]}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={themed($backButton)}
-        >
-          <ChevronLeft size={24} color={theme.colors.text} />
-        </TouchableOpacity>
-        <Text text="School Bus Provider" style={themed($headerText)} />
-      </View>
-
-      {/* Provider description */}
-      <View style={themed($section)}>
-        <View style={themed($descriptionHeader)}>
-          <Bus size={22} color={theme.colors.palette.primary500} strokeWidth={2} />
-          <Text text="Select Your School Bus Provider" style={themed($descriptionText)} />
-        </View>
-        
-        {/* Provider options */}
-        {PROVIDERS.map((provider, index) => (
-          <ListItem
-            key={provider.id}
-            text={provider.name}
-            textStyle={themed($listItemText)}
-            bottomSeparator={index < PROVIDERS.length - 1}
-            containerStyle={themed($listItemContainer)}
-            onPress={() => handleProviderSelect(provider.id)}
-            RightComponent={renderRadioButton(currentProvider === provider.id)}
-          />
-        ))}
-      </View>
-    </Screen>
-  )
-})
+  },
+)
 
 // Styles
 const $root: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
@@ -155,7 +147,7 @@ const $iconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
 })
 
-const $radioOuter: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $radioOuter: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 24,
   height: 24,
   borderRadius: 12,
@@ -175,4 +167,4 @@ const $radioInner: ThemedStyle<ViewStyle> = () => ({
   justifyContent: "center",
 })
 
-export default SchoolBusProviderScreen 
+export default SchoolBusProviderScreen

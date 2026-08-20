@@ -1,4 +1,4 @@
-import React from "react"
+import { createElement } from "react"
 import { View, ViewStyle, TextStyle } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Text, Button } from "@/components"
@@ -12,32 +12,32 @@ interface AlertCategoryHeaderProps {
    * Active tab ID
    */
   activeTab: AlertCategory
-  
+
   /**
    * Current tab index
    */
   currentTabIndex: number
-  
+
   /**
    * List of category tabs to display
    */
   categoryTabs: CategoryTab[]
-  
+
   /**
    * Category info for the active tab
    */
   activeCategoryInfo: CategoryInfo
-  
+
   /**
    * Function to call when a tab is selected
    */
   onTabChange: (tabId: string) => void
-  
+
   /**
    * Text to display for the sort button
    */
   sortButtonText: string
-  
+
   /**
    * Function to call when the sort button is pressed
    */
@@ -57,41 +57,43 @@ export function AlertCategoryHeader({
   onTabChange,
   sortButtonText,
   onSortPress,
-  sortIcon
+  sortIcon,
 }: AlertCategoryHeaderProps) {
   const { themed, theme } = useAppTheme()
 
   return (
     <View style={themed($stickyHeaderContainer)}>
       <View style={themed($categoryContainer)}>
-        <CategoryTabs 
+        <CategoryTabs
           tabs={categoryTabs}
           onTabChange={onTabChange}
           initialTabId={activeTab}
           currentIndex={currentTabIndex}
         />
       </View>
-      
+
       <View style={themed($headerRow)}>
         <View style={themed($categoryHeaderContainer)}>
-          {React.createElement(activeCategoryInfo.icon, { 
-            size: 24, 
-            color: activeCategoryInfo.color 
+          {createElement(activeCategoryInfo.icon, {
+            size: 24,
+            color: activeCategoryInfo.color,
           })}
-          <Text 
+          <Text
             text={activeCategoryInfo.label}
-            style={[themed($categoryHeaderText), { color: activeCategoryInfo.color }]} 
+            style={[themed($categoryHeaderText), { color: activeCategoryInfo.color }]}
           />
         </View>
-        
+
         <Button
           text={sortButtonText}
           onPress={onSortPress}
           style={themed($sortButton)}
           textStyle={themed($sortButtonText)}
-          RightAccessory={sortIcon ? 
-            () => React.createElement(sortIcon, { size: 18, color: theme.colors.text }) : 
-            undefined}
+          RightAccessory={
+            sortIcon
+              ? () => createElement(sortIcon, { size: 18, color: theme.colors.text })
+              : undefined
+          }
         />
       </View>
     </View>
@@ -141,11 +143,11 @@ const $sortButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderWidth: 0,
 })
 
-const $sortButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
+const $sortButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 16,
   color: colors.text,
   backgroundColor: colors.transparent,
   paddingHorizontal: 4,
   marginRight: 4,
   borderWidth: 0,
-}) 
+})

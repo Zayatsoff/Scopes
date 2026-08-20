@@ -1,6 +1,6 @@
 import { FC, useState, useEffect, useRef } from "react"
 import { observer } from "mobx-react-lite"
-import { ViewStyle, View, Linking, Dimensions } from "react-native"
+import { ViewStyle, Linking, Dimensions } from "react-native"
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen } from "@/components"
@@ -13,8 +13,8 @@ import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
 import { useStores } from "@/models"
 import { FlashList } from "@shopify/flash-list"
 import { useIsFocused } from "@react-navigation/native"
-import { AlertCategory, getAlertCategories, getCategoryInfo } from "@/utils/alertCategoryUtils"
-import { generateMockAlerts } from "@/utils/mockAlertGenerator" 
+import { AlertCategory, getCategoryInfo } from "@/utils/alertCategoryUtils"
+import { generateMockAlerts } from "@/utils/mockAlertGenerator"
 import { CategoryTab } from "@/components/CategoryTabs"
 import { SwipeableTabView } from "@/components/SwipeableTabView"
 import { AlertListView } from "@/components/AlertListView"
@@ -32,32 +32,32 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const [activeTab, setActiveTab] = useState<AlertCategory>("weather")
   const [currentTabIndex, setCurrentTabIndex] = useState(0)
   const [alerts, setAlerts] = useState<Record<string, AlertItem[]>>({
-    hydro: []
+    hydro: [],
   })
   const { progress, onScroll: pullRefreshOnScroll } = usePullToRefreshProgress()
   const weatherListRef = useRef<FlashList<WeatherAlertItem>>(null)
   const policeListRef = useRef<FlashList<PoliceNewsItem>>(null)
   const hydroListRef = useRef<FlashList<AlertItem>>(null)
   const trafficListRef = useRef<FlashList<any>>(null)
-  const isFocused = useIsFocused()
+  const _isFocused = useIsFocused()
   const { width: screenWidth } = Dimensions.get("window")
-  
+
   // Track scroll positions
   const scrollPositions = useRef<Record<string, number>>({
     weather: 0,
     police: 0,
     hydro: 0,
-    traffic: 0
+    traffic: 0,
   })
   const [containerLayout, setContainerLayout] = useState({ width: screenWidth, height: 0 })
-  const [allTabsPreloaded, setAllTabsPreloaded] = useState(false)
+  const [_allTabsPreloaded, setAllTabsPreloaded] = useState(false)
 
   // Category colors for consistent access
   const categoryColors: Record<AlertCategory, string> = {
     weather: theme.colors.weather,
     police: theme.colors.police,
     hydro: theme.colors.hydro,
-    traffic: theme.colors.traffic
+    traffic: theme.colors.traffic,
   }
 
   // Convert alert categories to category tabs
@@ -78,49 +78,52 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
       if (weatherAlertStore.items.length === 0) {
         weatherAlertStore.fetchWeatherAlerts(api)
       }
-      
+
       // Preload police news
       if (policeNewsStore.items.length === 0) {
         policeNewsStore.fetchPoliceNews(api)
       }
-      
+
       // Preload traffic alerts
       if (trafficAlertsStore.items.length === 0) {
         trafficAlertsStore.fetchTrafficAlerts(api)
       }
-      
+
       // Generate mock alerts for other tabs
       const hydroAlerts = generateMockAlerts("hydro")
-      
+
       setAlerts({
-        hydro: hydroAlerts
+        hydro: hydroAlerts,
       })
-      
+
       setAllTabsPreloaded(true)
     }
-    
+
     preloadAllTabs()
   }, [api, policeNewsStore, weatherAlertStore, trafficAlertsStore])
 
   // Set up the tab header with customized styling
-  useTabHeader({
-    title: "Alerts",
-    titleMode: "center",
-  }, [themeContext])
+  useTabHeader(
+    {
+      title: "Alerts",
+      titleMode: "center",
+    },
+    [themeContext],
+  )
 
   // Handle container layout changes
   useEffect(() => {
     const updateLayout = () => {
-      const { width, height } = Dimensions.get('window')
+      const { width, height } = Dimensions.get("window")
       setContainerLayout({ width, height })
     }
-    
+
     // Initial update
     updateLayout()
-    
+
     // Setup listener for dimension changes
-    const subscription = Dimensions.addEventListener('change', updateLayout)
-    
+    const subscription = Dimensions.addEventListener("change", updateLayout)
+
     return () => {
       subscription.remove()
     }
@@ -130,7 +133,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId as AlertCategory)
     // Find the index of the selected tab and update currentTabIndex
-    const tabIndex = categoryTabs.findIndex(tab => tab.id === tabId)
+    const tabIndex = categoryTabs.findIndex((tab) => tab.id === tabId)
     if (tabIndex !== -1) {
       setCurrentTabIndex(tabIndex)
     }
@@ -139,14 +142,19 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   // Get list ref for the given tab
   const getListRefForTab = (tabId: string) => {
     switch (tabId) {
-      case "weather": return weatherListRef
-      case "police": return policeListRef
-      case "hydro": return hydroListRef
-      case "traffic": return trafficListRef
-      default: return null
+      case "weather":
+        return weatherListRef
+      case "police":
+        return policeListRef
+      case "hydro":
+        return hydroListRef
+      case "traffic":
+        return trafficListRef
+      default:
+        return null
     }
   }
-  
+
   // Scroll to top when needed
   const scrollToTop = () => {
     const currentListRef = getListRefForTab(activeTab)
@@ -165,29 +173,29 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   // Handle refresh with preloading for all tabs
   const onRefresh = async () => {
     setRefreshing(true)
-    
+
     try {
       // Refresh ALL alerts when pulling down on Alerts screen, regardless of active tab
       const promises = []
-      
+
       // Refresh weather alerts
       promises.push(weatherAlertStore.refreshWeatherAlerts(api))
-      
+
       // Refresh police news
       promises.push(policeNewsStore.refreshPoliceNews(api))
-      
+
       // Refresh traffic alerts
       promises.push(trafficAlertsStore.refreshTrafficAlerts(api))
-      
+
       // Wait for all refreshes to complete
       await Promise.all(promises)
-      
+
       // Clear and refresh mock alerts
       const hydroAlerts = generateMockAlerts("hydro")
       setAlerts({
-        hydro: hydroAlerts
+        hydro: hydroAlerts,
       })
-      
+
       // Scroll active tab to top
       scrollToTop()
     } catch (error) {
@@ -201,7 +209,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   const handleScroll = (event: any) => {
     // Call the original onScroll handler for pull-to-refresh
     pullRefreshOnScroll(event)
-    
+
     // Save the scroll position for current tab
     const offset = event.nativeEvent.contentOffset.y
     scrollPositions.current[activeTab] = offset
@@ -231,7 +239,7 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
     } else if (activeTab === "traffic") {
       isNewestFirst = trafficAlertsStore.sortNewestFirst
     }
-    
+
     return isNewestFirst ? ArrowDownWideNarrow : ArrowUpNarrowWide
   }
 
@@ -292,10 +300,10 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
   }
 
   return (
-    <Screen 
-      style={themed($root)} 
-      preset="fixed" 
-      safeAreaEdges={["bottom"]} 
+    <Screen
+      style={themed($root)}
+      preset="fixed"
+      safeAreaEdges={["bottom"]}
       contentContainerStyle={themed($screenContent)}
     >
       <AlertCategoryHeader
@@ -308,24 +316,24 @@ export const AlertsScreen: FC<AlertsScreenProps> = observer(function AlertsScree
         onSortPress={handleSortPress}
         sortIcon={getSortIcon()}
       />
-      
-      <PullToRefreshIndicator 
-        visible={refreshing} 
-        color={activeCategoryInfo.color} 
-        progress={progress} 
+
+      <PullToRefreshIndicator
+        visible={refreshing}
+        color={activeCategoryInfo.color}
+        progress={progress}
       />
-      
+
       <SwipeableTabView
         activeTab={activeTab}
         setActiveTab={(tabId) => {
           // Ensure both activeTab and currentTabIndex are updated together
           setActiveTab(tabId as AlertCategory)
-          const index = categoryTabs.findIndex(tab => tab.id === tabId)
+          const index = categoryTabs.findIndex((tab) => tab.id === tabId)
           if (index !== -1) {
             setCurrentTabIndex(index)
           }
         }}
-        tabs={categoryTabs.map(tab => tab.id) as readonly string[]}
+        tabs={categoryTabs.map((tab) => tab.id) as readonly string[]}
         currentIndex={currentTabIndex}
         setCurrentIndex={(index) => {
           setCurrentTabIndex(index)

@@ -5,21 +5,21 @@ import { logError, ErrorMetadata } from "./errorLogger"
  * A hook that allows functional components to catch and handle errors.
  * This simulates the behavior of Error Boundaries but for specific operations
  * within a functional component.
- * 
+ *
  * @param componentName Optional name of the component for better error tracking
  * @param fallbackValue Value to return when an error occurs
  * @returns An array containing [errorHandler, error, resetError]
  */
 export function useErrorHandler<T = any>(
   componentName?: string,
-  fallbackValue?: T
+  fallbackValue?: T,
 ): [
   // Function to wrap operations that might throw
   <R>(fn: () => R, metadata?: ErrorMetadata) => R | T,
   // Current error state
   Error | null,
   // Function to reset the error state
-  () => void
+  () => void,
 ] {
   const [error, setError] = useState<Error | null>(null)
 
@@ -35,21 +35,21 @@ export function useErrorHandler<T = any>(
         return fn()
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err))
-        
+
         // Update error state
         setError(error)
-        
+
         // Log the error with component context
         logError(error, {
           componentName,
           ...metadata,
         })
-        
+
         // Return fallback value
         return fallbackValue as T
       }
     },
-    [componentName, fallbackValue]
+    [componentName, fallbackValue],
   )
 
   /**
@@ -64,19 +64,17 @@ export function useErrorHandler<T = any>(
 
 /**
  * A specialized version of useErrorHandler for async operations.
- * 
+ *
  * @param componentName Optional name of the component for better error tracking
  * @returns An array containing [asyncErrorHandler, error, resetError]
  */
-export function useAsyncErrorHandler(
-  componentName?: string
-): [
+export function useAsyncErrorHandler(componentName?: string): [
   // Function to wrap async operations that might throw
   <R>(fn: () => Promise<R>, metadata?: ErrorMetadata) => Promise<R | undefined>,
   // Current error state
   Error | null,
   // Function to reset the error state
-  () => void
+  () => void,
 ] {
   const [error, setError] = useState<Error | null>(null)
 
@@ -92,20 +90,20 @@ export function useAsyncErrorHandler(
         return await fn()
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err))
-        
+
         // Update error state
         setError(error)
-        
+
         // Log the error with component context
         logError(error, {
           componentName,
           ...metadata,
         })
-        
+
         return undefined
       }
     },
-    [componentName]
+    [componentName],
   )
 
   /**
@@ -116,4 +114,4 @@ export function useAsyncErrorHandler(
   }, [])
 
   return [handleAsyncError, error, resetError]
-} 
+}

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react"
-import { View, ViewStyle, TextStyle, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from "react-native"
+import { ReactNode } from "react"
+import { View, ViewStyle, TextStyle, Dimensions } from "react-native"
 import { PoliceSummaryItem } from "@/models/PoliceSummary"
 import { TrafficSummaryItem } from "@/models/TrafficSummary"
 import { Text } from "./Text"
@@ -28,35 +28,35 @@ export interface CompactSummaryCardsProps {
   trafficLoading?: boolean
 }
 
-export const CompactSummaryCards = observer(function CompactSummaryCards({ 
+export const CompactSummaryCards = observer(function CompactSummaryCards({
   policeSummary,
   weatherSummary,
   trafficSummary,
   policeLoading,
   weatherLoading,
-  trafficLoading
+  trafficLoading,
 }: CompactSummaryCardsProps) {
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
-  const cardWidth = screenWidth - (theme.spacing.md * 2) // Cards will be full width minus padding
-  
+  const cardWidth = screenWidth - theme.spacing.md * 2 // Cards will be full width minus padding
+
   // Function to parse bullet points from a summary string
   const getBulletPoints = (summary?: string) => {
-    return summary?.split("\n").filter(line => line.trim().startsWith("-")) || []
+    return summary?.split("\n").filter((line) => line.trim().startsWith("-")) || []
   }
-  
+
   // Get bullet points for each summary
   const policeBulletPoints = policeSummary ? getBulletPoints(policeSummary.summary) : []
   const weatherBulletPoints = weatherSummary ? getBulletPoints(weatherSummary.summary) : []
   const trafficBulletPoints = trafficSummary ? getBulletPoints(trafficSummary.summary) : []
-  
+
   // Render a single summary card. Content (loading/empty/list) crossfades on change;
   // the card itself staggers in on first reveal.
   const renderSummaryCard = (
     title: string,
     bulletPoints: string[],
     color: string,
-    icon: React.ReactNode,
+    icon: ReactNode,
     loading: boolean = false,
     index: number = 0,
   ) => {
@@ -88,9 +88,7 @@ export const CompactSummaryCards = observer(function CompactSummaryCards({
             bulletPoints.map((point, i) => (
               <View key={i} style={themed($bulletContainer)}>
                 <Text style={[themed($bullet), { color }]}>•</Text>
-                <Text style={themed($bulletText)}>
-                  {point.replace("- ", "").trim()}
-                </Text>
+                <Text style={themed($bulletText)}>{point.replace("- ", "").trim()}</Text>
               </View>
             ))
           )}
@@ -180,7 +178,7 @@ const $cardContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.xxs,
 })
 
-const $bulletContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $bulletContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "flex-start",
   marginBottom: 1,
@@ -218,4 +216,4 @@ const $emptyText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   opacity: 0.7,
   textAlign: "center",
   paddingVertical: typography.sizes.sm,
-}) 
+})

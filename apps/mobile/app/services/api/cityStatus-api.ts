@@ -17,9 +17,8 @@ export class CityStatusApi {
   async getOttawaStatus(): Promise<{ kind: string; status?: StatusItem[] }> {
     try {
       // Make the API call
-      const response: ApiResponse<GetOttawaStatusResponseDTO> = await this.api.apisauce.get(
-        "/api/getOttawaStatus"
-      )
+      const response: ApiResponse<GetOttawaStatusResponseDTO> =
+        await this.api.apisauce.get("/api/getOttawaStatus")
 
       // Handle the problem or return the result
       if (!response.ok) {
@@ -44,10 +43,10 @@ export class CityStatusApi {
         bool: true, // Enabled state
         scrapedAt: {
           _seconds: Math.floor(Date.now() / 1000),
-          _nanoseconds: 0
-        }
+          _nanoseconds: 0,
+        },
       }
-      
+
       status.push(schoolBusItem)
 
       return { kind: "ok", status }
@@ -56,4 +55,4 @@ export class CityStatusApi {
       return { kind: "rejected" }
     }
   }
-} 
+}

@@ -1,2 +1,2 @@
 export * from "./CityStatus"
-export * from "./types" 
+export * from "./types"

@@ -1,7 +1,13 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { ViewStyle } from "react-native"
 import { Loader2 } from "lucide-react-native"
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from "react-native-reanimated"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated"
 import { useAppTheme } from "@/utils/useAppTheme"
 
 interface LoadingIconProps {
@@ -13,28 +19,28 @@ interface LoadingIconProps {
 export function LoadingIcon({ size = 24, color, style }: LoadingIconProps) {
   const { theme } = useAppTheme()
   const rotation = useSharedValue(0)
-  
+
   // Set up rotation animation
   useEffect(() => {
     rotation.value = withRepeat(
-      withTiming(360, { 
+      withTiming(360, {
         duration: 1000,
-        easing: Easing.linear
+        easing: Easing.linear,
       }),
       -1, // -1 for infinite repetitions
-      false // Don't reverse the animation
+      false, // Don't reverse the animation
     )
   }, [])
-  
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ rotate: `${rotation.value}deg` }],
     }
   })
-  
+
   return (
     <Animated.View style={[animatedStyle, style]}>
       <Loader2 size={size} color={color || theme.colors.text} />
     </Animated.View>
   )
-} 
+}

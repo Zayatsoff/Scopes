@@ -20,7 +20,9 @@ export const TrafficSummaryItemModel = types
   .actions(withSetPropAction)
 
 export interface TrafficSummaryItem extends Instance<typeof TrafficSummaryItemModel> {}
-export interface TrafficSummaryItemSnapshotOut extends SnapshotOut<typeof TrafficSummaryItemModel> {}
+export interface TrafficSummaryItemSnapshotOut extends SnapshotOut<
+  typeof TrafficSummaryItemModel
+> {}
 export interface TrafficSummaryItemSnapshotIn extends SnapshotIn<typeof TrafficSummaryItemModel> {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +43,7 @@ export const TrafficSummaryStoreModel = types
     get latestSummary() {
       if (self.items.length === 0) return null
       // Find item with section = "Traffic"
-      const trafficItems = self.items.filter(item => item.section === "Traffic")
+      const trafficItems = self.items.filter((item) => item.section === "Traffic")
       return trafficItems.length > 0 ? trafficItems[0] : null
     },
   }))
@@ -49,21 +51,23 @@ export const TrafficSummaryStoreModel = types
     fetchTrafficSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         // Call the getSummaries endpoint
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Traffic") // Filter traffic summaries only
+            .filter((item) => item.section === "Traffic") // Filter traffic summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to fetch traffic summaries")
@@ -74,24 +78,26 @@ export const TrafficSummaryStoreModel = types
         self.setProp("isLoading", false)
       }
     },
-    
+
     refreshTrafficSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Traffic") // Filter traffic summaries only
+            .filter((item) => item.section === "Traffic") // Filter traffic summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to refresh traffic summaries")
@@ -101,11 +107,15 @@ export const TrafficSummaryStoreModel = types
       } finally {
         self.setProp("isLoading", false)
       }
-      
+
       return true // Return success indicator for the refresh control
-    }
+    },
   }))
 
 export interface TrafficSummaryStore extends Instance<typeof TrafficSummaryStoreModel> {}
-export interface TrafficSummaryStoreSnapshotOut extends SnapshotOut<typeof TrafficSummaryStoreModel> {}
-export interface TrafficSummaryStoreSnapshotIn extends SnapshotIn<typeof TrafficSummaryStoreModel> {} 
+export interface TrafficSummaryStoreSnapshotOut extends SnapshotOut<
+  typeof TrafficSummaryStoreModel
+> {}
+export interface TrafficSummaryStoreSnapshotIn extends SnapshotIn<
+  typeof TrafficSummaryStoreModel
+> {}

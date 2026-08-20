@@ -11,9 +11,7 @@ function makeApi(response: Partial<ApiResponse<any>>): Api {
   } as unknown as Api
 }
 
-const sampleAlerts = [
-  { id: "1", title: "Boil water advisory" },
-] as unknown as StatusStoryDTO[]
+const sampleAlerts = [{ id: "1", title: "Boil water advisory" }] as unknown as StatusStoryDTO[]
 
 test("maps a populated response", async () => {
   const api = makeApi({ ok: true, data: { alerts: sampleAlerts } })

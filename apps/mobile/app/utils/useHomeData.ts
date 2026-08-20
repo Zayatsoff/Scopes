@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useStores } from "@/models"
 
 export const useHomeData = () => {
-  const { 
-    newsStore, 
-    policeSummaryStore, 
-    weatherAlertStore, 
-    weatherSummaryStore, 
+  const {
+    newsStore,
+    policeSummaryStore,
+    weatherAlertStore,
+    weatherSummaryStore,
     trafficSummaryStore,
     cityStatusStore,
     ottawaAlertStore,
-    api
+    api,
   } = useStores()
-  
+
   const [refreshing, setRefreshing] = useState(false)
 
   // Data fetching functions
@@ -21,19 +21,19 @@ export const useHomeData = () => {
     if (newsStore.items.length === 0) {
       newsStore.fetchNews(api)
     }
-    
+
     // Fetch police summaries
     policeSummaryFetch()
-    
+
     // Fetch weather alerts (for Alerts screen)
     weatherAlertFetch()
-    
+
     // Fetch weather summaries (for Home screen)
     weatherSummaryFetch()
-    
+
     // Fetch traffic summaries
     trafficSummaryFetch()
-    
+
     // Fetch city status information
     cityStatusFetch()
 
@@ -47,21 +47,21 @@ export const useHomeData = () => {
       policeSummaryStore.fetchPoliceSummaries(api)
     }
   }
-  
+
   // Fetch weather alerts
   const weatherAlertFetch = () => {
     if (weatherAlertStore.items.length === 0) {
       weatherAlertStore.fetchWeatherAlerts(api)
     }
   }
-  
+
   // Fetch weather summaries
   const weatherSummaryFetch = () => {
     if (weatherSummaryStore.items.length === 0) {
       weatherSummaryStore.fetchWeatherSummaries(api)
     }
   }
-  
+
   // Fetch traffic summaries
   const trafficSummaryFetch = () => {
     if (trafficSummaryStore.items.length === 0) {
@@ -75,7 +75,7 @@ export const useHomeData = () => {
       cityStatusStore.fetchCityStatus(api)
     }
   }
-  
+
   // Fetch the city banner alert
   const ottawaAlertFetch = () => {
     if (ottawaAlertStore.items.length === 0) {
@@ -94,9 +94,9 @@ export const useHomeData = () => {
         weatherSummaryStore.refreshWeatherSummaries(api),
         trafficSummaryStore.refreshTrafficSummaries(api),
         cityStatusStore.refreshCityStatus(api),
-        ottawaAlertStore.fetchOttawaAlerts(api)
+        ottawaAlertStore.fetchOttawaAlerts(api),
       ])
-      
+
       // Also refresh weather display if provided
       if (weatherDisplayRefresh) {
         weatherDisplayRefresh()
@@ -116,10 +116,10 @@ export const useHomeData = () => {
       weatherSummaryStore,
       trafficSummaryStore,
       cityStatusStore,
-      ottawaAlertStore
+      ottawaAlertStore,
     },
     refreshing,
     fetchInitialData,
-    refreshData
+    refreshData,
   }
-} 
+}

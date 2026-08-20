@@ -1,7 +1,6 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import type { AssertExtends, PoliceNewsDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { formatDate } from "@/utils/formatDate"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
 
@@ -55,11 +54,11 @@ export const PoliceNewsStoreModel = types
     const clearItems = () => {
       store.setProp("items", [])
     }
-    
+
     const toggleSortOrder = () => {
       store.setProp("sortNewestFirst", !store.sortNewestFirst)
     }
-    
+
     // Return the actions to make them available
     return {
       clearItems,
@@ -71,17 +70,17 @@ export const PoliceNewsStoreModel = types
     const fetchPoliceNews = async (api: Api) => {
       store.setProp("isLoading", true)
       store.setProp("error", null)
-      
+
       try {
         const response = await api.policeNews.getPoliceNews()
         console.log("Police news API response:", response)
-        
+
         if (response.ok && response.data?.policeNews) {
           console.log("Raw police news items:", response.data.policeNews.length)
-          
+
           // Clear old cached items before setting new ones
           store.clearItems()
-          
+
           // Process the police news data to add formatted dates
           const processedItems = response.data.policeNews.map((item: any) => {
             console.log("Processing item:", item.id, item.title)
@@ -90,7 +89,7 @@ export const PoliceNewsStoreModel = types
               formattedDate: formatRelativeTime(item.date),
             }
           })
-          
+
           console.log("Processed police news items:", processedItems.length)
           store.setProp("items", processedItems)
         } else {
@@ -104,24 +103,24 @@ export const PoliceNewsStoreModel = types
         store.setProp("isLoading", false)
       }
     }
-    
+
     const refreshPoliceNews = async (api: Api) => {
       store.setProp("isLoading", true)
       store.setProp("error", null)
-      
+
       try {
         const response = await api.policeNews.getPoliceNews()
-        
+
         if (response.ok && response.data?.policeNews) {
           // Clear old cached items before setting new ones
           store.clearItems()
-          
+
           // Process the police news data to add formatted dates
           const processedItems = response.data.policeNews.map((item: any) => ({
             ...item,
             formattedDate: formatRelativeTime(item.date),
           }))
-          
+
           store.setProp("items", processedItems)
         } else {
           store.setProp("error", "Failed to refresh police news")
@@ -131,10 +130,10 @@ export const PoliceNewsStoreModel = types
       } finally {
         store.setProp("isLoading", false)
       }
-      
+
       return true // Return success indicator for the refresh control
     }
-    
+
     // Return the actions to make them available
     return {
       fetchPoliceNews,
@@ -144,4 +143,4 @@ export const PoliceNewsStoreModel = types
 
 export interface PoliceNewsStore extends Instance<typeof PoliceNewsStoreModel> {}
 export interface PoliceNewsStoreSnapshotOut extends SnapshotOut<typeof PoliceNewsStoreModel> {}
-export interface PoliceNewsStoreSnapshotIn extends SnapshotIn<typeof PoliceNewsStoreModel> {} 
+export interface PoliceNewsStoreSnapshotIn extends SnapshotIn<typeof PoliceNewsStoreModel> {}

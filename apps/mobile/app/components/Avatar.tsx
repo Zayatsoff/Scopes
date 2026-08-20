@@ -1,5 +1,4 @@
-import React from "react"
-import { View, Text, ViewStyle, TextStyle, Image } from "react-native"
+import { View, Text, ViewStyle, TextStyle } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
 
@@ -10,10 +9,10 @@ interface AvatarProps {
 
 export function Avatar({ source, size = 40 }: AvatarProps) {
   const { themed } = useAppTheme()
-  
+
   // For police service, use a specific style
   const isPoliceService = source.toLowerCase().includes("police")
-  
+
   // Get initials from source
   const initials = source
     .split(" ")
@@ -23,14 +22,14 @@ export function Avatar({ source, size = 40 }: AvatarProps) {
     .toUpperCase()
 
   return (
-    <View 
+    <View
       style={[
-        themed(isPoliceService ? $policeContainer : $container), 
-        { 
-          width: size, 
-          height: size, 
-          borderRadius: size / 2 
-        }
+        themed(isPoliceService ? $policeContainer : $container),
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+        },
       ]}
     >
       {isPoliceService ? (
@@ -49,7 +48,7 @@ const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   alignItems: "center",
 })
 
-const $policeContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+const $policeContainer: ThemedStyle<ViewStyle> = () => ({
   backgroundColor: "#2D3748",
   justifyContent: "center",
   alignItems: "center",
@@ -63,4 +62,4 @@ const $text: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $policeText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
   fontWeight: "bold",
-}) 
+})

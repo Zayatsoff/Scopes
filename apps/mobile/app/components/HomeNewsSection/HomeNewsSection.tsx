@@ -12,12 +12,8 @@ interface HomeNewsSectionProps {
   onNewsPress: (link: string) => void
 }
 
-export const HomeNewsSection: FC<HomeNewsSectionProps> = ({
-  title,
-  newsItems,
-  onNewsPress,
-}) => {
-  const { themed, theme } = useAppTheme()
+export const HomeNewsSection: FC<HomeNewsSectionProps> = ({ title, newsItems, onNewsPress }) => {
+  const { themed } = useAppTheme()
 
   if (!newsItems || newsItems.length === 0) return null
 
@@ -25,12 +21,7 @@ export const HomeNewsSection: FC<HomeNewsSectionProps> = ({
     <View style={themed($newsSection)}>
       <SectionHeader title={title} />
       {newsItems.map((item: NewsItem) => (
-        <NewsCard 
-          key={item.id} 
-          item={item} 
-          compact 
-          onPress={() => onNewsPress(item.link)} 
-        />
+        <NewsCard key={item.id} item={item} compact onPress={() => onNewsPress(item.link)} />
       ))}
     </View>
   )
@@ -46,4 +37,4 @@ const $newsSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.xs,
   paddingTop: spacing.md,
   marginBottom: spacing.md,
-}) 
+})

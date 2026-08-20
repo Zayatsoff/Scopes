@@ -1,22 +1,20 @@
 import { FC, useState } from "react"
 import { observer } from "mobx-react-lite"
-import { StyleSheet, TextStyle, View, ViewStyle } from "react-native"
+import { TextStyle, View, ViewStyle } from "react-native"
 import { Screen, ListItem, Text, Switch } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { 
-  Bell, 
-  Car, 
-  Bus, 
-  Cloud, 
-  Shield, 
+import {
+  Car,
+  Bus,
+  Cloud,
+  Shield,
   TrafficCone,
   Flame,
   Snowflake,
   Zap,
-  ChevronLeft
+  ChevronLeft,
 } from "lucide-react-native"
 import type { ThemedStyle } from "@/theme"
-import { SectionHeader } from "@/components/SectionHeader"
 import { useNavigation } from "@react-navigation/native"
 import { TouchableOpacity } from "react-native"
 import type { SettingsStackParamList } from "@/navigators/SettingsStack"
@@ -27,7 +25,7 @@ export const NotificationSettingsScreen: FC = observer(function NotificationSett
   const { themed, theme } = useAppTheme()
   const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>()
   const insets = useSafeAreaInsets()
-  
+
   // State for notification settings
   const [notificationSettings, setNotificationSettings] = useState({
     streetParkingBan: true,
@@ -60,10 +58,7 @@ export const NotificationSettingsScreen: FC = observer(function NotificationSett
   const renderSwitch = (value: boolean, onValueChange: () => void) => {
     return (
       <View style={themed($switchContainer)}>
-        <Switch 
-          value={value} 
-          onValueChange={onValueChange} 
-        />
+        <Switch value={value} onValueChange={onValueChange} />
       </View>
     )
   }
@@ -72,10 +67,7 @@ export const NotificationSettingsScreen: FC = observer(function NotificationSett
     <Screen style={themed($root)} preset="scroll" safeAreaEdges={[]}>
       {/* Header with back button */}
       <View style={[themed($header), { paddingTop: insets.top }]}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={themed($backButton)}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={themed($backButton)}>
           <ChevronLeft size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text text="Notification Settings" style={themed($headerText)} />
@@ -83,91 +75,83 @@ export const NotificationSettingsScreen: FC = observer(function NotificationSett
 
       {/* Notification Settings */}
       <View style={themed($section)}>
-        <ListItem 
+        <ListItem
           text="Street Parking Ban"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Car, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.streetParkingBan,
-            () => toggleNotificationSetting("streetParkingBan")
+          RightComponent={renderSwitch(notificationSettings.streetParkingBan, () =>
+            toggleNotificationSetting("streetParkingBan"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="School Buses"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Bus, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.schoolBuses,
-            () => toggleNotificationSetting("schoolBuses")
+          RightComponent={renderSwitch(notificationSettings.schoolBuses, () =>
+            toggleNotificationSetting("schoolBuses"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Weather Alerts"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Cloud, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.weatherAlerts,
-            () => toggleNotificationSetting("weatherAlerts")
+          RightComponent={renderSwitch(notificationSettings.weatherAlerts, () =>
+            toggleNotificationSetting("weatherAlerts"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Police Alerts"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Shield, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.policeAlerts,
-            () => toggleNotificationSetting("policeAlerts")
+          RightComponent={renderSwitch(notificationSettings.policeAlerts, () =>
+            toggleNotificationSetting("policeAlerts"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Traffic Alerts"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(TrafficCone, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.trafficAlerts,
-            () => toggleNotificationSetting("trafficAlerts")
+          RightComponent={renderSwitch(notificationSettings.trafficAlerts, () =>
+            toggleNotificationSetting("trafficAlerts"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Open Air Fires"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Flame, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.openAirFires,
-            () => toggleNotificationSetting("openAirFires")
+          RightComponent={renderSwitch(notificationSettings.openAirFires, () =>
+            toggleNotificationSetting("openAirFires"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Sledding Alerts"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Snowflake, theme.colors.palette.primary500)}
           bottomSeparator
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.sleddingAlerts,
-            () => toggleNotificationSetting("sleddingAlerts")
+          RightComponent={renderSwitch(notificationSettings.sleddingAlerts, () =>
+            toggleNotificationSetting("sleddingAlerts"),
           )}
         />
-        <ListItem 
+        <ListItem
           text="Hydro Alerts"
           textStyle={themed($listItemText)}
           LeftComponent={renderIcon(Zap, theme.colors.palette.primary500)}
           containerStyle={themed($listItemContainer)}
-          RightComponent={renderSwitch(
-            notificationSettings.hydroAlerts,
-            () => toggleNotificationSetting("hydroAlerts")
+          RightComponent={renderSwitch(notificationSettings.hydroAlerts, () =>
+            toggleNotificationSetting("hydroAlerts"),
           )}
         />
       </View>
@@ -220,4 +204,4 @@ const $listItemText: ThemedStyle<TextStyle> = ({ colors }) => ({
 
 const $switchContainer: ThemedStyle<ViewStyle> = () => ({
   justifyContent: "center",
-}) 
+})

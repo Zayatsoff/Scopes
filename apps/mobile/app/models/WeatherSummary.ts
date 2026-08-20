@@ -20,7 +20,9 @@ export const WeatherSummaryItemModel = types
   .actions(withSetPropAction)
 
 export interface WeatherSummaryItem extends Instance<typeof WeatherSummaryItemModel> {}
-export interface WeatherSummaryItemSnapshotOut extends SnapshotOut<typeof WeatherSummaryItemModel> {}
+export interface WeatherSummaryItemSnapshotOut extends SnapshotOut<
+  typeof WeatherSummaryItemModel
+> {}
 export interface WeatherSummaryItemSnapshotIn extends SnapshotIn<typeof WeatherSummaryItemModel> {}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +43,7 @@ export const WeatherSummaryStoreModel = types
     get latestSummary() {
       if (self.items.length === 0) return null
       // Find item with section = "Weather"
-      const weatherItems = self.items.filter(item => item.section === "Weather")
+      const weatherItems = self.items.filter((item) => item.section === "Weather")
       return weatherItems.length > 0 ? weatherItems[0] : null
     },
   }))
@@ -49,21 +51,23 @@ export const WeatherSummaryStoreModel = types
     fetchWeatherSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         // Call the getSummaries endpoint
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Weather") // Filter weather summaries only
+            .filter((item) => item.section === "Weather") // Filter weather summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to fetch weather summaries")
@@ -74,24 +78,26 @@ export const WeatherSummaryStoreModel = types
         self.setProp("isLoading", false)
       }
     },
-    
+
     refreshWeatherSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Weather") // Filter weather summaries only
+            .filter((item) => item.section === "Weather") // Filter weather summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to refresh weather summaries")
@@ -101,11 +107,15 @@ export const WeatherSummaryStoreModel = types
       } finally {
         self.setProp("isLoading", false)
       }
-      
+
       return true // Return success indicator for the refresh control
-    }
+    },
   }))
 
 export interface WeatherSummaryStore extends Instance<typeof WeatherSummaryStoreModel> {}
-export interface WeatherSummaryStoreSnapshotOut extends SnapshotOut<typeof WeatherSummaryStoreModel> {}
-export interface WeatherSummaryStoreSnapshotIn extends SnapshotIn<typeof WeatherSummaryStoreModel> {} 
+export interface WeatherSummaryStoreSnapshotOut extends SnapshotOut<
+  typeof WeatherSummaryStoreModel
+> {}
+export interface WeatherSummaryStoreSnapshotIn extends SnapshotIn<
+  typeof WeatherSummaryStoreModel
+> {}

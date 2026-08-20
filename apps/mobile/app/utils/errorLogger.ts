@@ -27,19 +27,19 @@ export function logError(error: Error, metadata: ErrorMetadata = {}) {
     console.error("======= ERROR CAPTURED =======")
     console.error(`Error: ${error.message}`)
     console.error(`Stack: ${error.stack}`)
-    
+
     if (metadata.componentName) {
       console.error(`Component: ${metadata.componentName}`)
     }
-    
+
     if (metadata.componentStack) {
       console.error(`Component Stack: ${metadata.componentStack}`)
     }
-    
+
     if (metadata.additionalInfo) {
       console.error("Additional Info:", metadata.additionalInfo)
     }
-    
+
     console.error("=============================")
   }
 
@@ -47,7 +47,6 @@ export function logError(error: Error, metadata: ErrorMetadata = {}) {
   if (Config.catchErrors === "always" || (Config.catchErrors === "prod" && !__DEV__)) {
     // Here you would integrate with error monitoring services
     // Examples:
-    
     // For Sentry:
     // import * as Sentry from '@sentry/react-native';
     // Sentry.captureException(error, {
@@ -55,7 +54,6 @@ export function logError(error: Error, metadata: ErrorMetadata = {}) {
     //   tags: metadata.tags ? Object.fromEntries(metadata.tags.map(tag => [tag, true])) : undefined,
     //   level: mapSeverityToSentryLevel(metadata.severity),
     // });
-    
     // For Firebase Crashlytics:
     // import crashlytics from '@react-native-firebase/crashlytics';
     // crashlytics().recordError(error);
@@ -70,16 +68,20 @@ export function logError(error: Error, metadata: ErrorMetadata = {}) {
  * @param code Optional error code
  * @param metadata Additional error context
  */
-export function createAppError(message: string, code?: string, metadata: ErrorMetadata = {}): Error {
+export function createAppError(
+  message: string,
+  code?: string,
+  metadata: ErrorMetadata = {},
+): Error {
   const error = new Error(message)
-  
+
   // Add custom properties to the error
-  Object.assign(error, { 
+  Object.assign(error, {
     code,
     metadata,
     timestamp: new Date().toISOString(),
   })
-  
+
   return error
 }
 
@@ -91,7 +93,7 @@ export function createAppError(message: string, code?: string, metadata: ErrorMe
 export function handleUnexpectedError(error: Error, fallbackMessage?: string): string {
   // Log the error
   logError(error, { severity: "high" })
-  
+
   // Return a user-friendly message
   return fallbackMessage || "An unexpected error occurred. Please try again later."
-} 
+}

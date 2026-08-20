@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, ViewStyle, TextStyle, ScrollView } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
@@ -50,37 +50,29 @@ export function CategoryTabs({ tabs, onTabChange, initialTabId, currentIndex }: 
         const isActive = tab.id === selectedTabId
         const isFirst = index === 0
         const isLast = index === tabs.length - 1
-        
+
         return (
-          <View 
-            key={tab.id} 
-            style={[
-              themed($tabWrapper),
-              isFirst && themed($firstTab),
-              isLast && themed($lastTab)
-            ]}
+          <View
+            key={tab.id}
+            style={[themed($tabWrapper), isFirst && themed($firstTab), isLast && themed($lastTab)]}
           >
-            <TouchableOpacity
-              onPress={() => handleTabPress(tab.id)}
-              style={themed($tabButton)}
-            >
+            <TouchableOpacity onPress={() => handleTabPress(tab.id)} style={themed($tabButton)}>
               <Text
                 style={[
                   themed($tabText),
-                  { color: tab.color, fontWeight: isActive ? "600" : "400" },
+                  isActive ? $tabTextActive : $tabTextInactive,
+                  { color: tab.color },
                 ]}
               >
                 {tab.label}
               </Text>
             </TouchableOpacity>
-            <View 
+            <View
               style={[
-                themed($tabIndicator), 
-                { 
-                  backgroundColor: tab.color,
-                  height: isActive ? 4 : 2,
-                }
-              ]} 
+                themed($tabIndicator),
+                isActive ? $tabIndicatorActive : $tabIndicatorInactive,
+                { backgroundColor: tab.color },
+              ]}
             />
           </View>
         )
@@ -124,7 +116,12 @@ const $tabIndicator: ThemedStyle<ViewStyle> = () => ({
   height: 2,
 })
 
-const $tabText: ThemedStyle<TextStyle> = ({ spacing, typography }) => ({
+const $tabText: ThemedStyle<TextStyle> = ({ typography }) => ({
   fontSize: typography.sizes.md,
   textAlign: "center",
-}) 
+})
+
+const $tabTextActive: TextStyle = { fontWeight: "600" }
+const $tabTextInactive: TextStyle = { fontWeight: "400" }
+const $tabIndicatorActive: ViewStyle = { height: 4 }
+const $tabIndicatorInactive: ViewStyle = { height: 2 }

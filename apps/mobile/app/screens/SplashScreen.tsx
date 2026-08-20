@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { View, ActivityIndicator, Animated, Image } from "react-native"
 import * as ExpoSplashScreen from "expo-splash-screen"
 import { useNavigation } from "@react-navigation/native"
@@ -17,7 +17,7 @@ const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 export function SplashScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const { themed, theme } = useAppTheme()
-  const fadeAnim = React.useRef(new Animated.Value(0)).current
+  const fadeAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     async function init() {

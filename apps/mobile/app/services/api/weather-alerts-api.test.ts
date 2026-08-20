@@ -10,7 +10,12 @@ function makeApisauce(response: Partial<ApiResponse<any>>): ApisauceInstance {
 }
 
 const sampleWeatherAlerts = [
-  { id: "1", title: "Severe Thunderstorm Warning", link: "https://example.com/1", pubDate: "2026-07-16" },
+  {
+    id: "1",
+    title: "Severe Thunderstorm Warning",
+    link: "https://example.com/1",
+    pubDate: "2026-07-16",
+  },
 ] as unknown as WeatherAlertItem[]
 
 test("maps a populated response", async () => {

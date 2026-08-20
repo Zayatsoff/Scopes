@@ -6,14 +6,13 @@ import type { MainTabParamList } from "@/navigators/MainTabs"
 import { Screen } from "@/components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import type { ThemedStyle } from "@/theme"
-import Animated, {
+import {
   useSharedValue,
   useAnimatedScrollHandler,
   withDelay,
   withSpring,
 } from "react-native-reanimated"
 import { SectionHeader } from "@/components/SectionHeader"
-import { useTabHeader } from "@/components/TabHeader"
 import { WeatherDisplay } from "@/components/WeatherDisplay"
 import { CompactSummaryCards } from "@/components/CompactSummaryCards"
 import { CityStatus } from "@/components/CityStatus"
@@ -28,22 +27,22 @@ interface HomeScreenProps extends BottomTabScreenProps<MainTabParamList, "Home">
 export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
   const { themed, theme } = useAppTheme()
   const screenWidth = Dimensions.get("window").width
-  
+
   // Custom hooks
-  const { 
+  const {
     stores: {
       newsStore,
       policeSummaryStore,
       weatherSummaryStore,
       trafficSummaryStore,
       cityStatusStore,
-      ottawaAlertStore
+      ottawaAlertStore,
     },
     refreshing,
     fetchInitialData,
-    refreshData
+    refreshData,
   } = useHomeData()
-  
+
   const { progress, onScroll: refreshProgress, resetProgress } = usePullToRefreshProgress()
 
   // The city's featured/pinned notice, if the scraper found one
@@ -54,7 +53,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   const opacityValue = useSharedValue(0)
   const translateYValue = useSharedValue(10)
   const scrollY = useSharedValue(0)
-  
+
   // Weather display refresh reference
   const weatherDisplayRefresh = useRef<() => void>(() => {})
 
@@ -63,17 +62,17 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     // Start animation when component mounts - make it snappier with less delay and stiffer spring
     opacityValue.value = withDelay(200, withSpring(1, { damping: 15, stiffness: 150 }))
     translateYValue.value = withDelay(200, withSpring(0, { damping: 15, stiffness: 150 }))
-    
+
     // Fetch initial data
     fetchInitialData()
   }, [])
-  
+
   // Reset progress when refreshing state changes to false
   useEffect(() => {
     if (!refreshing) {
-      resetProgress();
+      resetProgress()
     }
-  }, [refreshing, resetProgress]);
+  }, [refreshing, resetProgress])
 
   // Hide the header for this screen only
   useEffect(() => {
@@ -83,23 +82,23 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   // Scroll handler for animations
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
+      scrollY.value = event.contentOffset.y
     },
-  });
+  })
 
   // Handle news item press
   const handleNewsPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
-  
+
   // Handle refresh
   const onRefresh = async () => {
     await refreshData(weatherDisplayRefresh.current)
     // Ensure progress is reset when refresh completes
     resetProgress()
   }
-  
-  // Custom RefreshControl 
+
+  // Custom RefreshControl
   const renderRefreshControl = () => (
     <RefreshControl
       refreshing={refreshing}
@@ -107,7 +106,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       tintColor={theme.colors.transparent}
       colors={[theme.colors.transparent]}
       progressBackgroundColor={theme.colors.transparent}
-      progressViewOffset={screenWidth * 0.5 / 2}
+      progressViewOffset={(screenWidth * 0.5) / 2}
     />
   )
 
@@ -120,7 +119,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         onScroll: scrollHandler,
         onScrollEndDrag: refreshProgress,
         onMomentumScrollEnd: () => {
-          if (!refreshing) resetProgress();
+          if (!refreshing) resetProgress()
         },
         scrollEventThrottle: 16,
         showsVerticalScrollIndicator: false,
@@ -147,21 +146,20 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       {/* City Status Section */}
       <View style={themed($cityStatusSection)}>
         <View style={themed($sectionHeaderContainer)}>
-          <SectionHeader 
-            title="City Status" 
+          <SectionHeader
+            title="City Status"
             RightComponent={
-              <WeatherDisplay onRefresh={(refreshFn) => {
-                weatherDisplayRefresh.current = refreshFn
-              }} />
+              <WeatherDisplay
+                onRefresh={(refreshFn) => {
+                  weatherDisplayRefresh.current = refreshFn
+                }}
+              />
             }
           />
         </View>
-        <CityStatus 
-          statusItems={cityStatusStore.items}
-          loading={cityStatusStore.isLoading}
-        />
+        <CityStatus statusItems={cityStatusStore.items} loading={cityStatusStore.isLoading} />
       </View>
-      
+
       {/* City Updates Section - Compact cards for Police, Weather, and Traffic */}
       <View style={themed($section)}>
         <SectionHeader title="City Summaries" />

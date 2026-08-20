@@ -1,4 +1,3 @@
-import React from "react"
 import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -27,13 +26,13 @@ export interface SourceFaviconProps {
 
 export function SourceFavicon({ source, size = 16 }: SourceFaviconProps) {
   const { themed } = useAppTheme()
-  
+
   // Get domain from source (e.g., www.cbc.ca -> cbc.ca)
   const getDomain = (url: string) => {
     const domain = url.replace(/^www\./i, "").toLowerCase()
     return domain
   }
-  
+
   // Find matching favicon or return null if not found
   const getFaviconSource = (domain: string) => {
     const cleanDomain = getDomain(domain)
@@ -53,10 +52,7 @@ export function SourceFavicon({ source, size = 16 }: SourceFaviconProps) {
       {faviconSource ? (
         <Image
           source={faviconSource}
-          style={[
-            themed($favicon),
-            { width: size, height: size }
-          ]}
+          style={[themed($favicon), { width: size, height: size }]}
           resizeMode="contain"
         />
       ) : (
@@ -81,4 +77,4 @@ const $emojiText: ThemedStyle<TextStyle> = () => ({
   fontSize: 14,
   lineHeight: 16,
   textAlign: "center",
-}) 
+})

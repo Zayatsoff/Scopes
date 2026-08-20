@@ -4,16 +4,16 @@ import { ErrorDetails } from "./ErrorDetails"
 interface Props {
   children: ReactNode
   catchErrors: "always" | "dev" | "prod" | "never"
-  componentName?: string  // Add component name for better error tracking
-  onError?: (error: Error, componentStack: string, componentName?: string) => void  // Error callback for logging
-  fallback?: (props: { error: Error; resetError: () => void }) => ReactNode  // Custom fallback UI
-  maxRetries?: number  // Maximum number of retries before giving up
+  componentName?: string // Add component name for better error tracking
+  onError?: (error: Error, componentStack: string, componentName?: string) => void // Error callback for logging
+  fallback?: (props: { error: Error; resetError: () => void }) => ReactNode // Custom fallback UI
+  maxRetries?: number // Maximum number of retries before giving up
 }
 
 interface State {
   error: Error | null
   errorInfo: ErrorInfo | null
-  retryCount: number  // Track retry attempts
+  retryCount: number // Track retry attempts
 }
 
 /**
@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
   static defaultProps = {
     maxRetries: 1,
   }
-  
+
   state = { error: null, errorInfo: null, retryCount: 0 }
 
   // If an error in a child is encountered, this will run
@@ -47,11 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // Call the onError callback if provided
     if (this.props.onError) {
-      this.props.onError(
-        error, 
-        errorInfo.componentStack || "", 
-        this.props.componentName
-      )
+      this.props.onError(error, errorInfo.componentStack || "", this.props.componentName)
     }
 
     // You can also log error messages to an error reporting service here
@@ -62,16 +58,16 @@ export class ErrorBoundary extends Component<Props, State> {
   // Reset the error back to null
   resetError = () => {
     const { maxRetries = 1 } = this.props
-    
+
     if (this.state.retryCount >= maxRetries) {
       // If maximum retries reached, just clear the error without incrementing retry count
       this.setState({ error: null, errorInfo: null })
     } else {
       // Otherwise increment retry count and clear the error
-      this.setState(prevState => ({ 
-        error: null, 
-        errorInfo: null, 
-        retryCount: prevState.retryCount + 1 
+      this.setState((prevState) => ({
+        error: null,
+        errorInfo: null,
+        retryCount: prevState.retryCount + 1,
       }))
     }
   }
@@ -95,7 +91,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.isEnabled() || !this.state.error) {
       return this.props.children
     }
-    
+
     // If a custom fallback is provided, use it
     if (this.props.fallback) {
       return this.props.fallback({
@@ -103,7 +99,7 @@ export class ErrorBoundary extends Component<Props, State> {
         resetError: this.resetError,
       })
     }
-    
+
     // Otherwise use the default ErrorDetails component
     return (
       <ErrorDetails

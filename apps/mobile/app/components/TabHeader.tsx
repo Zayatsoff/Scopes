@@ -1,38 +1,44 @@
-import React, { ReactElement } from "react"
+import { ReactElement } from "react"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useHeader } from "@/utils/useHeader"
 
 interface UseTabHeaderProps {
-  title: string;
-  titleMode?: "center" | "flex";
-  RightActionComponent?: ReactElement;
-  backgroundColor?: string;
-  titleColor?: string;
+  title: string
+  titleMode?: "center" | "flex"
+  RightActionComponent?: ReactElement
+  backgroundColor?: string
+  titleColor?: string
 }
 
 /**
  * A hook that sets up a consistent header for main tabs
  * Can be used across different tabs in the app.
  */
-export function useTabHeader({ 
-  title, 
-  titleMode = "center", 
-  RightActionComponent,
-  backgroundColor,
-  titleColor
-}: UseTabHeaderProps, deps: any[] = []) {
-  const { theme } = useAppTheme()
-  
-  useHeader({
+export function useTabHeader(
+  {
     title,
-    titleMode,
-    backgroundColor: backgroundColor || theme.colors.background,
-    titleStyle: {
-      color: titleColor || theme.colors.text,
-      fontSize: theme.typography.sizes.xl,
-      // brand display face for screen titles (weight carried by the family)
-      fontFamily: theme.typography.display.semiBold,
+    titleMode = "center",
+    RightActionComponent,
+    backgroundColor,
+    titleColor,
+  }: UseTabHeaderProps,
+  deps: any[] = [],
+) {
+  const { theme } = useAppTheme()
+
+  useHeader(
+    {
+      title,
+      titleMode,
+      backgroundColor: backgroundColor || theme.colors.background,
+      titleStyle: {
+        color: titleColor || theme.colors.text,
+        fontSize: theme.typography.sizes.xl,
+        // brand display face for screen titles (weight carried by the family)
+        fontFamily: theme.typography.display.semiBold,
+      },
+      RightActionComponent,
     },
-    RightActionComponent
-  }, deps)
-} 
+    deps,
+  )
+}

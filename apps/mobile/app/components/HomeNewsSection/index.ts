@@ -1,1 +1,1 @@
-export * from "./HomeNewsSection" 
+export * from "./HomeNewsSection"

@@ -1,17 +1,17 @@
-import React from "react"
+import { ReactNode, ComponentType, useState } from "react"
 import { ErrorBoundary as BaseErrorBoundary } from "../../screens/ErrorScreen/ErrorBoundary"
 import { ErrorFallback } from "./ErrorFallback"
 import { logError } from "../../utils/errorLogger"
 import { View, ViewStyle } from "react-native"
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { TxKeyPath, translate } from "../../i18n"
+import { TxKeyPath } from "../../i18n"
 
 interface DataFetchingErrorBoundaryProps {
-  children: React.ReactNode
+  children: ReactNode
   dataSource: string
   fallbackType?: "card" | "inline" | "default"
-  FallbackComponent?: React.ComponentType<{
+  FallbackComponent?: ComponentType<{
     error: Error
     resetError: () => void
     retry?: () => Promise<void> | void
@@ -35,15 +35,15 @@ export function DataFetchingErrorBoundary({
   maxRetries = 1,
 }: DataFetchingErrorBoundaryProps) {
   const { themed } = useAppTheme()
-  
+
   // This tracks if a retry function is currently executing
-  const [isRetrying, setIsRetrying] = React.useState(false)
-  
+  const [isRetrying, setIsRetrying] = useState(false)
+
   // Error handler that includes API or data fetching context
   const handleError = (error: Error, componentStack: string) => {
     // If the error has a response property, it's likely an API error
-    const isApiError = 'response' in error || 'status' in error || error.name === 'NetworkError'
-    
+    const isApiError = "response" in error || "status" in error || error.name === "NetworkError"
+
     logError(error, {
       componentName: `DataFetching-${dataSource}`,
       componentStack,
@@ -52,19 +52,19 @@ export function DataFetchingErrorBoundary({
       additionalInfo: {
         dataSource,
         isApiError,
-      }
+      },
     })
   }
-  
+
   // Custom retry handler to coordinate with optional retryFn
   const handleRetry = async (resetError: () => void) => {
     if (isRetrying || !retryFn) {
       resetError()
       return
     }
-    
+
     setIsRetrying(true)
-    
+
     try {
       await retryFn()
       resetError()
@@ -86,9 +86,9 @@ export function DataFetchingErrorBoundary({
         FallbackComponent
           ? ({ error, resetError }) => (
               <View style={[themed($container), style]}>
-                <FallbackComponent 
-                  error={error} 
-                  resetError={resetError} 
+                <FallbackComponent
+                  error={error}
+                  resetError={resetError}
                   retry={retryFn ? () => handleRetry(resetError) : undefined}
                 />
               </View>
@@ -117,28 +117,36 @@ export function DataFetchingErrorBoundary({
  */
 function getErrorMessageTxKey(error: Error): TxKeyPath {
   // Check for network connectivity errors
-  if (error.message.includes('Network') || error.message.includes('network') || 
-      error.message.includes('connection') || error.message.includes('timeout') ||
-      error.message.includes('offline')) {
+  if (
+    error.message.includes("Network") ||
+    error.message.includes("network") ||
+    error.message.includes("connection") ||
+    error.message.includes("timeout") ||
+    error.message.includes("offline")
+  ) {
     return "errorBoundary:dataFetching.networkError"
   }
-  
+
   // Check for server errors
-  if (error.message.includes('500') || error.message.includes('server error')) {
+  if (error.message.includes("500") || error.message.includes("server error")) {
     return "errorBoundary:dataFetching.serverError"
   }
-  
+
   // Check for not found errors
-  if (error.message.includes('404') || error.message.includes('not found')) {
+  if (error.message.includes("404") || error.message.includes("not found")) {
     return "errorBoundary:dataFetching.notFoundError"
   }
-  
+
   // Check for authentication errors
-  if (error.message.includes('401') || error.message.includes('403') || 
-      error.message.includes('unauthorized') || error.message.includes('forbidden')) {
+  if (
+    error.message.includes("401") ||
+    error.message.includes("403") ||
+    error.message.includes("unauthorized") ||
+    error.message.includes("forbidden")
+  ) {
     return "errorBoundary:dataFetching.authError"
   }
-  
+
   // Default message
   return "errorBoundary:dataFetching.message"
 }
@@ -146,4 +154,4 @@ function getErrorMessageTxKey(error: Error): TxKeyPath {
 const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
   overflow: "hidden",
-}) 
+})

@@ -70,7 +70,8 @@ if (Platform.OS === "web") {
 
   const fontLink = document.createElement("link")
   fontLink.rel = "stylesheet"
-  fontLink.href = "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
+  fontLink.href =
+    "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
   document.head.appendChild(fontLink)
 }
 
@@ -84,7 +85,7 @@ export function App() {
     initialNavigationState,
     onNavigationStateChange,
     isRestored: isNavigationStateRestored,
-  } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY, (state) => {
+  } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY, () => {
     // Always return a cleared state to ensure intro screen shows
     return {
       index: 0,

@@ -16,7 +16,13 @@ const sampleEvents = [
 test("maps a populated response", async () => {
   const apisauce = makeApisauce({
     ok: true,
-    data: { trafficAlerts: { events: sampleEvents, scrapedAt: "2026-07-16T00:00:00Z", date: "2026-07-16" } },
+    data: {
+      trafficAlerts: {
+        events: sampleEvents,
+        scrapedAt: "2026-07-16T00:00:00Z",
+        date: "2026-07-16",
+      },
+    },
   })
   const api = new TrafficAlertsApi(apisauce)
 

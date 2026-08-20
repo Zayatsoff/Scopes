@@ -1,5 +1,12 @@
-import React, { useRef } from "react"
-import { View, ViewStyle, RefreshControl, NativeSyntheticEvent, NativeScrollEvent, TextStyle } from "react-native"
+import { useRef } from "react"
+import {
+  View,
+  ViewStyle,
+  RefreshControl,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  TextStyle,
+} from "react-native"
 import { FlashList, ListRenderItem } from "@shopify/flash-list"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Text } from "@/components"
@@ -60,7 +67,7 @@ interface AlertListViewProps<T extends AlertData> {
    * Error message to display if there was an error loading data
    */
   error?: string
-  
+
   /**
    * Custom render function for items
    */
@@ -77,7 +84,7 @@ export function AlertListView<T extends AlertData>({
   onScroll,
   isLoading,
   error,
-  renderItem
+  renderItem,
 }: AlertListViewProps<T>) {
   const { theme, themed } = useAppTheme()
   const listRef = useRef<FlashList<T>>(null)
@@ -88,10 +95,10 @@ export function AlertListView<T extends AlertData>({
     if (category === "weather" && "summary" in item) {
       // Weather alert
       const weatherItem = item as unknown as WeatherAlertItem
-      
+
       // Log the item to verify it's being processed correctly
       console.log(`Rendering weather alert: ${weatherItem.id}, title: ${weatherItem.title}`)
-      
+
       // Create a properly formatted item for the alert card
       const cardItem = {
         id: weatherItem.id,
@@ -104,12 +111,12 @@ export function AlertListView<T extends AlertData>({
         source: "Environment Canada",
         message: weatherItem.summary || "",
         timestamp: weatherItem.formattedDate || formatRelativeTime(weatherItem.pubDate),
-        locationsAffected: weatherItem.locationsAffected || []
+        locationsAffected: weatherItem.locationsAffected || [],
       }
-      
+
       return (
         <Animated.View entering={FadeIn.duration(200)}>
-          <EnhancedAlertCard 
+          <EnhancedAlertCard
             item={cardItem}
             onPress={() => onAlertPress(weatherItem.link)}
             categoryColor={categoryColor}
@@ -121,9 +128,11 @@ export function AlertListView<T extends AlertData>({
       const trafficItem = item as unknown as TrafficAlertItem
       return (
         <Animated.View entering={FadeIn.duration(200)}>
-          <EnhancedAlertCard 
+          <EnhancedAlertCard
             item={trafficItem}
-            onPress={() => onAlertPress(`https://traffic.ottawa.ca/map/?incident=${trafficItem.id}`)}
+            onPress={() =>
+              onAlertPress(`https://traffic.ottawa.ca/map/?incident=${trafficItem.id}`)
+            }
             categoryColor={categoryColor}
           />
         </Animated.View>
@@ -133,8 +142,8 @@ export function AlertListView<T extends AlertData>({
       const alertItem = item as AlertItem | PoliceNewsItem
       return (
         <Animated.View entering={FadeIn.duration(200)}>
-          <EnhancedAlertCard 
-            item={alertItem} 
+          <EnhancedAlertCard
+            item={alertItem}
             onPress={() => alertItem.link && onAlertPress(alertItem.link)}
             categoryColor={categoryColor}
           />
@@ -148,8 +157,8 @@ export function AlertListView<T extends AlertData>({
     <View style={themed($emptyContainer)}>
       <Text
         text={
-          isLoading 
-            ? `Loading ${category} alerts...` 
+          isLoading
+            ? `Loading ${category} alerts...`
             : error || `No ${category} alerts available. Pull down to refresh.`
         }
         style={themed($emptyText)}
@@ -182,7 +191,7 @@ export function AlertListView<T extends AlertData>({
         scrollIndicatorInsets={{ right: 1 }}
         overScrollMode="never"
         bounces={true}
-        ListFooterComponent={<View style={{ height: 150 }} />}
+        ListFooterComponent={<View style={$listFooter} />}
         ListEmptyComponent={getEmptyComponent()}
       />
     </View>
@@ -193,7 +202,7 @@ export function AlertListView<T extends AlertData>({
 const $listWrapper: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
   width: "100%",
-  minHeight: 800
+  minHeight: 800,
 })
 
 const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -206,10 +215,12 @@ const $emptyContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   justifyContent: "center",
   height: 200,
-  width: '100%',
+  width: "100%",
 })
 
 const $emptyText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   textAlign: "center",
-}) 
+})
+
+const $listFooter: ViewStyle = { height: 150 }

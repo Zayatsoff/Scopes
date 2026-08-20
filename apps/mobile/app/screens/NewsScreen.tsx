@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from "react"
-import { ViewStyle, TextStyle, View, RefreshControl, Pressable, ScrollView } from "react-native"
+import { useEffect, useState } from "react"
+import {
+  ViewStyle,
+  TextStyle,
+  View,
+  RefreshControl,
+  Pressable,
+  ScrollView,
+  Linking,
+} from "react-native"
 import { Screen } from "@/components/Screen"
 import { NewsCard } from "@/components/NewsCard"
 import { useStores } from "@/models"
@@ -7,10 +15,8 @@ import { observer } from "mobx-react-lite"
 import { FlashList } from "@shopify/flash-list"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { ThemedStyle } from "@/theme"
-import { Linking } from "react-native"
 import { Text } from "@/components/Text"
 import { NewsItem } from "@/models/News"
-import { SectionHeader } from "@/components/SectionHeader"
 import { useTabHeader } from "@/components/TabHeader"
 import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator"
 import { usePullToRefreshProgress } from "@/utils/usePullToRefreshProgress"
@@ -50,10 +56,7 @@ const FilterChip = ({
       accessibilityLabel={label === "All" ? "Show all topics" : `Filter by ${label}`}
       style={[themed($chip), selected && themed($chipSelected), pressStyle]}
     >
-      <Text
-        text={label}
-        style={[themed($chipText), selected && themed($chipTextSelected)]}
-      />
+      <Text text={label} style={[themed($chipText), selected && themed($chipTextSelected)]} />
     </AnimatedPressable>
   )
 }
@@ -63,13 +66,16 @@ export const NewsScreen = observer(function NewsScreen() {
   const { themed, theme, themeContext } = useAppTheme()
   const [refreshing, setRefreshing] = useState(false)
   const { progress, onScroll } = usePullToRefreshProgress()
-  
+
   // Set up the tab header with the same style as Settings
-  useTabHeader({ 
-    title: "Local News",
-    titleMode: "center"
-  }, [themeContext]);
-  
+  useTabHeader(
+    {
+      title: "Local News",
+      titleMode: "center",
+    },
+    [themeContext],
+  )
+
   // persistent, always-visible topic filter bar (Nextdoor-style tag filtering)
   // + a fixed sort pill, replacing the old filter-button + dropdown + active-filters label
   const NewsFilterBar = () => (
@@ -116,17 +122,17 @@ export const NewsScreen = observer(function NewsScreen() {
         />
       </Pressable>
     </View>
-  );
+  )
 
   useEffect(() => {
     // Fetch news when component mounts
     newsStore.fetchNews(api)
   }, [])
-  
+
   const handleNewsPress = (link: string) => {
     Linking.openURL(link).catch((err) => console.error("Couldn't open URL: ", err))
   }
-  
+
   const renderItem = ({ item }: { item: NewsItem }) => (
     <NewsCard
       item={item}
@@ -134,13 +140,13 @@ export const NewsScreen = observer(function NewsScreen() {
       compact={newsStore.compactView}
     />
   )
-  
+
   const onRefresh = async () => {
     setRefreshing(true)
     await newsStore.refreshNews(api)
     setRefreshing(false)
   }
-  
+
   const ListEmptyComponent = () => (
     <View style={themed($emptyContainer)}>
       <Text
@@ -149,7 +155,7 @@ export const NewsScreen = observer(function NewsScreen() {
       />
     </View>
   )
-  
+
   // Custom RefreshControl with our rotating icon
   const renderRefreshControl = () => (
     <RefreshControl
@@ -162,17 +168,13 @@ export const NewsScreen = observer(function NewsScreen() {
       // We make the default loading indicator invisible and show our custom one
     />
   )
-  
+
   return (
-    <Screen
-      preset="fixed"
-      contentContainerStyle={themed($screenContainer)}
-      safeAreaEdges={[]}
-    >
+    <Screen preset="fixed" contentContainerStyle={themed($screenContainer)} safeAreaEdges={[]}>
       <NewsFilterBar />
-      
+
       <PullToRefreshIndicator visible={refreshing} progress={progress} />
-      
+
       <FlashList
         key={newsStore.compactView ? "compact" : "full"}
         data={newsStore.sortedItems}

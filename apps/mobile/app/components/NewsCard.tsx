@@ -1,7 +1,6 @@
-import React from "react"
 import { Pressable, View, ViewStyle, TextStyle } from "react-native"
 import { Text } from "./Text"
-import { colors, spacing, type ThemedStyle } from "@/theme"
+import { spacing, type ThemedStyle } from "@/theme"
 import { NewsItem } from "@/models/News"
 import { observer } from "mobx-react-lite"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -53,22 +52,20 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
       {!compact ? (
         <View style={themed($footer)}>
           <Text text={item.formattedDate} style={themed($date)} numberOfLines={1} />
-          {item.authors && (
-            <Text text={item.authors} style={themed($author)} numberOfLines={1} />
-          )}
+          {item.authors && <Text text={item.authors} style={themed($author)} numberOfLines={1} />}
         </View>
       ) : (
         <View style={themed($compactFooter)}>
-          <Text 
-            text={item.formattedDate} 
-            style={[themed($date), themed($compactDate)]} 
-            numberOfLines={1} 
+          <Text
+            text={item.formattedDate}
+            style={[themed($date), themed($compactDate)]}
+            numberOfLines={1}
           />
           {item.authors && (
-            <Text 
-              text={item.authors} 
-              style={[themed($author), themed($compactAuthor)]} 
-              numberOfLines={1} 
+            <Text
+              text={item.authors}
+              style={[themed($author), themed($compactAuthor)]}
+              numberOfLines={1}
             />
           )}
         </View>
@@ -77,7 +74,7 @@ export const NewsCard = observer(function NewsCard({ item, onPress, compact }: N
       {/* Tags section - only shown in non-compact mode */}
       {!compact && item.tags && item.tags.length > 0 && (
         <View style={themed($tagsContainer)}>
-          {item.tags.map((tag, index) => (
+          {item.tags.map((tag) => (
             <View key={tag} style={themed($tagPill)}>
               <Text text={tag} style={themed($tagText)} />
             </View>

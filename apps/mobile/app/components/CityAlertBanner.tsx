@@ -1,4 +1,3 @@
-import React from "react"
 import { Pressable, View, ViewStyle, TextStyle } from "react-native"
 import { Text } from "./Text"
 import { useAppTheme } from "@/utils/useAppTheme"

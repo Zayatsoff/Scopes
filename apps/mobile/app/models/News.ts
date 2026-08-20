@@ -1,7 +1,6 @@
 import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree"
 import type { AssertExtends, NewsDTO } from "@scopes/shared-types"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { formatDate } from "@/utils/formatDate"
 import { formatRelativeTime } from "@/utils/formatRelativeTime"
 import { Api } from "@/services/api"
 
@@ -27,19 +26,20 @@ const SOURCE_NAMES = {
  */
 const toTitleCase = (str: string) => {
   // Special case for short abbreviations - keep them uppercase
-  if (str.length <= 3) return str.toUpperCase();
-  
+  if (str.length <= 3) return str.toUpperCase()
+
   // Split by spaces, dashes and underscores
-  return str.split(/[\s-_]+/)
-    .map(word => {
+  return str
+    .split(/[\s-_]+/)
+    .map((word) => {
       // Keep common abbreviations uppercase
-      if (word.toLowerCase() === 'cbc' || word.toLowerCase() === 'ctv') {
-        return word.toUpperCase();
+      if (word.toLowerCase() === "cbc" || word.toLowerCase() === "ctv") {
+        return word.toUpperCase()
       }
       // For other words, capitalize first letter and lowercase the rest
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     })
-    .join(' ');
+    .join(" ")
 }
 
 /**
@@ -63,17 +63,17 @@ export const NewsItemModel = types
     get sourceDisplay() {
       // Try to find a full name match from our mapping
       const domain = self.source.replace(/^www\./i, "").toLowerCase()
-      
+
       // Check if we have a direct match in our mapping
       for (const [key, value] of Object.entries(SOURCE_NAMES)) {
         if (domain.includes(key)) {
           return value
         }
       }
-      
+
       // Fallback to a properly formatted name if no match
-      const sourceName = domain.split(".")[0];
-      return toTitleCase(sourceName);
+      const sourceName = domain.split(".")[0]
+      return toTitleCase(sourceName)
     },
   }))
 
@@ -101,19 +101,20 @@ export const NewsStoreModel = types
   .views((self) => ({
     get sortedItems() {
       // First filter by selected tags, then sort
-      const filtered = self.selectedTags.length === 0
-        ? self.items
-        : self.items.filter(item => 
-            item.tags && item.tags.some(tag => self.selectedTags.includes(tag))
-          )
-      
+      const filtered =
+        self.selectedTags.length === 0
+          ? self.items
+          : self.items.filter(
+              (item) => item.tags && item.tags.some((tag) => self.selectedTags.includes(tag)),
+            )
+
       return [...filtered].sort((a, b) => {
         const dateA = new Date(a.date).getTime()
         const dateB = new Date(b.date).getTime()
         return self.sortNewestFirst ? dateB - dateA : dateA - dateB
       })
     },
-    
+
     get latestItems() {
       // Always return newest first for home screen
       return [...self.items]
@@ -128,13 +129,13 @@ export const NewsStoreModel = types
     get availableTags() {
       // Get all unique tags from news items
       const tagSet = new Set<string>()
-      self.items.forEach(item => {
+      self.items.forEach((item) => {
         if (item.tags) {
-          item.tags.forEach(tag => tagSet.add(tag))
+          item.tags.forEach((tag) => tagSet.add(tag))
         }
       })
       return Array.from(tagSet).sort()
-    }
+    },
   }))
   .actions((self) => ({
     toggleSortOrder() {
@@ -147,7 +148,10 @@ export const NewsStoreModel = types
 
     toggleTag(tag: string) {
       if (self.selectedTags.includes(tag)) {
-        self.setProp("selectedTags", self.selectedTags.filter(t => t !== tag))
+        self.setProp(
+          "selectedTags",
+          self.selectedTags.filter((t) => t !== tag),
+        )
       } else {
         self.setProp("selectedTags", [...self.selectedTags, tag])
       }
@@ -156,14 +160,14 @@ export const NewsStoreModel = types
     clearTagFilters() {
       self.setProp("selectedTags", [])
     },
-    
+
     fetchNews: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         const response = await api.news.getNews()
-        
+
         if (response.ok && response.data?.news) {
           // Process the news data to add formatted dates and ensure IDs
           const processedItems = response.data.news.map((item: any) => ({
@@ -171,7 +175,7 @@ export const NewsStoreModel = types
             id: item.id || item.link, // Use link as fallback ID if none provided
             formattedDate: formatRelativeTime(item.date),
           }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to fetch news")
@@ -182,15 +186,15 @@ export const NewsStoreModel = types
         self.setProp("isLoading", false)
       }
     },
-    
+
     refreshNews: async (api: Api) => {
       // Similar to fetchNews but intended to be used with pull-to-refresh
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         const response = await api.news.getNews()
-        
+
         if (response.ok && response.data?.news) {
           // Process the news data to add formatted dates and ensure IDs
           const processedItems = response.data.news.map((item: any) => ({
@@ -198,7 +202,7 @@ export const NewsStoreModel = types
             id: item.id || item.link,
             formattedDate: formatRelativeTime(item.date),
           }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to refresh news")
@@ -208,24 +212,24 @@ export const NewsStoreModel = types
       } finally {
         self.setProp("isLoading", false)
       }
-      
+
       return true // Return success indicator for the refresh control
     },
-    
+
     fetchNewsBySource: async (api: Api, source: string) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         const response = await api.news.getNewsBySource(source)
-        
+
         if (response.ok && response.data?.news) {
           const processedItems = response.data.news.map((item: any) => ({
             ...item,
             id: item.id || item.link,
             formattedDate: formatRelativeTime(item.date),
           }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to fetch news for source")
@@ -235,9 +239,9 @@ export const NewsStoreModel = types
       } finally {
         self.setProp("isLoading", false)
       }
-    }
+    },
   }))
 
 export interface NewsStore extends Instance<typeof NewsStoreModel> {}
 export interface NewsStoreSnapshotIn extends SnapshotIn<typeof NewsStoreModel> {}
-export interface NewsStoreSnapshotOut extends SnapshotOut<typeof NewsStoreModel> {} 
+export interface NewsStoreSnapshotOut extends SnapshotOut<typeof NewsStoreModel> {}

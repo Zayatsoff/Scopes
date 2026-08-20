@@ -1,14 +1,14 @@
-import React, { FC, useState } from "react"
+import { FC, useState, useLayoutEffect } from "react"
 import { observer } from "mobx-react-lite"
-import { 
-  View, 
-  ViewStyle, 
-  TextStyle, 
-  TextInput, 
-  TouchableOpacity, 
+import {
+  View,
+  ViewStyle,
+  TextStyle,
+  TextInput,
+  TouchableOpacity,
   Alert,
   Keyboard,
-  TouchableWithoutFeedback 
+  TouchableWithoutFeedback,
 } from "react-native"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { SettingsStackParamList } from "@/navigators/SettingsStack"
@@ -20,8 +20,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface FeedbackScreenProps extends NativeStackScreenProps<SettingsStackParamList, "Feedback"> {}
 
-export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function FeedbackScreen({ 
-  navigation 
+export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function FeedbackScreen({
+  navigation,
 }) {
   const { themed, theme } = useAppTheme()
   const [feedback, setFeedback] = useState("")
@@ -31,7 +31,7 @@ export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function Feedbac
   const insets = useSafeAreaInsets()
 
   // Setup the header - we'll use the navigation header pattern consistent with other screens
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false, // We'll add our own header
     })
@@ -48,53 +48,42 @@ export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function Feedbac
     // Simulate API call
     setTimeout(() => {
       setSubmitting(false)
-      Alert.alert(
-        "Thank You!",
-        "Your feedback has been submitted successfully.",
-        [
-          { 
-            text: "OK", 
-            onPress: () => {
-              setFeedback("")
-              setName("")
-              setEmail("")
-              navigation.goBack()
-            }
-          }
-        ]
-      )
+      Alert.alert("Thank You!", "Your feedback has been submitted successfully.", [
+        {
+          text: "OK",
+          onPress: () => {
+            setFeedback("")
+            setName("")
+            setEmail("")
+            navigation.goBack()
+          },
+        },
+      ])
     }, 1000)
   }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <Screen 
-        style={themed($root)} 
-        preset="scroll" 
-        safeAreaEdges={[]}
-        keyboardOffset={80}
-      >
+      <Screen style={themed($root)} preset="scroll" safeAreaEdges={[]} keyboardOffset={80}>
         {/* Header with back button */}
         <View style={[themed($header), { paddingTop: insets.top }]}>
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()}
-            style={themed($backButton)}
-          >
+          <TouchableOpacity onPress={() => navigation.goBack()} style={themed($backButton)}>
             <ChevronLeft size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text text="Feedback and Requests" style={themed($headerText)} />
         </View>
-        
+
         <View style={themed($section)}>
           <View style={themed($descriptionHeader)}>
             <MessageSquare size={22} color={theme.colors.palette.primary500} strokeWidth={2} />
             <Text text="Share Your Feedback" style={themed($descriptionText)} />
           </View>
-          
+
           <Text style={themed($description)}>
-            We appreciate your feedback and feature requests. Please let us know how we can improve your experience.
+            We appreciate your feedback and feature requests. Please let us know how we can improve
+            your experience.
           </Text>
-          
+
           <View style={themed($formContainer)}>
             <Text style={themed($label)}>Your Name (Optional)</Text>
             <TextInput
@@ -104,7 +93,7 @@ export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function Feedbac
               value={name}
               onChangeText={setName}
             />
-            
+
             <Text style={themed($label)}>Your Email (Optional)</Text>
             <TextInput
               style={themed($input)}
@@ -115,8 +104,10 @@ export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function Feedbac
               value={email}
               onChangeText={setEmail}
             />
-            
-            <Text style={themed($label)}>Feedback or Request <Text style={themed($required)}>*</Text></Text>
+
+            <Text style={themed($label)}>
+              Feedback or Request <Text style={themed($required)}>*</Text>
+            </Text>
             <TextInput
               style={themed($textArea)}
               placeholder="What would you like to tell us?"
@@ -127,12 +118,9 @@ export const FeedbackScreen: FC<FeedbackScreenProps> = observer(function Feedbac
               value={feedback}
               onChangeText={setFeedback}
             />
-            
-            <TouchableOpacity 
-              style={[
-                themed($submitButton),
-                submitting && themed($submitButtonDisabled)
-              ]}
+
+            <TouchableOpacity
+              style={[themed($submitButton), submitting && themed($submitButtonDisabled)]}
               onPress={handleSubmit}
               disabled={submitting}
             >
@@ -249,4 +237,4 @@ const $submitButtonText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   marginRight: spacing.sm,
 })
 
-export default FeedbackScreen 
+export default FeedbackScreen

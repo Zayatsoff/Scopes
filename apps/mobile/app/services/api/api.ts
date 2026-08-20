@@ -49,19 +49,19 @@ export class Api {
         Accept: "application/json",
       },
     })
-    
+
     // Initialize news API
     this.news = new NewsApi(this.apisauce)
-    
+
     // Initialize police news API
     this.policeNews = new PoliceNewsApi(this.apisauce)
-    
+
     // Initialize weather alerts API
     this.weatherAlerts = new WeatherAlertsApi(this.apisauce)
-    
+
     // Initialize traffic alerts API
     this.trafficAlerts = new TrafficAlertsApi(this.apisauce)
-    
+
     // Initialize city status API
     this.cityStatus = new CityStatusApi(this)
 

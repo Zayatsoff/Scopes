@@ -24,7 +24,8 @@ const en = {
     dataFetching: {
       title: "Failed to Load Data",
       message: "We couldn't load the required data. Please try again.",
-      networkError: "Couldn't connect to the server. Please check your internet connection and try again.",
+      networkError:
+        "Couldn't connect to the server. Please check your internet connection and try again.",
       serverError: "The server encountered a problem. Please try again later.",
       notFoundError: "The requested data could not be found.",
       authError: "You don't have permission to access this data. Please log in again.",

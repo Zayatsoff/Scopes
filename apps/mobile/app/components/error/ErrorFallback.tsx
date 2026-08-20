@@ -1,4 +1,3 @@
-import React from "react"
 import { View, ViewStyle, TextStyle } from "react-native"
 import { Text, Button, Icon } from "../../components"
 import { ThemedStyle } from "@/theme"
@@ -30,50 +29,56 @@ export function ErrorFallback({
   variant = "default",
 }: ErrorFallbackProps) {
   const { themed } = useAppTheme()
-  
+
   const titleText = titleTx ? translate(titleTx) : title
   const messageText = messageTx ? translate(messageTx) : message
-  
+
   // Minimal version just shows a small indicator with retry
   if (variant === "minimal") {
     return (
       <View style={themed($minimalContainer)}>
         <Icon icon="ladybug" size={16} color={themed($errorIcon).color} />
-        <Text preset="formLabel" style={themed($minimalText)}>Error</Text>
+        <Text preset="formLabel" style={themed($minimalText)}>
+          Error
+        </Text>
         <Button
           text={translate("common:retry")}
-          style={themed($retryButton)} 
+          style={themed($retryButton)}
           onPress={resetError}
         />
       </View>
     )
   }
-  
+
   // Inline version for row items or list elements
   if (variant === "inline") {
     return (
       <View style={themed($inlineContainer)}>
         <Icon icon="ladybug" size={20} color={themed($errorIcon).color} />
         <View style={$textContainer}>
-          <Text weight="bold" style={themed($title)}>{titleText}</Text>
+          <Text weight="bold" style={themed($title)}>
+            {titleText}
+          </Text>
           <Text style={themed($message)}>{messageText}</Text>
         </View>
         <Button
           preset="reversed"
           tx="common:retry"
-          style={themed($retryButton)} 
+          style={themed($retryButton)}
           onPress={resetError}
         />
       </View>
     )
   }
-  
+
   // Card version for components
   if (variant === "card") {
     return (
       <View style={themed($cardContainer)}>
         <Icon icon="ladybug" size={32} color={themed($errorIcon).color} />
-        <Text weight="bold" style={themed($title)}>{titleText}</Text>
+        <Text weight="bold" style={themed($title)}>
+          {titleText}
+        </Text>
         <Text style={themed($message)}>{messageText}</Text>
         {showDetails && (
           <Text selectable style={themed($errorDetails)}>
@@ -83,20 +88,22 @@ export function ErrorFallback({
         <Button
           preset="reversed"
           tx="common:retry"
-          style={themed($retryButton)} 
+          style={themed($retryButton)}
           onPress={resetError}
         />
       </View>
     )
   }
-  
+
   // Default full screen version
   return (
     <View style={themed($container)}>
       <Icon icon="ladybug" size={64} color={themed($errorIcon).color} />
-      <Text preset="heading" style={themed($title)}>{titleText}</Text>
+      <Text preset="heading" style={themed($title)}>
+        {titleText}
+      </Text>
       <Text style={themed($message)}>{messageText}</Text>
-      
+
       {showDetails && (
         <View style={themed($detailsContainer)}>
           <Text weight="bold" style={themed($detailsTitle)}>
@@ -112,11 +119,11 @@ export function ErrorFallback({
           )}
         </View>
       )}
-      
+
       <Button
         preset="reversed"
         tx="common:retry"
-        style={themed($retryButton)} 
+        style={themed($retryButton)}
         onPress={resetError}
       />
     </View>
@@ -155,7 +162,7 @@ const $inlineContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   borderRadius: 3,
 })
 
-const $minimalContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $minimalContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   padding: spacing.xs,
@@ -218,4 +225,4 @@ const $retryButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.error,
   minWidth: 120,
   marginTop: spacing.md,
-}) 
+})

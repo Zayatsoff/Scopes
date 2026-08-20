@@ -1,5 +1,5 @@
 import { ErrorInfo } from "react"
-import { ScrollView, TextStyle, View, ViewStyle, Dimensions } from "react-native"
+import { ScrollView, TextStyle, View, ViewStyle } from "react-native"
 import { Button, Screen, Text } from "../../components"
 import type { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -19,8 +19,7 @@ export interface ErrorDetailsProps {
  */
 export function ErrorDetails(props: ErrorDetailsProps) {
   const { themed, theme } = useAppTheme()
-  const { width } = Dimensions.get("window")
-  
+
   return (
     <Screen
       preset="fixed"
@@ -28,35 +27,17 @@ export function ErrorDetails(props: ErrorDetailsProps) {
       contentContainerStyle={themed($contentContainer)}
     >
       <Animated.View entering={FadeInDown.duration(600)} style={$topSection}>
-        <AlertTriangle 
-          size={64} 
-          color={theme.colors.error}
-          strokeWidth={1.5}
-        />
-        <Text 
-          style={themed($heading)} 
-          preset="heading" 
-          tx="errorScreen:title" 
-        />
-        <Text 
-          style={themed($subtitle)}
-          tx="errorScreen:friendlySubtitle" 
-        />
+        <AlertTriangle size={64} color={theme.colors.error} strokeWidth={1.5} />
+        <Text style={themed($heading)} preset="heading" tx="errorScreen:title" />
+        <Text style={themed($subtitle)} tx="errorScreen:friendlySubtitle" />
       </Animated.View>
 
-      <Animated.View 
-        entering={FadeIn.delay(400).duration(600)} 
-        style={themed($cardContainer)}
-      >
+      <Animated.View entering={FadeIn.delay(400).duration(600)} style={themed($cardContainer)}>
         <View style={themed($cardHeader)}>
           <Bug size={20} color={theme.colors.text} />
-          <Text 
-            style={themed($cardTitle)} 
-            weight="medium" 
-            tx="errorScreen:errorDetails" 
-          />
+          <Text style={themed($cardTitle)} weight="medium" tx="errorScreen:errorDetails" />
         </View>
-        
+
         <ScrollView
           style={themed($errorSection)}
           contentContainerStyle={themed($errorSectionContentContainer)}
@@ -79,11 +60,7 @@ export function ErrorDetails(props: ErrorDetailsProps) {
           onPress={props.onReset}
           tx="errorScreen:reset"
           RightAccessory={() => (
-            <RefreshCw 
-              size={18} 
-              color={theme.colors.palette.neutral100} 
-              style={$iconStyle} 
-            />
+            <RefreshCw size={18} color={theme.colors.palette.neutral100} style={$iconStyle} />
           )}
         />
       </Animated.View>

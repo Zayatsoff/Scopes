@@ -1,4 +1,4 @@
-import React from "react"
+import { ReactNode } from "react"
 import { ErrorBoundary as BaseErrorBoundary } from "../../screens/ErrorScreen/ErrorBoundary"
 import { ErrorFallback } from "./ErrorFallback"
 import { logError } from "../../utils/errorLogger"
@@ -8,7 +8,7 @@ import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 
 interface NavigationErrorBoundaryProps {
-  children: React.ReactNode
+  children: ReactNode
   routeName: string
   navigation?: NavigationContainerRef<any>
   fallbackRoute?: string // Route to navigate to if there's an error
@@ -27,7 +27,7 @@ export function NavigationErrorBoundary({
   style,
 }: NavigationErrorBoundaryProps) {
   const { themed } = useAppTheme()
-  
+
   // Error handler that includes navigation context
   const handleError = (error: Error, componentStack: string) => {
     logError(error, {
@@ -38,16 +38,16 @@ export function NavigationErrorBoundary({
       additionalInfo: {
         routeName,
         fallbackRoute,
-      }
+      },
     })
-    
+
     // If specified and available, navigate to a fallback route
     if (fallbackRoute && navigation?.isReady()) {
       try {
         navigation.dispatch(
           CommonActions.navigate({
             name: fallbackRoute,
-          })
+          }),
         )
       } catch (navError) {
         console.error("Failed to navigate to fallback route:", navError)
@@ -80,4 +80,4 @@ export function NavigationErrorBoundary({
 const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
-}) 
+})

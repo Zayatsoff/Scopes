@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { View, ViewStyle, TextStyle } from "react-native"
 import { Text } from "./Text"
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { 
-  CloudSun, 
-  Cloud, 
-  Sun, 
-  CloudRain, 
-  CloudSnow, 
-  CloudLightning, 
-  CloudFog
+import {
+  CloudSun,
+  Cloud,
+  Sun,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  CloudFog,
 } from "lucide-react-native"
 import { XMLParser } from "fast-xml-parser"
 
@@ -33,39 +33,39 @@ export function WeatherDisplay({ onRefresh }: WeatherDisplayProps) {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('https://weather.gc.ca/rss/weather/45.403_-75.687_e.xml')
+      const response = await fetch("https://weather.gc.ca/rss/weather/45.403_-75.687_e.xml")
       if (!response.ok) {
         throw new Error(`Failed to fetch weather: ${response.status}`)
       }
-      
+
       const xmlText = await response.text()
       const parser = new XMLParser({
         ignoreAttributes: false,
-        attributeNamePrefix: "@_"
+        attributeNamePrefix: "@_",
       })
-      
+
       const result = parser.parse(xmlText)
-      
+
       // Find the current conditions entry
       const currentEntry = result.feed.entry.find(
-        (entry: any) => entry.category?.["@_term"] === "Current Conditions"
+        (entry: any) => entry.category?.["@_term"] === "Current Conditions",
       )
-      
+
       if (!currentEntry) {
         throw new Error("Current conditions not found")
       }
-      
+
       // Parse the summary HTML to extract temperature and condition
       const summary = currentEntry.summary["#text"] || currentEntry.summary
-      
+
       // Extract temperature from the summary
       const tempMatch = summary.match(/<b>Temperature:<\/b>\s*([\-\+]?\d+\.?\d*)&deg;C/)
       const conditionMatch = summary.match(/<b>Condition:<\/b>\s*([^<]+)/)
-      
+
       if (tempMatch && conditionMatch) {
         setWeather({
           temperature: tempMatch[1],
-          condition: conditionMatch[1].trim()
+          condition: conditionMatch[1].trim(),
         })
       } else {
         throw new Error("Could not parse weather data")
@@ -92,9 +92,9 @@ export function WeatherDisplay({ onRefresh }: WeatherDisplayProps) {
   // Return appropriate icon based on condition
   const getWeatherIcon = () => {
     if (!weather) return null
-    
+
     const condition = weather.condition.toLowerCase()
-    
+
     if (condition.includes("snow")) {
       return <CloudSnow size={22} color={theme.colors.weather} />
     } else if (condition.includes("rain") || condition.includes("shower")) {
@@ -103,7 +103,10 @@ export function WeatherDisplay({ onRefresh }: WeatherDisplayProps) {
       return <CloudLightning size={22} color={theme.colors.weather} />
     } else if (condition.includes("fog") || condition.includes("mist")) {
       return <CloudFog size={22} color={theme.colors.weather} />
-    } else if (condition.includes("cloud") && condition.includes("sun") || condition.includes("partly")) {
+    } else if (
+      (condition.includes("cloud") && condition.includes("sun")) ||
+      condition.includes("partly")
+    ) {
       return <CloudSun size={22} color={theme.colors.weather} />
     } else if (condition.includes("cloud") || condition.includes("overcast")) {
       return <Cloud size={22} color={theme.colors.weather} />
@@ -136,22 +139,22 @@ export function WeatherDisplay({ onRefresh }: WeatherDisplayProps) {
 // Styles
 const $container: ThemedStyle<ViewStyle> = () => ({
   alignItems: "flex-end",
-  justifyContent: "center"
+  justifyContent: "center",
 })
 
 const $weatherContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-  gap: spacing.xs
+  gap: spacing.xs,
 })
 
 const $temperatureText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   fontSize: typography.sizes.sm,
-  fontWeight: "600"
+  fontWeight: "600",
 })
 
 const $loadingText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.textDim,
-  fontSize: typography.sizes.xs
-}) 
+  fontSize: typography.sizes.xs,
+})

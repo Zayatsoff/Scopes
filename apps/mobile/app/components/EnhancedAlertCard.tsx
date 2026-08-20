@@ -1,4 +1,3 @@
-import React from "react"
 import { Pressable, View, ViewStyle, TextStyle, Image, ImageStyle } from "react-native"
 import { Text } from "./Text"
 import { type ThemedStyle } from "@/theme"
@@ -26,11 +25,10 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
   const { themed, theme } = useAppTheme()
   const scale = useSharedValue(1)
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
-  
+
   // Get the item's category (if it's an AlertItem) or default to "police" for PoliceNewsItem
-  const category = 'category' in item ? item.category : 
-                   'eventType' in item ? "traffic" : "police"
-  
+  const category = "category" in item ? item.category : "eventType" in item ? "traffic" : "police"
+
   // Get the appropriate icon based on category
   const getIcon = () => {
     switch (category) {
@@ -38,133 +36,143 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
         return <CloudSun size={16} color={categoryColor || theme.colors.weather} />
       case "police":
         return (
-          <Image 
+          <Image
             source={require("../../assets/favicons/ottpolice.png")}
             style={themed($policeIcon)}
           />
         )
-      case "hydro": 
+      case "hydro":
         return <Zap size={16} color={categoryColor || theme.colors.hydro} />
       case "traffic":
         return <BusFront size={16} color={categoryColor || theme.colors.traffic} />
       default:
-        return <Image 
-          source={require("../../assets/favicons/ottpolice.png")}
-          style={themed($policeIcon)}
-        />
+        return (
+          <Image
+            source={require("../../assets/favicons/ottpolice.png")}
+            style={themed($policeIcon)}
+          />
+        )
     }
   }
 
   // Get color based on category
   const getColor = () => {
-    if (categoryColor) return categoryColor;
-    
-    if (category === "weather") return theme.colors.weather;
-    if (category === "police") return theme.colors.police;
-    if (category === "hydro") return theme.colors.hydro;
-    if (category === "traffic") return theme.colors.traffic;
-    
-    return theme.colors.tint;
+    if (categoryColor) return categoryColor
+
+    if (category === "weather") return theme.colors.weather
+    if (category === "police") return theme.colors.police
+    if (category === "hydro") return theme.colors.hydro
+    if (category === "traffic") return theme.colors.traffic
+
+    return theme.colors.tint
   }
 
   // Format date from item
   const getFormattedDate = () => {
-    if (item.formattedDate) return item.formattedDate;
-    
-    if ('date' in item && item.date) {
+    if (item.formattedDate) return item.formattedDate
+
+    if ("date" in item && item.date) {
       try {
-        return new Date(item.date).toLocaleDateString();
-      } catch (e) {
-        return '';
+        return new Date(item.date).toLocaleDateString()
+      } catch {
+        return ""
       }
     }
-    
-    if ('created' in item && item.created) {
+
+    if ("created" in item && item.created) {
       try {
-        return new Date(item.created).toLocaleDateString();
-      } catch (e) {
-        return '';
+        return new Date(item.created).toLocaleDateString()
+      } catch {
+        return ""
       }
     }
-    
-    return ('timestamp' in item) ? item.timestamp : '';
+
+    return "timestamp" in item ? item.timestamp : ""
   }
-  
+
   // Get title from item
   const getTitle = () => {
-    if ('improvedHeadline' in item && item.improvedHeadline) return item.improvedHeadline;
-    if ('headline' in item) return item.headline;
-    if (item.title) return item.title;
-    if ('message' in item) return item.message;
-    return "";
+    if ("improvedHeadline" in item && item.improvedHeadline) return item.improvedHeadline
+    if ("headline" in item) return item.headline
+    if (item.title) return item.title
+    if ("message" in item) return item.message
+    return ""
   }
-  
+
   // Get description from item
   const getDescription = () => {
-    if ('headline' in item && 'message' in item) return item.message;
-    if (item.excerpt) return item.excerpt;
-    if ('message' in item && !item.title) return "";
-    
+    if ("headline" in item && "message" in item) return item.message
+    if (item.excerpt) return item.excerpt
+    if ("message" in item && !item.title) return ""
+
     // Include locations affected for weather alerts if available
-    if ('locationsAffected' in item && Array.isArray(item.locationsAffected) && item.locationsAffected.length > 0) {
-      const locations = item.locationsAffected.join(", ");
+    if (
+      "locationsAffected" in item &&
+      Array.isArray(item.locationsAffected) &&
+      item.locationsAffected.length > 0
+    ) {
+      const locations = item.locationsAffected.join(", ")
       if (item.excerpt) {
-        return `${item.excerpt}\n\nRegions affected: ${locations}`;
+        return `${item.excerpt}\n\nRegions affected: ${locations}`
       }
-      return `Regions affected: ${locations}`;
+      return `Regions affected: ${locations}`
     }
-    
-    return "";
+
+    return ""
   }
-  
+
   // Check if item has an event type tag
   const hasEventTypeTag = () => {
-    return 'eventType' in item && item.eventType;
+    return "eventType" in item && item.eventType
   }
 
   // Format schedule dates for traffic alerts
   const getScheduleInfo = () => {
-    if (!('schedule' in item) || !item.schedule || item.schedule.length === 0) return null;
-    
+    if (!("schedule" in item) || !item.schedule || item.schedule.length === 0) return null
+
     // Get the most relevant schedule item (first one)
-    const scheduleItem = item.schedule[0];
-    
-    if (!scheduleItem.startDateTime && !scheduleItem.endDateTime) return null;
-    
+    const scheduleItem = item.schedule[0]
+
+    if (!scheduleItem.startDateTime && !scheduleItem.endDateTime) return null
+
     const formatDate = (dateStr: string) => {
-      if (!dateStr) return "";
+      if (!dateStr) return ""
       try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString(undefined, { 
-          month: 'short', 
-          day: 'numeric', 
-          hour: 'numeric', 
-          minute: '2-digit'
-        });
-      } catch (e) {
-        return dateStr;
+        const date = new Date(dateStr)
+        return date.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      } catch {
+        return dateStr
       }
-    };
-    
-    const startDate = formatDate(scheduleItem.startDateTime);
-    const endDate = formatDate(scheduleItem.endDateTime);
-    
-    if (startDate && endDate) {
-      return `${startDate} — ${endDate}`;
-    } else if (startDate) {
-      return `Starts: ${startDate}`;
-    } else if (endDate) {
-      return `Ends: ${endDate}`;
     }
-    
-    return null;
-  };
+
+    const startDate = formatDate(scheduleItem.startDateTime)
+    const endDate = formatDate(scheduleItem.endDateTime)
+
+    if (startDate && endDate) {
+      return `${startDate} — ${endDate}`
+    } else if (startDate) {
+      return `Starts: ${startDate}`
+    } else if (endDate) {
+      return `Ends: ${endDate}`
+    }
+
+    return null
+  }
 
   // Check if the item has a schedule
   const hasSchedule = () => {
-    return 'schedule' in item && item.schedule && item.schedule.length > 0 &&
-           (item.schedule[0].startDateTime || item.schedule[0].endDateTime);
-  };
+    return (
+      "schedule" in item &&
+      item.schedule &&
+      item.schedule.length > 0 &&
+      (item.schedule[0].startDateTime || item.schedule[0].endDateTime)
+    )
+  }
 
   return (
     <AnimatedPressable
@@ -183,51 +191,40 @@ export const EnhancedAlertCard = observer(function EnhancedAlertCard({
       <View style={themed($header)}>
         <View style={themed($sourceContainer)}>
           {getIcon()}
-          <Text 
+          <Text
             text={
-              'source' in item ? item.source : 
-              'generation_source' in item ? (item.generation_source === "MTO" ? "Ministry of Transportation" : "City of Ottawa Traffic") : 
-              "Ottawa Police"
-            } 
-            style={[
-              themed($source), 
-              { color: getColor() }
-            ]} 
+              "source" in item
+                ? item.source
+                : "generation_source" in item
+                  ? item.generation_source === "MTO"
+                    ? "Ministry of Transportation"
+                    : "City of Ottawa Traffic"
+                  : "Ottawa Police"
+            }
+            style={[themed($source), { color: getColor() }]}
           />
         </View>
-        
+
         {hasEventTypeTag() && (
           <View style={[themed($tagContainer), { backgroundColor: getColor() }]}>
-            <Text text={('eventType' in item) ? item.eventType : ""} style={themed($tagText)} />
+            <Text text={"eventType" in item ? item.eventType : ""} style={themed($tagText)} />
           </View>
         )}
       </View>
 
-      <Text
-        text={getTitle()}
-        style={themed($title)}
-        numberOfLines={3}
-      />
+      <Text text={getTitle()} style={themed($title)} numberOfLines={3} />
 
-      <Text 
-        text={getDescription()} 
-        style={themed($description)} 
-        numberOfLines={3} 
-      />
-      
+      <Text text={getDescription()} style={themed($description)} numberOfLines={3} />
+
       {hasSchedule() && (
         <View style={themed($scheduleContainer)}>
           <Calendar size={14} color={getColor()} />
           <Text text={getScheduleInfo() || ""} style={themed($scheduleText)} />
         </View>
       )}
-      
+
       <View style={themed($footer)}>
-        <Text 
-          text={getFormattedDate()} 
-          style={themed($date)} 
-          numberOfLines={1} 
-        />
+        <Text text={getFormattedDate()} style={themed($date)} numberOfLines={1} />
       </View>
     </AnimatedPressable>
   )
@@ -253,7 +250,7 @@ const $container: ThemedStyle<ViewStyle> = ({ colors, spacing, radius }) => ({
 const $policeIcon: ThemedStyle<ImageStyle> = () => ({
   width: 16,
   height: 16,
-  resizeMode: 'contain',
+  resizeMode: "contain",
 })
 
 const $header: ThemedStyle<ViewStyle> = () => ({
@@ -328,4 +325,4 @@ const $date: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.text,
   opacity: 0.7,
   flexShrink: 1,
-}) 
+})

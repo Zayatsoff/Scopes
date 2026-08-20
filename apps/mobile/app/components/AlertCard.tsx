@@ -1,4 +1,3 @@
-import React from "react"
 import { View, ViewStyle, TextStyle } from "react-native"
 import { Text } from "./Text"
 import { useAppTheme } from "@/utils/useAppTheme"
@@ -77,4 +76,4 @@ const $messageText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
 const $timestampText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   color: colors.textDim,
   fontSize: typography.sizes.sm,
-}) 
+})

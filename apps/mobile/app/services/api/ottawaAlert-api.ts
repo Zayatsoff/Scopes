@@ -15,9 +15,8 @@ export class OttawaAlertApi {
    */
   async getOttawaAlerts(): Promise<{ kind: string; alerts?: StatusStoryDTO[] }> {
     try {
-      const response: ApiResponse<GetOttawaAlertsResponseDTO> = await this.api.apisauce.get(
-        "/api/getOttawaAlerts"
-      )
+      const response: ApiResponse<GetOttawaAlertsResponseDTO> =
+        await this.api.apisauce.get("/api/getOttawaAlerts")
 
       if (!response.ok) {
         const problem = getGeneralApiProblem(response)

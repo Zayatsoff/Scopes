@@ -41,7 +41,7 @@ export const PoliceSummaryStoreModel = types
     get latestSummary() {
       if (self.items.length === 0) return null
       // Find item with section = "Police"
-      const policeItems = self.items.filter(item => item.section === "Police")
+      const policeItems = self.items.filter((item) => item.section === "Police")
       return policeItems.length > 0 ? policeItems[0] : null
     },
   }))
@@ -49,21 +49,23 @@ export const PoliceSummaryStoreModel = types
     fetchPoliceSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
         // Call the getSummaries endpoint
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Police") // Filter police summaries only
+            .filter((item) => item.section === "Police") // Filter police summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to fetch police summaries")
@@ -74,24 +76,26 @@ export const PoliceSummaryStoreModel = types
         self.setProp("isLoading", false)
       }
     },
-    
+
     refreshPoliceSummaries: async (api: Api) => {
       self.setProp("isLoading", true)
       self.setProp("error", null)
-      
+
       try {
-        const response = await api.apisauce.get<GetSummariesResponseDTO>("https://local-government-app-backend.vercel.app/api/getSummaries")
-        
+        const response = await api.apisauce.get<GetSummariesResponseDTO>(
+          "https://local-government-app-backend.vercel.app/api/getSummaries",
+        )
+
         if (response.ok && response.data) {
           const summaries = response.data.summaries || []
           // Process the summaries data to add formatted dates
           const processedItems = summaries
-            .filter(item => item.section === "Police") // Filter police summaries only
+            .filter((item) => item.section === "Police") // Filter police summaries only
             .map((item) => ({
               ...item,
               formattedDate: formatRelativeTime(item.date),
             }))
-          
+
           self.setProp("items", processedItems)
         } else {
           self.setProp("error", "Failed to refresh police summaries")
@@ -101,11 +105,13 @@ export const PoliceSummaryStoreModel = types
       } finally {
         self.setProp("isLoading", false)
       }
-      
+
       return true // Return success indicator for the refresh control
-    }
+    },
   }))
 
 export interface PoliceSummaryStore extends Instance<typeof PoliceSummaryStoreModel> {}
-export interface PoliceSummaryStoreSnapshotOut extends SnapshotOut<typeof PoliceSummaryStoreModel> {}
-export interface PoliceSummaryStoreSnapshotIn extends SnapshotIn<typeof PoliceSummaryStoreModel> {} 
+export interface PoliceSummaryStoreSnapshotOut extends SnapshotOut<
+  typeof PoliceSummaryStoreModel
+> {}
+export interface PoliceSummaryStoreSnapshotIn extends SnapshotIn<typeof PoliceSummaryStoreModel> {}

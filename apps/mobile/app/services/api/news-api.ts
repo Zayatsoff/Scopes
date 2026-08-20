@@ -37,4 +37,4 @@ export class NewsApi {
       throw error
     }
   }
-} 
+}
